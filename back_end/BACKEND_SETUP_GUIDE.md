@@ -1,0 +1,850 @@
+# 線上書城後端建置指南 (NestJS + MySQL)
+
+## 📋 目錄
+1. [環境準備](#環境準備)
+2. [專案初始化](#專案初始化)
+3. [資料庫設計](#資料庫設計)
+4. [模組架構](#模組架構)
+5. [開發步驟](#開發步驟)
+6. [API 設計](#api-設計)
+
+---
+
+## 🔧 環境準備
+
+### 必要工具
+- Node.js (v18+)
+- MySQL (v8.0+)
+- npm 或 yarn
+- VS Code (推薦)
+
+### VS Code 推薦擴充套件
+- ESLint
+- Prettier
+- REST Client (測試 API)
+
+---
+
+## 🚀 專案初始化
+
+### Step 1: 使用 Nest CLI 建立專案
+```bash
+# 安裝 Nest CLI
+npm install -g @nestjs/cli
+
+# 建立新專案
+nest new OBS-backend
+
+# 進入專案目錄
+cd OBS-backend
+```
+
+### Step 2: 安裝必要套件
+```bash
+# TypeORM 和 MySQL
+npm install @nestjs/typeorm typeorm mysql2
+
+# 設定檔管理
+npm install @nestjs/config
+
+# JWT 認證
+npm install @nestjs/jwt @nestjs/passport passport passport-jwt
+npm install -D @types/passport-jwt
+
+# 密碼加密
+npm install bcrypt
+npm install -D @types/bcrypt
+
+# 驗證工具
+npm install class-validator class-transformer
+```
+
+---
+
+## 🗄️ 資料庫設計
+
+### 核心資料表
+
+#### 1. Users (會員表)
+```sql
+CREATE TABLE users (
+  user_id INT PRIMARY KEY AUTO_INCREMENT,
+  email VARCHAR(100) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  username VARCHAR(50) NOT NULL,
+  phone VARCHAR(20),
+  role ENUM('customer', 'admin') DEFAULT 'customer',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+```
+
+#### 2. Books (書籍表)
+```sql
+CREATE TABLE books (
+  book_id INT PRIMARY KEY AUTO_INCREMENT,
+  isbn VARCHAR(13) UNIQUE,
+  title VARCHAR(200) NOT NULL,
+  author VARCHAR(100),
+  publisher VARCHAR(100),
+  publication_date DATE,
+  price DECIMAL(10, 2) NOT NULL,
+  stock_quantity INT DEFAULT 0,
+  category VARCHAR(50),
+  description TEXT,
+  cover_image VARCHAR(255),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+```
+
+#### 3. Orders (訂單表)
+```sql
+CREATE TABLE orders (
+  order_id INT PRIMARY KEY AUTO_INCREMENT,
+  user_id INT NOT NULL,
+  total_amount DECIMAL(10, 2) NOT NULL,
+  status ENUM('pending', 'paid', 'shipped', 'completed', 'cancelled') DEFAULT 'pending',
+  shipping_address TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+```
+
+#### 4. Order_Items (訂單明細表)
+```sql
+CREATE TABLE order_items (
+  order_item_id INT PRIMARY KEY AUTO_INCREMENT,
+  order_id INT NOT NULL,
+  book_id INT NOT NULL,
+  quantity INT NOT NULL,
+  unit_price DECIMAL(10, 2) NOT NULL,
+  subtotal DECIMAL(10, 2) NOT NULL,
+  FOREIGN KEY (order_id) REFERENCES orders(order_id),
+  FOREIGN KEY (book_id) REFERENCES books(book_id)
+);
+```
+
+#### 5. Shopping_Cart (購物車表)
+```sql
+CREATE TABLE shopping_cart (
+  cart_id INT PRIMARY KEY AUTO_INCREMENT,
+  user_id INT NOT NULL,
+  book_id INT NOT NULL,
+  quantity INT DEFAULT 1,
+  added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(user_id),
+  FOREIGN KEY (book_id) REFERENCES books(book_id),
+  UNIQUE KEY unique_user_book (user_id, book_id)
+);
+```
+
+---
+
+## 📁 模組架構
+
+```
+src/
+├── app.module.ts                 # 根模組
+├── main.ts                       # 應用程式入口
+├── config/
+│   └── database.config.ts        # 資料庫設定
+├── auth/                         # 認證模組
+│   ├── auth.module.ts
+│   ├── auth.controller.ts
+│   ├── auth.service.ts
+│   ├── strategies/
+│   │   └── jwt.strategy.ts
+│   └── guards/
+│       └── jwt-auth.guard.ts
+├── users/                        # 會員模組
+│   ├── users.module.ts
+│   ├── users.controller.ts
+│   ├── users.service.ts
+│   ├── entities/
+│   │   └── user.entity.ts
+│   └── dto/
+│       ├── create-user.dto.ts
+│       └── update-user.dto.ts
+├── books/                        # 書籍模組
+│   ├── books.module.ts
+│   ├── books.controller.ts
+│   ├── books.service.ts
+│   ├── entities/
+│   │   └── book.entity.ts
+│   └── dto/
+│       ├── create-book.dto.ts
+│       ├── update-book.dto.ts
+│       └── search-book.dto.ts
+├── orders/                       # 訂單模組
+│   ├── orders.module.ts
+│   ├── orders.controller.ts
+│   ├── orders.service.ts
+│   ├── entities/
+│   │   ├── order.entity.ts
+│   │   └── order-item.entity.ts
+│   └── dto/
+│       └── create-order.dto.ts
+└── cart/                         # 購物車模組
+    ├── cart.module.ts
+    ├── cart.controller.ts
+    ├── cart.service.ts
+    ├── entities/
+    │   └── cart.entity.ts
+    └── dto/
+        └── add-to-cart.dto.ts
+```
+
+---
+
+## 🔨 開發步驟
+
+### Phase 1: 基礎設定
+
+#### 1. 設定環境變數
+建立 `.env` 檔案：
+```env
+# Database
+DB_HOST=localhost
+DB_PORT=3306
+DB_USERNAME=root
+DB_PASSWORD=your_password
+DB_DATABASE=online_bookstore
+
+# JWT
+JWT_SECRET=your_super_secret_key_here
+JWT_EXPIRES_IN=7d
+
+# App
+PORT=3000
+```
+
+#### 2. 設定 TypeORM
+在 `app.module.ts` 中配置：
+```typescript
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    TypeOrmModule.forRoot({
+      type: 'mysql',
+      host: process.env.DB_HOST || 'localhost',
+      port: parseInt(process.env.DB_PORT || '3306'),
+      username: process.env.DB_USERNAME || 'root',
+      password: process.env.DB_PASSWORD || '',
+      database: process.env.DB_DATABASE || 'OBS',
+      entities: [__dirname + '/**/*.entity{.ts,.js}'],
+      synchronize: true, // 開發時使用，正式環境要改為 false
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+**重要提醒**：
+- 確保 `.env` 檔案放在專案根目錄（`obs-backend/.env`），不是外層資料夾
+- 每個環境變數都加上預設值（`|| 'default_value'`），避免 TypeScript 型別錯誤
+
+#### 3. 建立 MySQL 資料庫
+
+在開始之前，需要先在 MySQL 中建立資料庫：
+
+**方法 1：使用 MySQL 指令**
+```bash
+# 登入 MySQL
+mysql -u root -p
+
+# 建立資料庫
+CREATE DATABASE OBS CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+# 確認建立成功
+SHOW DATABASES;
+
+# 離開
+EXIT;
+```
+
+**方法 2：使用 MySQL Workbench**
+1. 開啟 MySQL Workbench
+2. 連接到你的 MySQL 伺服器
+3. 點擊工具列的「Create a new schema」圖示
+4. 輸入資料庫名稱：`OBS`
+5. Character Set: `utf8mb4`
+6. Collation: `utf8mb4_unicode_ci`
+7. 點擊 Apply
+
+**方法 3：使用 phpMyAdmin**
+1. 開啟 phpMyAdmin
+2. 點擊左側的「新增」或頂部的「資料庫」
+3. 輸入資料庫名稱：`OBS`
+4. 選擇編碼：`utf8mb4_unicode_ci`
+5. 點擊「建立」
+
+#### 4. 測試專案是否正常運行
+
+完成上述設定後，測試專案能否成功啟動：
+
+```bash
+# 確保在專案目錄中
+cd obs-backend
+
+# 啟動開發伺服器
+npm run start:dev
+```
+
+**預期看到的成功訊息**：
+```
+[Nest] Starting Nest application...
+[Nest] AppModule dependencies initialized
+[Nest] TypeOrmModule dependencies initialized
+[Nest] ConfigModule dependencies initialized
+[Nest] TypeOrmCoreModule dependencies initialized
+[Nest] Nest application successfully started  ← 看到這個就成功了！
+```
+
+**如果看到錯誤訊息**：
+
+| 錯誤訊息 | 原因 | 解決方法 |
+|---------|------|---------|
+| `Unknown database 'obs'` | 資料庫還沒建立 | 按照步驟 3 建立 OBS 資料庫 |
+| `Access denied for user` | 帳號密碼錯誤 | 檢查 `.env` 的 `DB_USERNAME` 和 `DB_PASSWORD` |
+| `Type 'undefined' is not assignable to type 'string'` | 環境變數讀取失敗 | 確認 `.env` 在正確位置，並在環境變數後加上預設值（如 `\|\| '3306'`） |
+| `ECONNREFUSED` | MySQL 沒有啟動 | 啟動 MySQL 服務（XAMPP/MAMP 或 `mysql.server start`） |
+| `EADDRINUSE: address already in use` | Port 3000 被其他程序佔用 | 參考步驟 6「如何停止開發伺服器」關閉佔用的程序 |
+
+#### 5. 測試 API 是否回應
+
+開啟另一個終端機視窗，測試伺服器是否正常回應：
+
+**方法 1：使用 curl（推薦）**
+```bash
+curl http://localhost:3000
+```
+
+**方法 2：使用瀏覽器**
+- 直接開啟 `http://localhost:3000`
+
+**預期結果**：
+```json
+{
+  "message": "Cannot GET /",
+  "error": "Not Found",
+  "statusCode": 404
+}
+```
+
+看到 404 錯誤是**正常的**！這表示：
+- ✅ 伺服器正常運行
+- ✅ API 可以正常回應
+- ⚠️ 根路由沒有定義（因為還沒建立任何 Controller）
+
+#### 6. 如何停止開發伺服器
+
+當你需要停止正在運行的開發伺服器時：
+
+**方法 1：正常停止（最推薦）**
+在運行 `npm run start:dev` 的終端機視窗中按：
+```
+Ctrl + C
+```
+連按兩次確保完全停止。
+
+**方法 2：強制停止（當程序卡住時）**
+
+如果 `Ctrl + C` 無效，或出現 `EADDRINUSE: address already in use` 錯誤：
+
+**Step 1：找出佔用 port 的程序**
+```bash
+# 查看哪個程序佔用 port 3000
+netstat -ano | findstr :3000
+
+# 輸出範例：
+# TCP    0.0.0.0:3000    0.0.0.0:0    LISTENING    22048
+#                                                   ↑ 這是 PID（程序 ID）
+```
+
+**Step 2：強制結束該程序**
+```bash
+# 使用 PowerShell 強制停止（將 22048 替換成你的 PID）
+powershell -Command "Stop-Process -Id 22048 -Force"
+```
+
+**或使用 taskkill**
+```bash
+taskkill /PID 22048 /F
+```
+
+**Step 3：確認 port 已經釋放**
+```bash
+# 再次檢查，應該不會有任何輸出
+netstat -ano | findstr :3000
+```
+
+**常見情境**：
+- 💡 不小心開了多個開發伺服器
+- 💡 程序異常終止但 port 沒有釋放
+- 💡 修改程式碼後想要重新啟動
+
+#### 7. Phase 1 完成檢查清單
+
+確認以下項目都完成：
+
+- [ ] NestJS 專案建立完成
+- [ ] 必要套件安裝完成（TypeORM, MySQL2, Config, JWT 等）
+- [ ] `.env` 檔案建立並放在正確位置（`obs-backend/.env`）
+- [ ] `app.module.ts` 設定 TypeORM 連接
+- [ ] MySQL 資料庫 `OBS` 建立完成
+- [ ] 執行 `npm run start:dev` 成功啟動
+- [ ] 看到 "Nest application successfully started" 訊息
+- [ ] 訪問 `http://localhost:3000` 有回應（即使是 404）
+
+**🎉 恭喜！Phase 1 完成，可以開始 Phase 2 了！**
+
+---
+
+### Phase 2: 建立 Entity
+
+#### 範例：User Entity
+```typescript
+// src/users/entities/user.entity.ts
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+
+@Entity('users')
+export class User {
+  @PrimaryGeneratedColumn()
+  user_id: number;
+
+  @Column({ unique: true, length: 100 })
+  email: string;
+
+  @Column({ length: 255 })
+  password: string;
+
+  @Column({ length: 50 })
+  username: string;
+
+  @Column({ length: 20, nullable: true })
+  phone: string;
+
+  @Column({ type: 'enum', enum: ['customer', 'admin'], default: 'customer' })
+  role: string;
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
+}
+```
+
+### Phase 3: 建立模組
+
+使用 Nest CLI 快速生成：
+```bash
+# 生成 users 模組
+nest g module users
+nest g controller users
+nest g service users
+
+# 生成 books 模組
+nest g module books
+nest g controller books
+nest g service books
+
+# 生成 orders 模組
+nest g module orders
+nest g controller orders
+nest g service orders
+
+# 生成 cart 模組
+nest g module cart
+nest g controller cart
+nest g service cart
+
+# 生成 auth 模組
+nest g module auth
+nest g controller auth
+nest g service auth
+```
+
+### Phase 4: 實作 DTO (資料傳輸物件)
+
+#### 範例：Create User DTO
+```typescript
+// src/users/dto/create-user.dto.ts
+import { IsEmail, IsNotEmpty, MinLength, IsOptional, IsString } from 'class-validator';
+
+export class CreateUserDto {
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
+  @IsString()
+  @MinLength(6)
+  password: string;
+
+  @IsString()
+  @IsNotEmpty()
+  username: string;
+
+  @IsOptional()
+  @IsString()
+  phone?: string;
+}
+```
+
+### Phase 5: 實作 Service
+
+#### 範例：Books Service 基礎 CRUD
+```typescript
+// src/books/books.service.ts
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Book } from './entities/book.entity';
+import { CreateBookDto } from './dto/create-book.dto';
+import { UpdateBookDto } from './dto/update-book.dto';
+
+@Injectable()
+export class BooksService {
+  constructor(
+    @InjectRepository(Book)
+    private booksRepository: Repository<Book>,
+  ) {}
+
+  async create(createBookDto: CreateBookDto): Promise<Book> {
+    const book = this.booksRepository.create(createBookDto);
+    return await this.booksRepository.save(book);
+  }
+
+  async findAll(): Promise<Book[]> {
+    return await this.booksRepository.find();
+  }
+
+  async findOne(id: number): Promise<Book> {
+    const book = await this.booksRepository.findOne({ where: { book_id: id } });
+    if (!book) {
+      throw new NotFoundException(`Book with ID ${id} not found`);
+    }
+    return book;
+  }
+
+  async update(id: number, updateBookDto: UpdateBookDto): Promise<Book> {
+    await this.findOne(id); // 確認書籍存在
+    await this.booksRepository.update(id, updateBookDto);
+    return this.findOne(id);
+  }
+
+  async remove(id: number): Promise<void> {
+    const result = await this.booksRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Book with ID ${id} not found`);
+    }
+  }
+}
+```
+
+### Phase 6: 實作 Controller
+
+#### 範例：Books Controller
+```typescript
+// src/books/books.controller.ts
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { BooksService } from './books.service';
+import { CreateBookDto } from './dto/create-book.dto';
+import { UpdateBookDto } from './dto/update-book.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+
+@Controller('books')
+export class BooksController {
+  constructor(private readonly booksService: BooksService) {}
+
+  @Post()
+  @UseGuards(JwtAuthGuard) // 需要登入才能新增書籍
+  create(@Body() createBookDto: CreateBookDto) {
+    return this.booksService.create(createBookDto);
+  }
+
+  @Get()
+  findAll() {
+    return this.booksService.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.booksService.findOne(+id);
+  }
+
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard)
+  update(@Param('id') id: string, @Body() updateBookDto: UpdateBookDto) {
+    return this.booksService.update(+id, updateBookDto);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  remove(@Param('id') id: string) {
+    return this.booksService.remove(+id);
+  }
+}
+```
+
+### Phase 7: 實作 JWT 認證
+
+#### 1. JWT Strategy
+```typescript
+// src/auth/strategies/jwt.strategy.ts
+import { Injectable } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
+import { ExtractJwt, Strategy } from 'passport-jwt';
+import { ConfigService } from '@nestjs/config';
+
+@Injectable()
+export class JwtStrategy extends PassportStrategy(Strategy) {
+  constructor(private configService: ConfigService) {
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false,
+      secretOrKey: configService.get<string>('JWT_SECRET'),
+    });
+  }
+
+  async validate(payload: any) {
+    return { userId: payload.sub, email: payload.email, role: payload.role };
+  }
+}
+```
+
+#### 2. Auth Service
+```typescript
+// src/auth/auth.service.ts
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { UsersService } from '../users/users.service';
+import * as bcrypt from 'bcrypt';
+
+@Injectable()
+export class AuthService {
+  constructor(
+    private usersService: UsersService,
+    private jwtService: JwtService,
+  ) {}
+
+  async register(email: string, password: string, username: string) {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    return this.usersService.create({
+      email,
+      password: hashedPassword,
+      username,
+    });
+  }
+
+  async login(email: string, password: string) {
+    const user = await this.usersService.findByEmail(email);
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const payload = { email: user.email, sub: user.user_id, role: user.role };
+    return {
+      access_token: this.jwtService.sign(payload),
+      user: {
+        id: user.user_id,
+        email: user.email,
+        username: user.username,
+        role: user.role,
+      },
+    };
+  }
+}
+```
+
+---
+
+## 🔌 API 設計
+
+### 認證相關
+- `POST /auth/register` - 註冊
+- `POST /auth/login` - 登入
+
+### 會員相關
+- `GET /users/profile` - 取得個人資料（需登入）
+- `PATCH /users/profile` - 更新個人資料（需登入）
+
+### 書籍相關
+- `GET /books` - 取得所有書籍
+- `GET /books/:id` - 取得單一書籍
+- `GET /books/search?keyword=xxx` - 搜尋書籍
+- `POST /books` - 新增書籍（需管理員權限）
+- `PATCH /books/:id` - 更新書籍（需管理員權限）
+- `DELETE /books/:id` - 刪除書籍（需管理員權限）
+
+### 購物車相關
+- `GET /cart` - 取得購物車內容（需登入）
+- `POST /cart` - 加入購物車（需登入）
+- `PATCH /cart/:id` - 更新購物車數量（需登入）
+- `DELETE /cart/:id` - 移除購物車項目（需登入）
+
+### 訂單相關
+- `POST /orders` - 建立訂單（需登入）
+- `GET /orders` - 取得訂單列表（需登入）
+- `GET /orders/:id` - 取得訂單詳情（需登入）
+- `PATCH /orders/:id/status` - 更新訂單狀態（需管理員權限）
+
+---
+
+## 🧪 測試 API
+
+建立 `test.http` 檔案（使用 REST Client 擴充套件）：
+
+```http
+### 註冊
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123",
+  "username": "測試用戶"
+}
+
+### 登入
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+### 取得所有書籍
+GET http://localhost:3000/books
+
+### 新增書籍（需要 JWT token）
+POST http://localhost:3000/books
+Content-Type: application/json
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+{
+  "isbn": "9789571234567",
+  "title": "測試書籍",
+  "author": "測試作者",
+  "publisher": "測試出版社",
+  "price": 350,
+  "stock_quantity": 100,
+  "category": "程式設計"
+}
+```
+
+---
+
+## 🚀 啟動專案
+
+```bash
+# 開發模式
+npm run start:dev
+
+# 正式環境
+npm run build
+npm run start:prod
+```
+
+---
+
+## 📝 開發檢查清單
+
+- [ ] MySQL 資料庫建立完成
+- [ ] `.env` 設定檔配置完成
+- [ ] 所有 Entity 建立完成
+- [ ] 基礎 CRUD API 實作完成
+- [ ] JWT 認證機制實作完成
+- [ ] API 測試通過
+- [ ] 與前端 Vue.js 整合測試
+- [ ] 錯誤處理機制
+- [ ] API 文檔撰寫（可使用 Swagger）
+- [ ] 資料驗證完善
+
+---
+
+## 🔗 與前端整合注意事項
+
+### CORS 設定
+在 `main.ts` 中啟用 CORS：
+```typescript
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  // 啟用 CORS
+  app.enableCors({
+    origin: 'http://localhost:5173', // Vue.js 開發伺服器位址
+    credentials: true,
+  });
+
+  // 啟用全域驗證
+  app.useGlobalPipes(new ValidationPipe());
+
+  await app.listen(3000);
+}
+bootstrap();
+```
+
+### API 回應格式統一
+建議所有 API 回應使用統一格式：
+```typescript
+{
+  "success": true,
+  "data": { ... },
+  "message": "操作成功"
+}
+```
+
+---
+
+## 📚 參考資源
+
+- [NestJS 官方文件](https://docs.nestjs.com/)
+- [TypeORM 文件](https://typeorm.io/)
+- [JWT 認證最佳實踐](https://jwt.io/introduction)
+
+---
+
+## 💡 進階功能建議
+
+1. **Swagger API 文檔**
+   ```bash
+   npm install @nestjs/swagger swagger-ui-express
+   ```
+
+2. **檔案上傳（書籍封面）**
+   ```bash
+   npm install @nestjs/platform-express multer
+   ```
+
+3. **分頁功能**
+   - 使用 TypeORM 的 `skip` 和 `take`
+
+4. **快取機制**
+   ```bash
+   npm install cache-manager
+   npm install @nestjs/cache-manager
+   ```
+
+5. **日誌記錄**
+   - 使用 NestJS 內建的 Logger
+
+6. **資料庫遷移**
+   - 使用 TypeORM Migration 管理資料庫版本
+
+---
+
+祝你開發順利！🎉
