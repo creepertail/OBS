@@ -410,7 +410,68 @@ netstat -ano | findstr :3000
 
 ### Phase 2: 建立 Entity
 
-#### 範例：User Entity
+Entity 是 TypeORM 中用來定義資料表結構的類別。每個 Entity 對應資料庫中的一張表。
+
+#### 步驟 1：建立 users 模組的資料夾結構
+
+在開始之前，我們需要建立模組的資料夾結構：
+
+```bash
+# 進入專案目錄
+cd obs-backend
+
+# 建立 users 模組的資料夾結構
+mkdir -p src/users/entities
+```
+
+**Windows 使用者注意**：如果 `mkdir -p` 指令無法使用，請使用以下指令：
+```bash
+mkdir src\users
+mkdir src\users\entities
+```
+
+或者直接在 VS Code 中：
+1. 在左側檔案總管中，右鍵點擊 `src` 資料夾
+2. 選擇「新增資料夾」
+3. 輸入 `users`
+4. 在 `users` 資料夾上右鍵，選擇「新增資料夾」
+5. 輸入 `entities`
+
+完成後，你的資料夾結構應該如下：
+```
+src/
+├── users/
+│   └── entities/
+├── app.controller.ts
+├── app.module.ts
+├── app.service.ts
+└── main.ts
+```
+
+#### 步驟 2：建立 User Entity 檔案
+
+現在我們要建立第一個 Entity 檔案：
+
+**方法 1：使用 VS Code 建立（推薦）**
+1. 在左側檔案總管中，右鍵點擊 `src/users/entities` 資料夾
+2. 選擇「新增檔案」
+3. 輸入檔案名稱：`user.entity.ts`
+
+**方法 2：使用指令建立**
+```bash
+# 在專案目錄中執行
+touch src/users/entities/user.entity.ts
+```
+
+**Windows 使用者**可以使用：
+```bash
+type nul > src\users\entities\user.entity.ts
+```
+
+#### 步驟 3：撰寫 User Entity 程式碼
+
+打開剛剛建立的 `src/users/entities/user.entity.ts` 檔案，並輸入以下程式碼：
+
 ```typescript
 // src/users/entities/user.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
@@ -442,6 +503,145 @@ export class User {
   updated_at: Date;
 }
 ```
+
+#### 步驟 4：理解 Entity 的結構
+
+讓我們了解一下這個 Entity 的各個部分：
+
+**1. 匯入必要的裝飾器（Decorators）**
+```typescript
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+```
+- `Entity`：標記這是一個實體類別，對應資料庫中的表
+- `PrimaryGeneratedColumn`：自動遞增的主鍵
+- `Column`：定義表中的欄位
+- `CreateDateColumn`：自動記錄建立時間
+- `UpdateDateColumn`：自動記錄更新時間
+
+**2. Entity 裝飾器**
+```typescript
+@Entity('users')
+```
+- `'users'` 是資料庫中的表名稱
+- 如果不指定，預設會使用類別名稱的小寫版本
+
+**3. 欄位定義**
+- `@PrimaryGeneratedColumn()`：主鍵，會自動遞增
+- `@Column({ unique: true, length: 100 })`：唯一值欄位，最大長度 100
+- `@Column({ length: 255 })`：普通欄位，最大長度 255
+- `@Column({ nullable: true })`：可以為空的欄位
+- `@Column({ type: 'enum', enum: [...], default: 'customer' })`：枚舉類型，有預設值
+
+#### 步驟 5：在 app.module.ts 中註冊 Entity
+
+為了讓 TypeORM 能夠識別這個 Entity，我們需要更新 `app.module.ts`：
+
+打開 `src/app.module.ts`，確認檔案內容如下（TypeORM 的 `entities` 設定應該已經包含了自動掃描）：
+
+```typescript
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    TypeOrmModule.forRoot({
+      type: 'mysql',
+      host: process.env.DB_HOST || 'localhost',
+      port: parseInt(process.env.DB_PORT || '3306'),
+      username: process.env.DB_USERNAME || 'root',
+      password: process.env.DB_PASSWORD || '',
+      database: process.env.DB_DATABASE || 'OBS',
+      entities: [__dirname + '/**/*.entity{.ts,.js}'],  // 這行會自動掃描所有 .entity.ts 檔案
+      synchronize: true, // 開發時使用，正式環境要改為 false
+    }),
+  ],
+  controllers: [AppController],
+  providers: [AppService],
+})
+export class AppModule {}
+```
+
+**重要**：`entities: [__dirname + '/**/*.entity{.ts,.js}']` 這行設定會自動掃描所有以 `.entity.ts` 結尾的檔案，所以不需要手動逐一註冊每個 Entity。
+
+#### 步驟 6：測試 Entity 是否正確連接
+
+完成以上步驟後，重新啟動開發伺服器來測試：
+
+```bash
+# 如果伺服器正在運行，先按 Ctrl + C 停止
+# 然後重新啟動
+npm run start:dev
+```
+
+**成功的訊息**應該包含：
+```
+[Nest] Starting Nest application...
+[Nest] TypeOrmModule dependencies initialized
+[Nest] Mapped {/, GET} route
+[Nest] Nest application successfully started
+```
+
+**檢查資料庫**：
+1. 打開 MySQL Workbench 或 phpMyAdmin
+2. 選擇 `OBS` 資料庫
+3. 查看表格列表，應該會看到新建立的 `users` 表
+
+**如果看到 `users` 表，恭喜你成功建立了第一個 Entity！**
+
+#### 步驟 7：檢查自動建立的資料表結構
+
+連接到 MySQL，執行以下指令檢查表結構：
+
+```sql
+USE OBS;
+DESCRIBE users;
+```
+
+你應該會看到類似這樣的輸出：
+```
++------------+---------------------------------+------+-----+---------+----------------+
+| Field      | Type                            | Null | Key | Default | Extra          |
++------------+---------------------------------+------+-----+---------+----------------+
+| user_id    | int                             | NO   | PRI | NULL    | auto_increment |
+| email      | varchar(100)                    | NO   | UNI | NULL    |                |
+| password   | varchar(255)                    | NO   |     | NULL    |                |
+| username   | varchar(50)                     | NO   |     | NULL    |                |
+| phone      | varchar(20)                     | YES  |     | NULL    |                |
+| role       | enum('customer','admin')        | NO   |     | customer|                |
+| created_at | datetime(6)                     | NO   |     | CURRENT_TIMESTAMP(6) |  |
+| updated_at | datetime(6)                     | NO   |     | CURRENT_TIMESTAMP(6) |  |
++------------+---------------------------------+------+-----+---------+----------------+
+```
+
+#### 常見錯誤排除
+
+| 錯誤訊息 | 原因 | 解決方法 |
+|---------|------|---------|
+| `Cannot find module 'typeorm'` | TypeORM 未安裝 | 執行 `npm install @nestjs/typeorm typeorm mysql2` |
+| `Table 'users' already exists` | 表已經存在但結構不同 | 刪除舊表或將 `synchronize` 改為 `false` 並使用 migration |
+| `Entity metadata for User was not found` | Entity 未被正確掃描 | 檢查 `app.module.ts` 中的 `entities` 設定 |
+| 啟動後沒有建立表 | `synchronize: false` | 確認 `app.module.ts` 中 `synchronize: true` |
+
+#### Phase 2 完成檢查清單
+
+確認以下項目都完成：
+
+- [ ] 建立了 `src/users/entities` 資料夾
+- [ ] 建立了 `user.entity.ts` 檔案
+- [ ] 程式碼沒有語法錯誤（VS Code 不會顯示紅色波浪線）
+- [ ] 重新啟動開發伺服器成功
+- [ ] 資料庫中自動建立了 `users` 表
+- [ ] 表結構與 Entity 定義一致
+
+**🎉 恭喜！Phase 2 完成，你已經成功建立了第一個 Entity！**
+
+---
 
 ### Phase 3: 建立模組
 
