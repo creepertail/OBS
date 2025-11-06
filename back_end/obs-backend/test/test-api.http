@@ -1,0 +1,38 @@
+### 測試建立新用戶
+POST http://localhost:3000/users
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "account": "testuser",
+  "password": "password123",
+  "username": "測試用戶",
+  "phone": "0912345678"
+}
+
+### 取得所有用戶
+GET http://localhost:3000/users
+
+### 測試建立第二個用戶
+POST http://localhost:3000/users
+Content-Type: application/json
+
+{
+  "email": "alice@example.com",
+  "account": "alice",
+  "password": "alice123456",
+  "username": "Alice",
+  "phone": "0923456789"
+}
+
+### 測試重複的 email（應該會失敗）
+POST http://localhost:3000/users
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "account": "anotheruser",
+  "password": "password123",
+  "username": "另一個用戶",
+  "phone": "0934567890"
+}
