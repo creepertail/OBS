@@ -54,7 +54,8 @@ export class UsersService {
     return await this.usersRepository.find();
   }
 
-  async findOne(id: string): Promise<User> {
+  // 用 ID 找尋 user
+  async findByID(id: string): Promise<User> {
     const user = await this.usersRepository.findOne({ where: { user_id: id } });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
