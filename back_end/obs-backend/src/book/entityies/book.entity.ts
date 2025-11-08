@@ -1,5 +1,6 @@
 // src/book/entities/book.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { BookImage } from './book-image.entity';
 
 @Entity('book')
 export class Book {
@@ -12,8 +13,9 @@ export class Book {
     @Column({ type: 'varchar', length: 100, nullable: false})
     Name: string;
 
-    @Column({ type: 'varchar', length: 400, nullable: true}) // to-do nullable => false
-    Image: string;
+    @OneToMany(() => BookImage, image => image.book, { cascade: true })
+    images: BookImage[];
+
 
     // 書本上架狀態：0表示售完，1表示上架中
     @Column({ type: 'int', default: 0, nullable: false})
@@ -24,11 +26,6 @@ export class Book {
 
     // todo
     // InventoryQuantity、Price 要 > 0
-    /*
-    @IsInt()
-    @Min(1, { message: 'Price must be greater than 0' })
-    Price: number;
-    */
     @Column({ type: 'int', default: 0, nullable: false})
     InventoryQuantity: number;
 
@@ -41,7 +38,13 @@ export class Book {
     @Column({ type: 'varchar', length: 50, nullable: false})
     Publisher: string;
 
-    // todo => foreign key
+    // todo => foreign key to Merchant
     @Column({ type: 'uuid', nullable: false})
     MerchantID: string;
+
+    @CreateDateColumn()
+    created_at: Date;
+
+    @UpdateDateColumn()
+    updated_at: Date;
 }

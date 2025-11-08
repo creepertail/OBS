@@ -1,3 +1,8 @@
+### 變數設定
+@baseUrl = http://localhost:3000
+
+
+# ----User Entity 測試------
 ### 測試建立新用戶
 POST http://localhost:3000/users
 Content-Type: application/json
@@ -36,3 +41,114 @@ Content-Type: application/json
   "username": "另一個用戶",
   "phone": "0934567890"
 }
+
+# ----------------------------
+
+
+# ------Book Entity 測試--------
+
+### 1. 取得所有書籍
+### 若沒有書的情況下是空陣列
+GET http://localhost:3000/books
+
+
+### 2. 測試建立新書籍
+POST http://localhost:3000/books/
+Content-Type: application/json
+
+{
+  "ISBN": "9789571234567",
+  "Name": "Node.js 實戰開發",
+  "ProductDescription": "深入淺出學習 Node.js 後端開發，從零開始打造企業級應用",
+  "Price": 450,
+  "InventoryQuantity": 100,
+  "Status": 1,
+  "Author": "張三",
+  "Publisher": "人民郵電出版社",
+  "MerchantID": "merchant-uuid-123",
+  "images": [
+    {
+      "imageUrl": "https://via.placeholder.com/300x400?text=Cover",
+      "displayOrder": 0,
+      "isCover": true
+    },
+    {
+      "imageUrl": "https://via.placeholder.com/300x400?text=Back",
+      "displayOrder": 1,
+      "isCover": false
+    }
+  ]
+}
+
+### 3. 測試建立第二個書籍
+POST http://localhost:3000/books
+Content-Type: application/json
+
+{
+  "ISBN": "9787115556789",
+  "Name": "TypeScript 完全指南",
+  "ProductDescription": "TypeScript 從入門到精通，掌握現代前端開發技術",
+  "Price": 520,
+  "InventoryQuantity": 50,
+  "Status": 1,
+  "Author": "李四",
+  "Publisher": "電子工業出版社",
+  "MerchantID": "merchant-uuid-123",
+  "images": [
+    {
+      "imageUrl": "https://via.placeholder.com/300x400?text=TS+Cover",
+      "displayOrder": 0,
+      "isCover": true
+    }
+  ]
+}
+
+### 4. 再次取得所有書籍（應該有 2 本書）
+GET http://localhost:3000/books
+
+
+@bookId = 6b0921b8-aa16-4935-9231-302737847dc0
+### 5. 根據 ID 取得單一書籍（記得替換成實際的 bookID）
+# 從上面的回應中複製 bookID，貼到最上面的 @bookId 變數中
+GET http://localhost:3000/books/{{bookId}}
+
+### 6. 根據 ISBN 取得書籍
+GET http://localhost:3000/books/isbn/9789571234567
+
+### 7. 更新書籍資訊（記得替換成實際的 bookID）
+PATCH http://localhost:3000/books/{{bookId}}
+Content-Type: application/json
+
+{
+  "Price": 399,
+  "InventoryQuantity": 80
+}
+
+### 8. 更新書籍狀態（下架）
+PATCH http://localhost:3000/books/{{bookId}}/status
+Content-Type: application/json
+
+{
+  "status": 0
+}
+
+### 9. 新增書籍圖片
+POST http://localhost:3000/books/{{bookId}}/images
+Content-Type: application/json
+
+{
+  "imageUrl": "https://via.placeholder.com/300x400?text=New+Image",
+  "displayOrder": 2,
+  "isCover": false
+}
+
+### 10. 刪除書籍圖片（記得替換成實際的 imageId）
+@imageId = 10f481f3-d478-4b53-83df-7192224bc65a
+DELETE http://localhost:3000/books/images/{imageId}
+
+### 11. 刪除書籍（記得替換成實際的 bookID）
+DELETE http://localhost:3000/books/{{bookId}}
+
+
+
+

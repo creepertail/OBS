@@ -643,6 +643,265 @@ DESCRIBE users;
 
 ---
 
+### Phase 2.5: 使用 TypeORM Migration 管理資料庫（推薦）
+
+#### 為什麼需要 Migration？
+
+在開發過程中，使用 `synchronize: true` 會遇到以下問題：
+- ❌ 每次重啟應用程式都會嘗試重新建立表，造成「Table already exists」錯誤
+- ❌ 無法追蹤資料庫結構的變更歷史
+- ❌ 團隊協作時資料庫結構容易不一致
+- ❌ 正式環境使用非常危險（可能會刪除資料）
+
+**Migration 的好處**：
+- ✅ 不會重複建表，可以安全重啟應用程式
+- ✅ 可以版本控制資料庫變更
+- ✅ 可以回滾（rollback）資料庫變更
+- ✅ 團隊成員可以同步資料庫結構
+
+#### 步驟 1：安裝必要套件
+
+```bash
+npm install -D ts-node @types/node
+```
+
+#### 步驟 2：建立 TypeORM Data Source 設定檔
+
+建立 `src/data-source.ts`：
+
+```typescript
+// src/data-source.ts
+import { DataSource } from 'typeorm';
+import { config } from 'dotenv';
+
+// 載入環境變數
+config();
+
+export const AppDataSource = new DataSource({
+  type: 'mysql',
+  host: process.env.DB_HOST || 'localhost',
+  port: parseInt(process.env.DB_PORT || '3306'),
+  username: process.env.DB_USERNAME || 'root',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_DATABASE || 'OBS',
+  entities: ['src/**/*.entity.ts'],
+  migrations: ['src/migrations/*.ts'],
+  synchronize: false,
+  logging: true,
+});
+```
+
+#### 步驟 3：在 package.json 新增 Migration 指令
+
+打開 `package.json`，在 `scripts` 區塊中新增以下指令：
+
+```json
+{
+  "scripts": {
+    "typeorm": "typeorm-ts-node-commonjs -d src/data-source.ts",
+    "migration:generate": "npm run typeorm -- migration:generate",
+    "migration:run": "npm run typeorm -- migration:run",
+    "migration:revert": "npm run typeorm -- migration:revert"
+  }
+}
+```
+
+#### 步驟 4：建立 migrations 資料夾
+
+```bash
+mkdir src/migrations
+```
+
+或在 VS Code 中手動建立 `src/migrations` 資料夾。
+
+#### 步驟 5：將 app.module.ts 中的 synchronize 改為 false
+
+打開 `src/app.module.ts`，將 `synchronize: true` 改為 `synchronize: false`：
+
+```typescript
+TypeOrmModule.forRoot({
+  // ... 其他設定
+  synchronize: false, // 改為 false，使用 Migration 管理
+}),
+```
+
+#### 步驟 6：生成 Migration 檔案
+
+當你建立或修改 Entity 後，執行以下指令生成 Migration：
+
+```bash
+npm run migration:generate -- src/migrations/CreateBookTables
+```
+
+TypeORM 會：
+1. 比對你的 Entity 和資料庫現有結構
+2. 自動生成 SQL 指令
+3. 建立一個新的 Migration 檔案（例如：`1762584580047-CreateBookTables.ts`）
+
+**生成的 Migration 檔案範例**：
+```typescript
+import { MigrationInterface, QueryRunner } from "typeorm";
+
+export class CreateBookTables1762584580047 implements MigrationInterface {
+    name = 'CreateBookTables1762584580047'
+
+    public async up(queryRunner: QueryRunner): Promise<void> {
+        // 建立 book 表
+        await queryRunner.query(`CREATE TABLE \`book\` ...`);
+
+        // 建立 book_images 表
+        await queryRunner.query(`CREATE TABLE \`book_images\` ...`);
+
+        // 建立外鍵約束
+        await queryRunner.query(`ALTER TABLE \`book_images\` ADD CONSTRAINT ...`);
+    }
+
+    public async down(queryRunner: QueryRunner): Promise<void> {
+        // 回滾時執行（刪除表）
+        await queryRunner.query(`DROP TABLE \`book_images\``);
+        await queryRunner.query(`DROP TABLE \`book\``);
+    }
+}
+```
+
+#### 步驟 7：執行 Migration
+
+```bash
+npm run migration:run
+```
+
+**執行結果**：
+```
+Migration CreateBookTables1762584580047 has been executed successfully.
+```
+
+TypeORM 會：
+1. 在資料庫中建立 `migrations` 表（追蹤已執行的 migration）
+2. 執行 `up()` 方法中的 SQL 指令
+3. 記錄此 migration 已執行
+
+#### 步驟 8：驗證資料表已建立
+
+連接到 MySQL，檢查資料表：
+
+```sql
+USE OBS;
+SHOW TABLES;
+```
+
+你應該會看到：
+```
++---------------+
+| Tables_in_OBS |
++---------------+
+| book          |
+| book_images   |
+| migrations    |
+| users         |
++---------------+
+```
+
+檢查 migrations 表的內容：
+```sql
+SELECT * FROM migrations;
+```
+
+結果：
+```
+| id | timestamp      | name                           |
+|----|----------------|--------------------------------|
+| 1  | 1762584580047  | CreateBookTables1762584580047 |
+```
+
+#### Migration 常用指令
+
+```bash
+# 生成新的 migration（會自動比對 Entity 和資料庫的差異）
+npm run migration:generate -- src/migrations/NameOfMigration
+
+# 執行所有尚未執行的 migration
+npm run migration:run
+
+# 回滾最後一次 migration
+npm run migration:revert
+
+# 顯示所有 migration 的狀態
+npm run typeorm -- migration:show
+```
+
+#### Migration vs Synchronize 對比
+
+| 特性 | `synchronize: true` | Migration |
+|------|---------------------|-----------|
+| 重複啟動 | ❌ 會報錯 | ✅ 不會重複執行 |
+| 版本控制 | ❌ 無法追蹤 | ✅ 可以看歷史變更 |
+| 團隊協作 | ❌ 容易衝突 | ✅ 統一資料庫結構 |
+| 生產環境 | ❌ 危險（可能刪資料） | ✅ 安全可控 |
+| 回滾 | ❌ 無法回滾 | ✅ 可以執行 `down()` |
+| 開發速度 | ✅ 快速（自動同步） | ⚠️ 需要手動生成 |
+
+#### 實際開發流程
+
+**情境：新增一個 Category Entity**
+
+1. 建立 Entity 檔案 `src/categories/entities/category.entity.ts`
+2. 生成 Migration：
+   ```bash
+   npm run migration:generate -- src/migrations/CreateCategoryTable
+   ```
+3. 檢查生成的 Migration 檔案，確認 SQL 正確
+4. 執行 Migration：
+   ```bash
+   npm run migration:run
+   ```
+5. 提交到 Git：
+   ```bash
+   git add src/categories src/migrations
+   git commit -m "Add Category entity and migration"
+   ```
+
+**團隊成員同步**：
+```bash
+git pull
+npm run migration:run  # 自動執行新的 migration
+```
+
+#### 常見問題排除
+
+**Q: Migration 生成失敗，顯示 "No changes in database schema were found"**
+
+A: 表示你的 Entity 定義和資料庫結構完全一致，不需要生成 migration。
+
+**Q: 如果我不小心執行錯誤的 Migration 怎麼辦？**
+
+A: 使用 `npm run migration:revert` 回滾最後一次 migration。
+
+**Q: 能否跳過某個 Migration？**
+
+A: 可以手動修改 `migrations` 表，但不建議這樣做。應該使用 `migration:revert` 回滾。
+
+**Q: 正式環境如何使用 Migration？**
+
+A:
+1. 確保 `synchronize: false`
+2. 在部署前先執行 `npm run migration:run`
+3. 確保 Migration 檔案和程式碼一起部署
+
+#### Phase 2.5 完成檢查清單
+
+- [ ] 安裝 ts-node 和 @types/node
+- [ ] 建立 `src/data-source.ts` 設定檔
+- [ ] 在 `package.json` 新增 migration 指令
+- [ ] 建立 `src/migrations` 資料夾
+- [ ] 將 `app.module.ts` 的 `synchronize` 改為 `false`
+- [ ] 成功生成第一個 Migration
+- [ ] 成功執行 Migration
+- [ ] 資料庫中出現 `migrations` 追蹤表
+
+**🎉 恭喜！Migration 設定完成，之後新增或修改 Entity 都不會有重複建表的問題了！**
+
+---
+
 ### Phase 3: 建立模組
 
 使用 Nest CLI 快速生成：
@@ -1044,6 +1303,394 @@ bootstrap();
 
 6. **資料庫遷移**
    - 使用 TypeORM Migration 管理資料庫版本
+
+---
+
+## 🧪 測試 API 實戰教學
+
+### 使用 VS Code REST Client 擴充套件測試（推薦）
+
+#### 步驟 1：安裝 REST Client 擴充套件
+
+1. 打開 VS Code
+2. 點擊左側的擴充套件圖示（或按 `Ctrl+Shift+X`）
+3. 搜尋「REST Client」
+4. 安裝由 Huachao Mao 開發的 REST Client
+
+#### 步驟 2：建立測試檔案
+
+在專案根目錄建立 `test-api.http` 檔案：
+
+```http
+### ========================================
+### Books API 測試
+### ========================================
+
+### 變數設定
+@baseUrl = http://localhost:3000
+@bookId =
+
+### 1. 測試伺服器是否運行
+GET {{baseUrl}}
+
+### 2. 取得所有書籍（應該是空陣列）
+GET {{baseUrl}}/books
+
+### 3. 新增第一本書籍
+POST {{baseUrl}}/books
+Content-Type: application/json
+
+{
+  "ISBN": "9789571234567",
+  "Name": "Node.js 實戰開發",
+  "ProductDescription": "深入淺出學習 Node.js 後端開發，從零開始打造企業級應用",
+  "Price": 450,
+  "InventoryQuantity": 100,
+  "Status": 1,
+  "Author": "張三",
+  "Publisher": "人民郵電出版社",
+  "MerchantID": "merchant-uuid-123",
+  "images": [
+    {
+      "imageUrl": "https://via.placeholder.com/300x400?text=Cover",
+      "displayOrder": 0,
+      "isCover": true
+    },
+    {
+      "imageUrl": "https://via.placeholder.com/300x400?text=Back",
+      "displayOrder": 1,
+      "isCover": false
+    }
+  ]
+}
+
+### 4. 新增第二本書籍
+POST {{baseUrl}}/books
+Content-Type: application/json
+
+{
+  "ISBN": "9787115556789",
+  "Name": "TypeScript 完全指南",
+  "ProductDescription": "TypeScript 從入門到精通，掌握現代前端開發技術",
+  "Price": 520,
+  "InventoryQuantity": 50,
+  "Status": 1,
+  "Author": "李四",
+  "Publisher": "電子工業出版社",
+  "MerchantID": "merchant-uuid-123",
+  "images": [
+    {
+      "imageUrl": "https://via.placeholder.com/300x400?text=TS+Cover",
+      "displayOrder": 0,
+      "isCover": true
+    }
+  ]
+}
+
+### 5. 再次取得所有書籍（應該有 2 本書）
+GET {{baseUrl}}/books
+
+### 6. 根據 ID 取得單一書籍（記得替換成實際的 bookID）
+# 從上面的回應中複製 bookID，貼到最上面的 @bookId 變數中
+GET {{baseUrl}}/books/{{bookId}}
+
+### 7. 根據 ISBN 取得書籍
+GET {{baseUrl}}/books/isbn/9789571234567
+
+### 8. 更新書籍資訊（記得替換成實際的 bookID）
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+
+{
+  "Price": 399,
+  "InventoryQuantity": 80
+}
+
+### 9. 更新書籍狀態（下架）
+PATCH {{baseUrl}}/books/{{bookId}}/status
+Content-Type: application/json
+
+{
+  "status": 0
+}
+
+### 10. 新增書籍圖片
+POST {{baseUrl}}/books/{{bookId}}/images
+Content-Type: application/json
+
+{
+  "imageUrl": "https://via.placeholder.com/300x400?text=New+Image",
+  "displayOrder": 2,
+  "isCover": false
+}
+
+### 11. 刪除書籍圖片（記得替換成實際的 imageId）
+DELETE {{baseUrl}}/books/images/{imageId}
+
+### 12. 刪除書籍（記得替換成實際的 bookID）
+DELETE {{baseUrl}}/books/{{bookId}}
+
+### ========================================
+### Users API 測試
+### ========================================
+
+### 1. 新增使用者
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "account": "testuser",
+  "password": "password123",
+  "username": "測試用戶",
+  "phone": "0912345678"
+}
+
+### 2. 取得所有使用者
+GET {{baseUrl}}/users
+
+### 3. 根據 ID 取得使用者（記得替換成實際的 user_id）
+GET {{baseUrl}}/users/{userId}
+```
+
+#### 步驟 3：使用 REST Client 測試
+
+1. 打開 `test-api.http` 檔案
+2. 確保後端伺服器正在運行（`npm run start:dev`）
+3. 點擊每個請求上方的 **Send Request** 連結
+4. 查看右側面板的回應結果
+
+**示範：測試「新增書籍」API**
+
+1. 找到「3. 新增第一本書籍」區塊
+2. 點擊 `POST {{baseUrl}}/books` 上方的 **Send Request**
+3. 右側會顯示回應結果：
+
+```json
+{
+  "bookID": "e8c7b2a1-3d4f-5e6g-7h8i-9j0k1l2m3n4o",
+  "ISBN": "9789571234567",
+  "Name": "Node.js 實戰開發",
+  "ProductDescription": "深入淺出學習 Node.js 後端開發，從零開始打造企業級應用",
+  "Price": 450,
+  "InventoryQuantity": 100,
+  "Status": 1,
+  "Author": "張三",
+  "Publisher": "人民郵電出版社",
+  "MerchantID": "merchant-uuid-123",
+  "images": [
+    {
+      "imageID": "img-uuid-1",
+      "imageUrl": "https://via.placeholder.com/300x400?text=Cover",
+      "displayOrder": 0,
+      "isCover": true
+    },
+    {
+      "imageID": "img-uuid-2",
+      "imageUrl": "https://via.placeholder.com/300x400?text=Back",
+      "displayOrder": 1,
+      "isCover": false
+    }
+  ],
+  "created_at": "2025-11-08T06:52:23.000Z",
+  "updated_at": "2025-11-08T06:52:23.000Z"
+}
+```
+
+4. 複製回應中的 `bookID` 值
+5. 將它貼到檔案最上方的 `@bookId =` 後面：
+   ```http
+   @bookId = e8c7b2a1-3d4f-5e6g-7h8i-9j0k1l2m3n4o
+   ```
+6. 現在你可以測試其他需要 bookID 的 API 了！
+
+---
+
+### 使用 Postman 測試（替代方案）
+
+#### 步驟 1：安裝 Postman
+
+1. 前往 [Postman 官網](https://www.postman.com/downloads/)
+2. 下載並安裝 Postman
+
+#### 步驟 2：建立新請求
+
+**測試「新增書籍」API**：
+
+1. 打開 Postman
+2. 點擊左上角的「New」→「HTTP Request」
+3. 設定請求方法為 **POST**
+4. 輸入 URL：`http://localhost:3000/books`
+5. 切換到「Body」頁籤
+6. 選擇「raw」和「JSON」
+7. 輸入以下 JSON 資料：
+
+```json
+{
+  "ISBN": "9789571234567",
+  "Name": "Node.js 實戰開發",
+  "ProductDescription": "深入淺出學習 Node.js 後端開發，從零開始打造企業級應用",
+  "Price": 450,
+  "InventoryQuantity": 100,
+  "Status": 1,
+  "Author": "張三",
+  "Publisher": "人民郵電出版社",
+  "MerchantID": "merchant-uuid-123",
+  "images": [
+    {
+      "imageUrl": "https://via.placeholder.com/300x400?text=Cover",
+      "displayOrder": 0,
+      "isCover": true
+    },
+    {
+      "imageUrl": "https://via.placeholder.com/300x400?text=Back",
+      "displayOrder": 1,
+      "isCover": false
+    }
+  ]
+}
+```
+
+8. 點擊「Send」按鈕
+9. 查看下方的回應結果
+
+**測試「取得所有書籍」API**：
+
+1. 新建請求，方法改為 **GET**
+2. URL：`http://localhost:3000/books`
+3. 點擊「Send」
+4. 查看回應，應該會看到剛才新增的書籍
+
+---
+
+### 使用 curl 測試（命令列）
+
+**取得所有書籍**：
+```bash
+curl http://localhost:3000/books
+```
+
+**新增書籍**：
+```bash
+curl -X POST http://localhost:3000/books \
+  -H "Content-Type: application/json" \
+  -d '{
+    "ISBN": "9789571234567",
+    "Name": "Node.js 實戰開發",
+    "ProductDescription": "深入淺出學習 Node.js 後端開發",
+    "Price": 450,
+    "InventoryQuantity": 100,
+    "Status": 1,
+    "Author": "張三",
+    "Publisher": "人民郵電出版社",
+    "MerchantID": "merchant-uuid-123",
+    "images": [
+      {
+        "imageUrl": "https://via.placeholder.com/300x400?text=Cover",
+        "displayOrder": 0,
+        "isCover": true
+      }
+    ]
+  }'
+```
+
+**根據 ID 取得書籍**（替換成實際的 bookID）：
+```bash
+curl http://localhost:3000/books/e8c7b2a1-3d4f-5e6g-7h8i-9j0k1l2m3n4o
+```
+
+---
+
+### 常見錯誤和解決方法
+
+#### 1. 連接被拒絕（Connection Refused）
+
+**錯誤訊息**：
+```
+Error: connect ECONNREFUSED 127.0.0.1:3000
+```
+
+**原因**：後端伺服器沒有啟動
+
+**解決方法**：
+```bash
+cd obs-backend
+npm run start:dev
+```
+
+#### 2. 400 Bad Request - 驗證錯誤
+
+**回應範例**：
+```json
+{
+  "statusCode": 400,
+  "message": [
+    "Price must be greater than 0",
+    "ISBN must be exactly 13 characters"
+  ],
+  "error": "Bad Request"
+}
+```
+
+**原因**：資料不符合 DTO 的驗證規則
+
+**解決方法**：檢查並修正請求資料
+
+#### 3. 404 Not Found
+
+**回應範例**：
+```json
+{
+  "statusCode": 404,
+  "message": "Book with ID xxx not found",
+  "error": "Not Found"
+}
+```
+
+**原因**：指定的 ID 不存在
+
+**解決方法**：使用正確的 ID 或先新增資料
+
+#### 4. 409 Conflict - ISBN 已存在
+
+**回應範例**：
+```json
+{
+  "statusCode": 409,
+  "message": "ISBN already exists",
+  "error": "Conflict"
+}
+```
+
+**原因**：嘗試新增重複的 ISBN
+
+**解決方法**：使用不同的 ISBN 或更新現有書籍
+
+---
+
+### 測試流程建議
+
+**完整測試流程**：
+
+1. ✅ 確認伺服器運行：`GET /`
+2. ✅ 新增第一本書：`POST /books`
+3. ✅ 查看所有書籍：`GET /books`
+4. ✅ 查看單一書籍：`GET /books/:id`
+5. ✅ 根據 ISBN 查詢：`GET /books/isbn/:isbn`
+6. ✅ 更新書籍資訊：`PATCH /books/:id`
+7. ✅ 更新書籍狀態：`PATCH /books/:id/status`
+8. ✅ 新增書籍圖片：`POST /books/:id/images`
+9. ✅ 刪除書籍：`DELETE /books/:id`
+
+**檢查清單**：
+
+- [ ] 所有 GET 請求都能正常回應
+- [ ] POST 請求能成功新增資料
+- [ ] PATCH 請求能成功更新資料
+- [ ] DELETE 請求能成功刪除資料
+- [ ] 驗證規則正常運作（例如 Price > 0）
+- [ ] 錯誤訊息清楚明確
+- [ ] 資料庫中的資料與 API 回應一致
 
 ---
 

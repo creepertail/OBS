@@ -109,7 +109,6 @@ publisher       // 出版社
 publication_date // 出版日期
 price           // 價格
 stock_quantity  // 庫存數量
-category        // 分類
 description     // 描述
 cover_image     // 封面圖片 URL
 created_at      // 建立時間
