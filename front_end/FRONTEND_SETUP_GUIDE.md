@@ -87,7 +87,7 @@ npm install vee-validate yup
 VITE_API_BASE_URL=http://localhost:3000
 
 # 其他設定
-VITE_APP_TITLE=線上書城
+VITE_APP_TITLE=OBS
 ```
 
 建立 `.env.production` 檔案（正式環境）：
@@ -95,7 +95,7 @@ VITE_APP_TITLE=線上書城
 # 正式環境 API 位址
 VITE_API_BASE_URL=https://your-api-domain.com
 
-VITE_APP_TITLE=線上書城
+VITE_APP_TITLE=OBS
 ```
 
 ---
