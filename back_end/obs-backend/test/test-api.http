@@ -18,6 +18,10 @@ Content-Type: application/json
 ### 取得所有用戶
 GET http://localhost:3000/users
 
+### 取得指定id用戶
+@id = 0b92b549-c05e-436b-a729-ea587275280d
+GET http://localhost:3000/users/{{id}}
+
 ### 測試建立第二個用戶
 POST http://localhost:3000/users
 Content-Type: application/json
@@ -40,6 +44,18 @@ Content-Type: application/json
   "password": "password123",
   "username": "另一個用戶",
   "phone": "0934567890"
+}
+
+### 測試 更新指定id的User資料(可更改：email, account, password, username, phone)
+# 設計成要改什麼參數放什麼
+# 全部都放也不會怎樣
+# 會自己檢查有無跟別人重複
+PATCH http://localhost:3000/users/{{id}}
+Content-Type: application/json
+
+{
+  "phone" : "0911222333",
+  "username" : "Username-test"
 }
 
 # ----------------------------

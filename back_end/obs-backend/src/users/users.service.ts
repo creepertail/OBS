@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entityies/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -61,5 +62,54 @@ export class UsersService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
     return user;
+  }
+
+  // 修改User的資料
+  async updateData(id: string, updateUserDto: UpdateUserDto): Promise<User>{
+    const user = await this.findByID(id);
+    // email 有沒有跟別人重複
+    if (updateUserDto.email && updateUserDto.email !== user.email) {
+      const existingUserByEmail = await this.usersRepository.findOne({
+        where: { email: updateUserDto.email },
+      });
+      if (existingUserByEmail) {
+        throw new ConflictException('Email already exists');
+      }
+    }
+    // account 有沒有跟別人重複
+    if(updateUserDto.account && updateUserDto.account !== user.account){
+      const existingUserByAccount = await this.usersRepository.findOne({
+        where: { account: updateUserDto.account },
+      });
+      if (existingUserByAccount) {
+        throw new ConflictException('Account already exists');
+      }
+    }
+    // username 有沒有跟別人重複
+    if(updateUserDto.username && updateUserDto.username !== user.username){
+      const existingUserByUsename = await this.usersRepository.findOne({
+        where: { username: updateUserDto.username },
+      });
+      if (existingUserByUsename) {
+        throw new ConflictException('Username already exists');
+      }
+    }
+    // phone 有沒有跟別人重複
+    if (updateUserDto.phone && updateUserDto.phone !== user.phone) {
+      const existingUserByPhone = await this.usersRepository.findOne({
+        where: { phone: updateUserDto.phone },
+      });
+      if (existingUserByPhone) {
+        throw new ConflictException('Phone number already exists');
+      }
+    }
+    // 處理密碼加密（如果要更新密碼）
+    if (updateUserDto.password) {
+      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+    }
+
+    Object.assign(user, updateUserDto);
+
+    return await this.usersRepository.save(user);
   }
 }
