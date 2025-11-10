@@ -3,12 +3,10 @@ import { IsEmail, IsNotEmpty, MinLength, IsString, MaxLength, IsUUID } from 'cla
 
 export class UpdateUserDto {
   @IsEmail()
-  @IsNotEmpty()
   @MaxLength(40)
   email: string;
 
   @IsString()
-  @IsNotEmpty()
   @MaxLength(20)
   account: string;
 
@@ -18,12 +16,10 @@ export class UpdateUserDto {
   password: string;
 
   @IsString()
-  @IsNotEmpty()
   @MaxLength(20)
   username: string;
 
   @IsString()
-  @IsNotEmpty()
   @MaxLength(12)
   phone: string;
 }
