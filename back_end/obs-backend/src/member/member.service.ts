@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
 import { Member } from './member.entity';
+import { MemberType } from './member-type.enum';
 
 @Injectable()
 export class MemberService {
@@ -13,6 +14,23 @@ export class MemberService {
     @InjectRepository(Member)
     private readonly memberRepository: Repository<Member>,
   ) {}
+
+  findAll(): Promise<Member[]> {
+    return this.memberRepository.find();
+  }
+
+  async findByID(id: string): Promise<Member> {
+    const member = await this.memberRepository.findOne({ where: { member_id: id } });
+    if (!member) {
+      throw new NotFoundException(`Member with ID ${id} not found`);
+    }
+    return member;
+  }
+
+  async findMemberType(id: string): Promise<MemberType> {
+    const member = await this.findByID(id);
+    return member.type;
+  }
 
   async create(createMemberDto: CreateMemberDto): Promise<Member> {
     await this.ensureUniqueFields(createMemberDto);
@@ -25,20 +43,8 @@ export class MemberService {
     return this.memberRepository.save(member);
   }
 
-  findAll(): Promise<Member[]> {
-    return this.memberRepository.find();
-  }
-
-  async findOne(id: string): Promise<Member> {
-    const member = await this.memberRepository.findOne({ where: { member_id: id } });
-    if (!member) {
-      throw new NotFoundException(`Member with ID ${id} not found`);
-    }
-    return member;
-  }
-
   async update(id: string, updateMemberDto: UpdateMemberDto): Promise<Member> {
-    const member = await this.findOne(id);
+    const member = await this.findByID(id);
 
     await this.ensureUniqueFields(updateMemberDto, member.member_id);
 
@@ -51,8 +57,8 @@ export class MemberService {
   }
 
   async remove(id: string): Promise<void> {
-    await this.findOne(id);
-    await this.memberRepository.delete(id);
+    await this.findByID(id);
+    await this.memberRepository.delete({ member_id: id });
   }
 
   private async ensureUniqueFields(
@@ -73,10 +79,17 @@ export class MemberService {
       }
     }
 
-    if (dto.phoneNumber) {
+    if (dto.phoneNumber && dto.type != MemberType.Admin) {
       const existingByPhone = await this.memberRepository.findOne({ where: { phoneNumber: dto.phoneNumber } });
       if (existingByPhone && existingByPhone.member_id !== currentId) {
         throw new ConflictException('Phone number already exists');
+      }
+    }
+    
+    if(dto.type === MemberType.Merchant){
+      const existingByMerchantName = await this.memberRepository.findOne({ where: { type: MemberType.Merchant, merchantsName: dto.merchantsName } });
+      if(existingByMerchantName && existingByMerchantName.member_id !== currentId){
+        throw new ConflictException('Merchant name already exists');
       }
     }
   }
