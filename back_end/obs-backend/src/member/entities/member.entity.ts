@@ -6,9 +6,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { MemberType } from '../member-type.enum';
 
-@Entity('members')
+@Entity('member')
 export class Member {
   @PrimaryGeneratedColumn('uuid')
   member_id: string;
@@ -19,35 +18,36 @@ export class Member {
   @Column({ type: 'varchar', length: 20, unique: true, nullable: false })
   account: string;
 
+  // 密碼需儲存雜湊後字串，預留較長長度
   @Column({ type: 'varchar', length: 255, nullable: false })
   password: string;
 
   @Column({ type: 'varchar', length: 12, unique: true, nullable: false })
   phoneNumber: string;
 
-  @Column({ type: 'enum', enum: MemberType, default: MemberType.User })
-  type: MemberType;
-
-  @Column({ type: 'varchar', length: 20, nullable: false })
-  username: string;
-
   @Column({ type: 'int', default: 0 })
-  level: number;
+  type: number;
 
-  @Column({ type: 'int', default: 0 })
-  userState: number;
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  username?: string;
+
+  @Column({ type: 'int', nullable: true, default: 0 })
+  userLevel?: number;
+
+  @Column({ type: 'int', nullable: true, default: 0 })
+  userState?: number;
+
+  @Column({ type: 'varchar', length: 20, unique: true, nullable: true })
+  merchantName?: string;
+
+  @Column({ type: 'int', nullable: true, default: 0 })
+  merchantState?: number;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
-  merchantsName: string | null;
+  merchantAddress?: string;
 
-  @Column({ type: 'int', nullable: true, default: null })
-  merchantsState: number | null;
-
-  @Column({ type: 'varchar', length: 200, nullable: true })
-  address: string | null;
-
-  @Column({ type: 'int', default: 0 })
-  subscriberCount: number;
+  @Column({ type: 'int', nullable: true, default: 0 })
+  merchantSubscriberCount?: number;
 
   @CreateDateColumn()
   createdAt: Date;
