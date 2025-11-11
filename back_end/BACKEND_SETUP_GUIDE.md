@@ -13,14 +13,13 @@
 ## 🔧 環境準備
 
 ### 必要工具
-- Node.js (v18+)
+- Node.js (v24+)
 - MySQL (v8.0+)
-- npm 或 yarn
+- npm(v11+)
 - VS Code (推薦)
 
 ### VS Code 推薦擴充套件
-- ESLint
-- Prettier
+- Thunder Client (測試 API)
 - REST Client (測試 API)
 
 ---
@@ -32,11 +31,8 @@
 # 安裝 Nest CLI
 npm install -g @nestjs/cli
 
-# 建立新專案
-nest new OBS-backend
-
 # 進入專案目錄
-cd OBS-backend
+cd back_end/obs-backend
 ```
 
 ### Step 2: 安裝必要套件
@@ -57,87 +53,6 @@ npm install -D @types/bcrypt
 
 # 驗證工具
 npm install class-validator class-transformer
-```
-
----
-
-## 🗄️ 資料庫設計
-
-### 核心資料表
-
-#### 1. Users (會員表)
-```sql
-CREATE TABLE users (
-  user_id INT PRIMARY KEY AUTO_INCREMENT,
-  email VARCHAR(100) UNIQUE NOT NULL,
-  password VARCHAR(255) NOT NULL,
-  username VARCHAR(50) NOT NULL,
-  phone VARCHAR(20),
-  role ENUM('customer', 'admin') DEFAULT 'customer',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-```
-
-#### 2. Books (書籍表)
-```sql
-CREATE TABLE books (
-  book_id INT PRIMARY KEY AUTO_INCREMENT,
-  isbn VARCHAR(13) UNIQUE,
-  title VARCHAR(200) NOT NULL,
-  author VARCHAR(100),
-  publisher VARCHAR(100),
-  publication_date DATE,
-  price DECIMAL(10, 2) NOT NULL,
-  stock_quantity INT DEFAULT 0,
-  category VARCHAR(50),
-  description TEXT,
-  cover_image VARCHAR(255),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-```
-
-#### 3. Orders (訂單表)
-```sql
-CREATE TABLE orders (
-  order_id INT PRIMARY KEY AUTO_INCREMENT,
-  user_id INT NOT NULL,
-  total_amount DECIMAL(10, 2) NOT NULL,
-  status ENUM('pending', 'paid', 'shipped', 'completed', 'cancelled') DEFAULT 'pending',
-  shipping_address TEXT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(user_id)
-);
-```
-
-#### 4. Order_Items (訂單明細表)
-```sql
-CREATE TABLE order_items (
-  order_item_id INT PRIMARY KEY AUTO_INCREMENT,
-  order_id INT NOT NULL,
-  book_id INT NOT NULL,
-  quantity INT NOT NULL,
-  unit_price DECIMAL(10, 2) NOT NULL,
-  subtotal DECIMAL(10, 2) NOT NULL,
-  FOREIGN KEY (order_id) REFERENCES orders(order_id),
-  FOREIGN KEY (book_id) REFERENCES books(book_id)
-);
-```
-
-#### 5. Shopping_Cart (購物車表)
-```sql
-CREATE TABLE shopping_cart (
-  cart_id INT PRIMARY KEY AUTO_INCREMENT,
-  user_id INT NOT NULL,
-  book_id INT NOT NULL,
-  quantity INT DEFAULT 1,
-  added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(user_id),
-  FOREIGN KEY (book_id) REFERENCES books(book_id),
-  UNIQUE KEY unique_user_book (user_id, book_id)
-);
 ```
 
 ---
@@ -203,13 +118,13 @@ src/
 ### Phase 1: 基礎設定
 
 #### 1. 設定環境變數
-建立 `.env` 檔案：
+在`OBS\back_end\obs-backend` 建立 `.env` 檔案：
 ```env
 # Database
 DB_HOST=localhost
 DB_PORT=3306
 DB_USERNAME=root
-DB_PASSWORD=your_password
+DB_PASSWORD=Your_MySQL_Password
 DB_DATABASE=obs
 
 # JWT
@@ -220,38 +135,11 @@ JWT_EXPIRES_IN=7d
 PORT=3000
 ```
 
-#### 2. 設定 TypeORM
-在 `app.module.ts` 中配置：
-```typescript
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-
-@Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT || '3306'),
-      username: process.env.DB_USERNAME || 'root',
-      password: process.env.DB_PASSWORD || '',
-      database: process.env.DB_DATABASE || 'OBS',
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true, // 開發時使用，正式環境要改為 false
-    }),
-  ],
-})
-export class AppModule {}
-```
-
 **重要提醒**：
 - 確保 `.env` 檔案放在專案根目錄（`obs-backend/.env`），不是外層資料夾
 - 每個環境變數都加上預設值（`|| 'default_value'`），避免 TypeScript 型別錯誤
 
-#### 3. 建立 MySQL 資料庫
+#### 2. 建立 MySQL 資料庫
 
 在開始之前，需要先在 MySQL 中建立資料庫：
 
@@ -273,26 +161,20 @@ EXIT;
 **方法 2：使用 MySQL Workbench**
 1. 開啟 MySQL Workbench
 2. 連接到你的 MySQL 伺服器
-3. 點擊工具列的「Create a new schema」圖示
-4. 輸入資料庫名稱：`OBS`
-5. Character Set: `utf8mb4`
-6. Collation: `utf8mb4_unicode_ci`
-7. 點擊 Apply
+3. 在指令區打
+```
+create database obs;
+```
+4. 按下左上角閃電`Execute`
 
-**方法 3：使用 phpMyAdmin**
-1. 開啟 phpMyAdmin
-2. 點擊左側的「新增」或頂部的「資料庫」
-3. 輸入資料庫名稱：`OBS`
-4. 選擇編碼：`utf8mb4_unicode_ci`
-5. 點擊「建立」
 
-#### 4. 測試專案是否正常運行
+#### 3. 測試專案是否正常運行
 
 完成上述設定後，測試專案能否成功啟動：
 
 ```bash
 # 確保在專案目錄中
-cd obs-backend
+cd OBS\back_end\obs-backend
 
 # 啟動開發伺服器
 npm run start:dev
