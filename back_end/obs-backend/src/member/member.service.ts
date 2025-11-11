@@ -5,7 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
-import { Member } from './member.entity';
+import { Member } from './entities/member.entity';
 
 @Injectable()
 export class MemberService {
@@ -52,7 +52,7 @@ export class MemberService {
 
   async remove(id: string): Promise<void> {
     await this.findOne(id);
-    await this.memberRepository.delete(id);
+    await this.memberRepository.delete({ member_id: id });
   }
 
   private async ensureUniqueFields(
@@ -81,4 +81,3 @@ export class MemberService {
     }
   }
 }
-
