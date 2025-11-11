@@ -210,7 +210,7 @@ DB_HOST=localhost
 DB_PORT=3306
 DB_USERNAME=root
 DB_PASSWORD=your_password
-DB_DATABASE=online_bookstore
+DB_DATABASE=obs
 
 # JWT
 JWT_SECRET=your_super_secret_key_here

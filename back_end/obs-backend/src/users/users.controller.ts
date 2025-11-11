@@ -15,21 +15,31 @@ export class UsersController {
   PATCH /users/:id
   */
 
+  // @url = http://localhost:3000
 
+  // POST {url}/users
+  /* Body: 
+    
+
+
+  */
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
 
+  // GET {url}/users
   @Get()
   findAll() {
     return this.usersService.findAll();
   }
 
+  // GET {url}/users/
   @Get(':id')
   findByID(@Param('id') id: string) {
     return this.usersService.findByID(id);
   }
+
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto:UpdateUserDto){
