@@ -1,7 +1,7 @@
 // src/member/member.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Member } from './member.entity';
+import { Member } from './entities/member.entity';
 import { MemberService } from './member.service';
 import { MemberController } from './member.controller';
 
@@ -12,4 +12,3 @@ import { MemberController } from './member.controller';
   exports: [MemberService],
 })
 export class MemberModule {}
-

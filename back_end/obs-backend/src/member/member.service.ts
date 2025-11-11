@@ -5,7 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
-import { Member } from './member.entity';
+import { Member } from './entities/member.entity';
 import { MemberType } from './member-type.enum';
 
 @Injectable()
@@ -94,4 +94,3 @@ export class MemberService {
     }
   }
 }
-
