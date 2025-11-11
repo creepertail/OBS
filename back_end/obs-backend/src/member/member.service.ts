@@ -27,7 +27,7 @@ export class MemberService {
     return member;
   }
 
-  async findMemberType(id: string): Promise<MemberType> {
+  async findMemberType(id: string): Promise<number> {
     const member = await this.findByID(id);
     return member.type;
   }
