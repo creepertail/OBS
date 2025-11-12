@@ -1,50 +1,73 @@
 // src/book/entities/book.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne, JoinColumn} from 'typeorm';
 import { BookImage } from './book-image.entity';
+import { BelongsTo } from './belongs-to.entity';
+import { Favorite } from '../../favorite/entities/favorite.entity';
+import { AddsToCart } from '../../cart/entities/adds-to-cart.entity';
+import { Review } from '../../review/entities/review.entity';
+import { Contains } from '../../order/entities/contains.entity';
+import { Member } from '../../member/entities/member.entity';
 
-@Entity('book')
+@Entity('Book')
 export class Book {
-    @PrimaryGeneratedColumn('uuid')
-    bookID: string;
+  @PrimaryGeneratedColumn('uuid')
+  bookId: string;
 
-    @Column({ type: 'char', length: 13, nullable: false })
-    ISBN: string;
+  @Column({ type: 'char', length: 13, nullable: false })
+  isbn: string;
 
-    @Column({ type: 'varchar', length: 100, nullable: false})
-    Name: string;
+  @Column({ type: 'varchar', length: 100, nullable: false })
+  name: string;
 
-    @OneToMany(() => BookImage, image => image.book, { cascade: true })
-    images: BookImage[];
+  @Column({ type: 'varchar', length: 400, nullable: false, default: '' })
+  image: string;
 
+  @OneToMany(() => BookImage, (image) => image.book, { cascade: true })
+  images: BookImage[];
 
-    // 書本上架狀態：0表示售完，1表示上架中
-    @Column({ type: 'int', default: 0, nullable: false})
-    Status: number;
-    
-    @Column({ type: 'varchar', length: 500, nullable: false})
-    ProductDescription: string;
+  @OneToMany(() => BelongsTo, (connection) => connection.book, { cascade: true })
+  belongsToConnections: BelongsTo[];
 
-    // todo
-    // InventoryQuantity、Price 要 > 0
-    @Column({ type: 'int', default: 0, nullable: false})
-    InventoryQuantity: number;
+  @OneToMany(() => Favorite, (favorite) => favorite.book)
+  favorites: Favorite[];
 
-    @Column({ type: 'int', default: 0, nullable: false})
-    Price: number;
+  @OneToMany(() => AddsToCart, (item) => item.book)
+  addsToCart: AddsToCart[];
 
-    @Column({ type: 'varchar', length: 200, nullable: false})
-    Author: string;
+  @OneToMany(() => Review, (review) => review.book)
+  reviews: Review[];
 
-    @Column({ type: 'varchar', length: 50, nullable: false})
-    Publisher: string;
+  @OneToMany(() => Contains, (item) => item.book)
+  contains: Contains[];
 
-    // todo => foreign key to Merchant
-    @Column({ type: 'uuid', nullable: false})
-    MerchantID: string;
+  @Column({ type: 'int', default: 0, nullable: false })
+  status: number;
 
-    @CreateDateColumn()
-    created_at: Date;
+  @Column({ type: 'varchar', length: 500, nullable: false })
+  productDescription: string;
 
-    @UpdateDateColumn()
-    updated_at: Date;
+  @Column({ type: 'int', nullable: false })
+  inventoryQuantity: number;
+
+  @Column({ type: 'int', nullable: false })
+  price: number;
+
+  @Column({ type: 'varchar', length: 200, nullable: false })
+  author: string;
+
+  @Column({ type: 'varchar', length: 50, nullable: false })
+  publisher: string;
+
+  @Column({ type: 'char', length: 36, nullable: false })
+  merchantId: string;
+
+  @ManyToOne(() => Member, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'merchantId', referencedColumnName: 'member_id' })
+  merchant: Member;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
