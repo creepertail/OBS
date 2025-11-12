@@ -1,20 +1,16 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterLink, RouterView, useRoute  } from 'vue-router'
+import { computed } from 'vue'
 import HelloWorld from './components/HelloWorld.vue'
+
+const route = useRoute()
+const hideLayout = computed(() => route.meta.hideLayout)
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
+  <header v-if="!hideLayout">
+    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" /> <!-- TODO: change img -->
+    <h1>Online Bookstore System</h1>
   </header>
 
   <RouterView />
@@ -22,16 +18,29 @@ import HelloWorld from './components/HelloWorld.vue'
 
 <style scoped>
 header {
+  position: absolute;
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
   line-height: 1.5;
-  max-height: 100vh;
+  max-height: 20vh;
+  background-color: gray;
 }
 
 .logo {
   display: block;
-  margin: 0 auto 2rem;
+  margin: auto 0 auto 2rem;
 }
 
-nav {
+h1 {
+  font-size: 3em;
+}
+
+/* nav {
   width: 100%;
   font-size: 12px;
   text-align: center;
@@ -54,9 +63,9 @@ nav a {
 
 nav a:first-of-type {
   border: 0;
-}
+} */
 
-@media (min-width: 1024px) {
+/* @media (min-width: 1024px) {
   header {
     display: flex;
     place-items: center;
@@ -81,5 +90,5 @@ nav a:first-of-type {
     padding: 1rem 0;
     margin-top: 1rem;
   }
-}
+} */
 </style>
