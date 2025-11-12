@@ -32,7 +32,7 @@ export class CreateMemberDto {
 
   @IsInt()
   @IsOptional()
-  level?: number;
+  userLevel?: number;
 
   @IsInt()
   @IsOptional()
@@ -40,11 +40,11 @@ export class CreateMemberDto {
 
   @IsString()
   @IsOptional()
-  merchantsName?: string;
+  merchantName?: string;
 
   @IsInt()
   @IsOptional()
-  merchantsState?: number;
+  merchantState?: number;
 
   @IsString()
   @IsOptional()
