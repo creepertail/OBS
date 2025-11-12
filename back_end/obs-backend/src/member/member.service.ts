@@ -27,7 +27,7 @@ export class MemberService {
     return member;
   }
 
-  async findMemberType(id: string): Promise<number> {
+  async findMemberType(id: string): Promise<MemberType> {
     const member = await this.findByID(id);
     return member.type;
   }
@@ -87,7 +87,7 @@ export class MemberService {
     }
     
     if(dto.type === MemberType.Merchant){
-      const existingByMerchantName = await this.memberRepository.findOne({ where: { type: MemberType.Merchant, merchantsName: dto.merchantsName } });
+      const existingByMerchantName = await this.memberRepository.findOne({ where: { type: MemberType.Merchant, merchantName: dto.merchantsName } });
       if(existingByMerchantName && existingByMerchantName.member_id !== currentId){
         throw new ConflictException('Merchant name already exists');
       }

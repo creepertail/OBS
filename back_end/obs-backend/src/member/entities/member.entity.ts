@@ -1,11 +1,6 @@
 // src/member/entities/member.entity.ts
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { MemberType } from '../member-type.enum';
 
 @Entity('member')
 export class Member {
@@ -25,8 +20,8 @@ export class Member {
   @Column({ type: 'varchar', length: 12, unique: true, nullable: false })
   phoneNumber: string;
 
-  @Column({ type: 'int', default: 0 })
-  type: number;
+  @Column({ type: 'enum', enum: MemberType, default: MemberType.User })
+  type: MemberType;
 
   @Column({ type: 'varchar', length: 20, nullable: true })
   username?: string;
