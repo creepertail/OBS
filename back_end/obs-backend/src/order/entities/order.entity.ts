@@ -19,7 +19,7 @@ export class Order {
   @Column({ type: 'int', nullable: false, default: 0 })
   totalPrice: number;
 
-  @Column({ type: 'int', default: 0, nullable: false })
+  @Column({ type: 'int',  nullable: false, default: 0 })
   state: number;
 
   @Column({ type: 'int', nullable: false, default: 0 })
