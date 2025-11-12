@@ -22,6 +22,8 @@ export class MemberController {
    * PATCH url/member/:id + body    => 修改member資料，並回傳member
    *   - email account password phoneNumber
    *   - username level
+   * DELETE url/members/:id     => 刪掉某id member
+   * 
    */
 
   
@@ -50,11 +52,13 @@ export class MemberController {
     return this.memberService.create(createMemberDto);
   }
   
+  // PATCH url/members/:id + body
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateMemberDto: UpdateMemberDto) {
     return this.memberService.update(id, updateMemberDto);
   }
 
+  // DELETE url/members/:id
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.memberService.remove(id);

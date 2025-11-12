@@ -87,7 +87,7 @@ export class MemberService {
     }
     
     if(dto.type === MemberType.Merchant){
-      const existingByMerchantName = await this.memberRepository.findOne({ where: { type: MemberType.Merchant, merchantName: dto.merchantsName } });
+      const existingByMerchantName = await this.memberRepository.findOne({where: { type: MemberType.Merchant, merchantName: dto.merchantName }});
       if(existingByMerchantName && existingByMerchantName.member_id !== currentId){
         throw new ConflictException('Merchant name already exists');
       }
