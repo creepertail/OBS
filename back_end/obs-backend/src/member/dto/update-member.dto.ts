@@ -16,7 +16,6 @@ export class UpdateMemberDto extends PartialType(CreateMemberDto) {
   account?: string;
 
   @IsString()
-  @MinLength(6)
   @MaxLength(255)
   @IsOptional()
   password?: string;
