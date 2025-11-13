@@ -6,7 +6,7 @@ import { Favorite } from '../../favorite/entities/favorite.entity';
 import { AddsToCart } from '../../cart/entities/adds-to-cart.entity';
 import { Review } from '../../review/entities/review.entity';
 import { Contains } from '../../order/entities/contains.entity';
-import { Member } from '../../member/entities/member.entity';
+import { Member } from '../../../obs-backend/src/member/entities/member.entity';
 
 @Entity('Book')
 export class Book {

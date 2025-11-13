@@ -1,7 +1,7 @@
 // src/order/entities/order.entity.ts
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Member } from '../../member/entities/member.entity';
-import { Coupon } from '../../coupon/entities/coupon.entity';
+// import { Coupon } from '../../coupon/entities/coupon.entity';
 import { Contains } from './contains.entity';
 import { Control } from './control.entity';
 
