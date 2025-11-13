@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { RouterLink, RouterView, useRoute  } from 'vue-router'
 import { computed } from 'vue'
+import { MagnifyingGlassIcon } from '@heroicons/vue/24/solid'
 
 const route = useRoute()
 const hideLayout = computed(() => route.meta.hideLayout)
@@ -15,6 +16,7 @@ const isLogin = computed(() => route.meta.isLogin)
     </RouterLink>
 
     <div class="routerButtons">
+      <MagnifyingGlassIcon style="width:32px; height:32px; color:aliceblue;" />
       <RouterLink :to="{name: 'login'}" v-if="!isLogin">Login</RouterLink>
       <RouterLink :to="{name: 'register'}" v-if="!isLogin">Register</RouterLink>
     </div>
