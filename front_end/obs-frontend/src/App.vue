@@ -1,16 +1,25 @@
 <script setup lang="ts">
 import { RouterLink, RouterView, useRoute  } from 'vue-router'
 import { computed } from 'vue'
-import HelloWorld from './components/HelloWorld.vue'
+import { MagnifyingGlassIcon } from '@heroicons/vue/24/solid'
 
 const route = useRoute()
 const hideLayout = computed(() => route.meta.hideLayout)
+const isLogin = computed(() => route.meta.isLogin)
 </script>
 
 <template>
   <header v-if="!hideLayout">
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" /> <!-- TODO: change img -->
-    <h1>Online Bookstore System</h1>
+    <RouterLink :to="{name: 'home'}" class="homeButton">
+      <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" /> <!-- TODO: change img -->
+      <h1>Online Bookstore System</h1>
+    </RouterLink>
+
+    <div class="routerButtons">
+      <MagnifyingGlassIcon style="width:32px; height:32px; color:aliceblue;" />
+      <RouterLink :to="{name: 'login'}" v-if="!isLogin">Login</RouterLink>
+      <RouterLink :to="{name: 'register'}" v-if="!isLogin">Register</RouterLink>
+    </div>
   </header>
 
   <RouterView />
@@ -29,6 +38,34 @@ header {
   line-height: 1.5;
   max-height: 20vh;
   background-color: gray;
+}
+
+.homeButton {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.homeButton:hover,
+.homeButton:focus,
+.homeButton:active {
+  background-color: transparent;
+}
+
+.routerButtons{
+  display: flex;
+  align-items: center;
+  margin: auto 2rem auto auto;
+  gap: 1rem;
+  font-size: 1.8em;
+  text-decoration: none;
+}
+
+.routerButtons a {
+  background-color: transparent;
 }
 
 .logo {
