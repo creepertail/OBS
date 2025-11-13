@@ -25,10 +25,6 @@ export class UpdateMemberDto extends PartialType(CreateMemberDto) {
   @IsOptional()
   phoneNumber?: string;
 
-  @IsEnum(MemberType)
-  @IsOptional()
-  type?: MemberType;
-
   @IsString()
   @MaxLength(20)
   @IsOptional()

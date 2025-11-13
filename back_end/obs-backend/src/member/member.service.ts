@@ -1,5 +1,5 @@
 // src/member/member.service.ts
-import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -46,10 +46,17 @@ export class MemberService {
     return this.memberRepository.save(member);
   }
 
-  async update(id: string, updateMemberDto: UpdateMemberDto): Promise<Member> {
+  // id 為 被改動的人
+  // sub 為 發這個API的Member 的 ID
+  async update(id: string, updateMemberDto: UpdateMemberDto, user: { sub: string; type: MemberType; account: string }): Promise<Member> {
     const member = await this.findByID(id);
 
-    // 根據現有會員的類型進行欄位驗證
+    // 權限檢查：非 Admin 用戶只能修改自己的資料
+    if (user.type !== MemberType.Admin && user.sub !== id) {
+      throw new ForbiddenException('You do not have permission to modify this member');
+    }
+
+    // 根據目標會員的類型進行欄位驗證（防止修改不屬於該類型的欄位）
     if (member.type === MemberType.Admin) {
       if (updateMemberDto.username !== undefined) {
         throw new ConflictException('Since the type is Admin, the Username cannot be modified.');

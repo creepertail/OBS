@@ -20,31 +20,50 @@
 @merchant_id = 0281a18a-b682-40ae-bff3-bddaf041fa57
 
 # 先登入取得 token (請先執行 LOGIN.http 取得你的 token)
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzMWZkZTYwZS02YjNhLTQ5MTAtYWUyMi1hNDg0ZTI3NzY0YWEiLCJhY2NvdW50IjoidXNlci10ZXN0LTEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2MzAxNzc0MCwiZXhwIjoxNzYzMTA0MTQwfQ.IPSzqGyEwuawhvJmaqdtHvQrqx9HBLcD8toh499xFP8
+@user_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzMWZkZTYwZS02YjNhLTQ5MTAtYWUyMi1hNDg0ZTI3NzY0YWEiLCJhY2NvdW50IjoidXNlci10ZXN0LTEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2MzAyNjA4MSwiZXhwIjoxNzYzMTEyNDgxfQ.R6MikVQrbRDfHCLKGa11FpQhgJvWDhT-8xL9HpV--8k
+@admin_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4MWRjM2I0Mi1kNzA2LTRiODgtOGU3OS00ZjFlZDkzYjU2ZTYiLCJhY2NvdW50IjoiYWRtaW4tdGVzdC0xIiwidHlwZSI6ImFkbWluIiwiaWF0IjoxNzYzMDI2MzYzLCJleHAiOjE3NjMxMTI3NjN9.TN5QGBe4SiCwg3I3-bbkwUOice7fWAKy2s-arYDWKog
 
 ### 更改 admin 電話
-PATCH http://localhost:3000/members/81dc3b42-d706-4b88-8e79-4f1ed93b56e6
+PATCH http://localhost:3000/members/{{admin_id}}
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{admin_token}}
 
 {
-  "phoneNumber": "0999888777"
+  "phoneNumber": "0998765432"
 }
 
 ### 更改 user 電話
-PATCH http://localhost:3000/members/31fde60e-6b3a-4910-ae22-a484e27764aa
+PATCH http://localhost:3000/members/{{user_id}}
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{user_token}}
+
+{
+  "phoneNumber": "0912345678"
+}
+
+### admin 更改 user 的 level => 因為admin 可以改其他人的資料 => 成功
+PATCH http://localhost:3000/members/{{user_id}}
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "userLevel": 1
+}
+
+### user 更改 admin 的 phoneNumber => 因為 user 不能改其他人的資料 => 失敗 403 "Forbidden"
+PATCH http://localhost:3000/members/{{admin_id}}
+Content-Type: application/json
+Authorization: Bearer {{user_token}}
 
 {
   "phoneNumber": "0900000000"
 }
 
 ### 更改 user 的 merchant Name => 報錯誤說不能修改
-PATCH http://localhost:3000/members/31fde60e-6b3a-4910-ae22-a484e27764aa
+PATCH http://localhost:3000/members/{{user_id}}
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{user_token}}
 
 {
-  "merchantName": "Merchant Name 2"
+  "merchantName": "Merchant-Name"
 }
