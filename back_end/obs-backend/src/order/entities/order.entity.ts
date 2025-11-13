@@ -45,6 +45,8 @@ export class Order {
   @Column({ type: 'char', length: 36, nullable: true })
   couponId?: string;
 
+  // TODO: Uncomment when Coupon entity is available
+
   // @ManyToOne(() => Coupon, (coupon) => coupon.orders, { onDelete: 'SET NULL' })
   // @JoinColumn({ name: 'couponId', referencedColumnName: 'couponId' })
   // coupon?: Coupon;

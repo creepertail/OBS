@@ -18,6 +18,8 @@ export class Contains {
   @JoinColumn({ name: 'orderId', referencedColumnName: 'orderId' })
   order: Order;
 
+  // TODO: Uncomment when Book entity is available 
+
   // @ManyToOne(() => Book, { onDelete: 'CASCADE' })
   // @JoinColumn({ name: 'bookId', referencedColumnName: 'bookID' })
   // book: Book;
