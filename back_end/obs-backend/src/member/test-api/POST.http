@@ -1,14 +1,20 @@
-#   @url = http://localhost:3000
-#   /**
+#  /**
 #    * API 功能：
-#    * GET url/members            => 所有member
-#    * GET url/members/:id        => 用id找member
-#    * GET url/members/:id/type   => 用id找member的type
-#    * POST url/member + body     => 新增member資料，並回傳member
-#    *   - email account password phoneNumber type              => member皆有，type = "admin" or "user" or "merchant" 
-#    *   - username level userState                             => type = "user" 會有的
-#    *   - merchantsName merchantsState address subscriberCount => type = "merchant" 會有的
+#    *
+#    * POST url/members + body     => 新增member資料，並回傳member
+#    *   - email account password phoneNumber type              => member皆有，type = "admin" or "user" or "merchant"
+#    *   - username level                                       => type = "user" 會有的
+#    *   - merchantsName address => type = "merchant" 會有的    => type = "merchant" 會有的
+#    * 
+#    * POST url/members/login + body   => 登入member，回傳JWT access token和會員資料
+#    *   - body :
+#    *   - account password
 #    */
+
+# ----------
+#  若某資料重複會回覆 "xxx already Exist."
+#  xxx => Email、Account、Phone number、Merchant name
+# ----------
 @baseUrl = http://localhost:3000
 
 ### 測試建立新admin
@@ -19,7 +25,7 @@ Content-Type: application/json
   "email": "test-admin@example.com",
   "account": "admin-test-1",
   "password": "0000",
-  "phone": "0912345678",
+  "phoneNumber": "0912345678",
   "type": "admin"
 }
 
@@ -32,7 +38,7 @@ Content-Type: application/json
   "email": "test-user@example.com",
   "account": "user-test-1",
   "password": "0000",
-  "phone": "0911222333",
+  "phoneNumber": "0911222333",
   "type": "user",
   "username": "User1"
 }
@@ -45,8 +51,36 @@ Content-Type: application/json
   "email": "test-merchant@example.com",
   "account": "merchant-test-1",
   "password": "0000",
-  "phone": "0911222333",
+  "phoneNumber": "0944555666",
   "type": "merchant",
   "merchantsName": "Merchant1",
   "address": "New TaipeiCity"
+}
+
+
+### 會員登入 API 測試
+POST http://localhost:3000/members/login
+Content-Type: application/json
+
+{
+  "account": "user-test-1",
+  "password": "0000"
+}
+
+### 登入失敗測試 - 錯誤密碼
+POST http://localhost:3000/members/login
+Content-Type: application/json
+
+{
+  "account": "user-test-1",
+  "password": "1111"
+}
+
+### 登入失敗測試 - 不存在的帳號
+POST http://localhost:3000/members/login
+Content-Type: application/json
+
+{
+  "account": "nonexistuser",
+  "password": "0000"
 }

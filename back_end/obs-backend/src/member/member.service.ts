@@ -1,10 +1,12 @@
 // src/member/member.service.ts
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
+import { LoginMemberDto } from './dto/login-member.dto';
 import { Member } from './entities/member.entity';
 import { MemberType } from './member-type.enum';
 
@@ -13,6 +15,7 @@ export class MemberService {
   constructor(
     @InjectRepository(Member)
     private readonly memberRepository: Repository<Member>,
+    private readonly jwtService: JwtService,
   ) {}
 
   findAll(): Promise<Member[]> {
@@ -46,6 +49,58 @@ export class MemberService {
   async update(id: string, updateMemberDto: UpdateMemberDto): Promise<Member> {
     const member = await this.findByID(id);
 
+    // 根據現有會員的類型進行欄位驗證
+    if (member.type === MemberType.Admin) {
+      if (updateMemberDto.username !== undefined) {
+        throw new ConflictException('Since the type is Admin, the Username cannot be modified.');
+      }
+      if (updateMemberDto.level !== undefined) {
+        throw new ConflictException('Since the type is Admin, the Level cannot be modified.');
+      }
+      if (updateMemberDto.userState !== undefined) {
+        throw new ConflictException('Since the type is Admin, the UserState cannot be modified.');
+      }
+      if (updateMemberDto.merchantName !== undefined) {
+        throw new ConflictException('Since the type is Admin, the MerchantName cannot be modified.');
+      }
+      if (updateMemberDto.merchantsState !== undefined) {
+        throw new ConflictException('Since the type is Admin, the MerchantsState cannot be modified.');
+      }
+      if (updateMemberDto.address !== undefined) {
+        throw new ConflictException('Since the type is Admin, the Address cannot be modified.');
+      }
+      if (updateMemberDto.subscriberCount !== undefined) {
+        throw new ConflictException('Since the type is Admin, the SubscriberCount cannot be modified.');
+      }
+    }
+
+    if (member.type === MemberType.User) {
+      if (updateMemberDto.merchantName !== undefined) {
+        throw new ConflictException('Since the type is User, the MerchantName cannot be modified.');
+      }
+      if (updateMemberDto.merchantsState !== undefined) {
+        throw new ConflictException('Since the type is User, the MerchantsState cannot be modified.');
+      }
+      if (updateMemberDto.address !== undefined) {
+        throw new ConflictException('Since the type is User, the Address cannot be modified.');
+      }
+      if (updateMemberDto.subscriberCount !== undefined) {
+        throw new ConflictException('Since the type is User, the SubscriberCount cannot be modified.');
+      }
+    }
+
+    if (member.type === MemberType.Merchant) {
+      if (updateMemberDto.username !== undefined) {
+        throw new ConflictException('Since the type is Merchant, the Username cannot be modified.');
+      }
+      if (updateMemberDto.level !== undefined) {
+        throw new ConflictException('Since the type is Merchant, the Level cannot be modified.');
+      }
+      if (updateMemberDto.userState !== undefined) {
+        throw new ConflictException('Since the type is Merchant, the UserState cannot be modified.');
+      }
+    }
+
     await this.ensureUniqueFields(updateMemberDto, member.member_id);
 
     if (updateMemberDto.password) {
@@ -59,6 +114,41 @@ export class MemberService {
   async remove(id: string): Promise<void> {
     await this.findByID(id);
     await this.memberRepository.delete({ member_id: id });
+  }
+
+  async login(loginMemberDto: LoginMemberDto): Promise<{ access_token: string; member: Omit<Member, 'password'> }> {
+    const { account, password } = loginMemberDto;
+
+    // 使用 account 找到會員
+    const member = await this.memberRepository.findOne({ where: { account } });
+
+    if (!member) {
+      throw new UnauthorizedException('Invalid account or password');
+    }
+
+    // 驗證密碼
+    const isPasswordValid = await bcrypt.compare(password, member.password);
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid account or password');
+    }
+
+    // 生成 JWT token
+    const payload = {
+      sub: member.member_id,
+      account: member.account,
+      type: member.type,
+    };
+
+    const access_token = await this.jwtService.signAsync(payload);
+
+    // 回傳 token 和會員資料（不包含密碼）
+    const { password: _, ...memberWithoutPassword } = member;
+
+    return {
+      access_token,
+      member: memberWithoutPassword,
+    };
   }
 
   private async ensureUniqueFields(

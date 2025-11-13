@@ -1,0 +1,50 @@
+#  /**
+#    * API 功能：
+#    * PATCH url/members/:id + body    => 用memberID找到member，修改其資料，並回傳member
+#    *   - "membertype" is necessary
+#    *   - email account password phoneNumber
+#    *   - username level userState (when membertype is user)
+#    *   - merchantsName merchantsState address subscriberCount(when membertype is merchant)
+#    * 
+#    */
+
+
+# throw 錯誤說不能修改
+# "Since the type is xxx, the oooo cannot be modified."
+# xxx => Admin, User, Merchant
+# oooo => username, level, userState, merchantsName, merchantsState, address, subscriberCount
+
+
+@admin_id = 81dc3b42-d706-4b88-8e79-4f1ed93b56e6
+@user_id = 31fde60e-6b3a-4910-ae22-a484e27764aa
+@merchant_id = 0281a18a-b682-40ae-bff3-bddaf041fa57
+
+# 先登入取得 token (請先執行 LOGIN.http 取得你的 token)
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzMWZkZTYwZS02YjNhLTQ5MTAtYWUyMi1hNDg0ZTI3NzY0YWEiLCJhY2NvdW50IjoidXNlci10ZXN0LTEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2MzAxNzc0MCwiZXhwIjoxNzYzMTA0MTQwfQ.IPSzqGyEwuawhvJmaqdtHvQrqx9HBLcD8toh499xFP8
+
+### 更改 admin 電話
+PATCH http://localhost:3000/members/81dc3b42-d706-4b88-8e79-4f1ed93b56e6
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "phoneNumber": "0999888777"
+}
+
+### 更改 user 電話
+PATCH http://localhost:3000/members/31fde60e-6b3a-4910-ae22-a484e27764aa
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "phoneNumber": "0900000000"
+}
+
+### 更改 user 的 merchant Name => 報錯誤說不能修改
+PATCH http://localhost:3000/members/31fde60e-6b3a-4910-ae22-a484e27764aa
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "merchantName": "Merchant Name 2"
+}

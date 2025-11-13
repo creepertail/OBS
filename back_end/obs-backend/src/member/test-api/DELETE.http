@@ -1,0 +1,9 @@
+#  /**
+#    * DELETE url/members/:id     => 刪掉某id member
+#    */
+
+# 先登入取得 token (請先執行 LOGIN.http 取得你的 token)
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzMWZkZTYwZS02YjNhLTQ5MTAtYWUyMi1hNDg0ZTI3NzY0YWEiLCJhY2NvdW50IjoidXNlci10ZXN0LTEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2MzAxNTgxMSwiZXhwIjoxNzYzMTAyMjExfQ.YXeuBgoWgDDIJDVDDyzb-lhs78iWx54JDLwY19SzJYY
+
+DELETE http://localhost:3000/members/0281a18a-b682-40ae-bff3-bddaf041fa57
+Authorization: Bearer {{token}}
