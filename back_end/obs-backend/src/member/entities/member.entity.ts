@@ -20,7 +20,7 @@ export class Member {
   @Column({ type: 'varchar', length: 12, unique: true, nullable: false })
   phoneNumber: string;
 
-  @Column({ type: 'enum', enum: MemberType, default: MemberType.User })
+  @Column({ type: 'enum', enum: MemberType, default: MemberType.User, nullable: false })
   type: MemberType;
 
   @Column({ type: 'varchar', length: 20, nullable: true })
