@@ -1,0 +1,62 @@
+# docker-compose.yml
+# 啟動所有服務：
+# docker-compose up -d
+#   - `-d` 表示在背景執行
+# 停止所有服務：
+# docker-compose down
+# 重新建立服務：
+# docker-compose up -d --build
+#   - `--build` 會重新建立映像檔，適用於 Dockerfile 或程式碼有變動時
+#
+version: '3.8'
+
+services:
+  # 1. 前端應用服務 (開發模式)
+  frontend:
+    build: ./front_end/obs-frontend # 指向前端專案的 Dockerfile 所在目錄
+    container_name: obs-frontend
+    ports:
+      - "5173:5173" # 將本機的 5173 port 映射到容器的 5173 port
+    volumes:
+      # 將本地的前端原始碼掛載到容器中，以實現熱加載 (Hot-Reload)
+      # 當您修改本地程式碼時，容器內的程式碼會同步更新，無需重啟
+      - ./front_end/obs-frontend:/usr/src/app
+      # 使用一個匿名 volume 來隔離容器中的 node_modules，避免與本地的 node_modules 衝突
+      - /usr/src/app/node_modules
+    environment:
+      # 設定環境變數，告訴前端 API 伺服器的位址
+      # 在 Docker 網路中，可以直接使用服務名稱 'backend' 作為主機名稱
+      - VITE_API_BASE_URL=http://backend:3000
+    depends_on:
+      - backend # 確保前端在後端啟動後才啟動
+
+  # 2. 後端應用服務
+  backend:
+    build: ./back_end/obs-backend  # 指向後端專案的 Dockerfile 所在目錄
+    container_name: obs-backend
+    ports:
+      - "3000:3000"  # 將本機的 3000 port 映射到容器的 3000 port
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_USERNAME=root
+      - DB_PASSWORD=your_strong_password  # 請將此處的密碼替換成您想設定的密碼 (懶得動也能直接跑)
+      - DB_DATABASE=OBS
+      - PORT=3000
+    depends_on:
+      - db  # 告訴 Docker，backend 服務必須在 db 服務啟動後才能啟動
+
+  # 3. MySQL 資料庫服務
+  db:
+    image: mysql:8.0  # 使用官方的 MySQL 8.0 映像
+    container_name: obs-mysql-db
+    ports:
+      - "3306:3306"  # 將本機的 3306 port 映射到容器的 3306 port (有衝突可能是你本地的MYSQL佔著3306)
+    environment:
+      - MYSQL_ROOT_PASSWORD=your_strong_password  # 請將此處的密碼替換成您想設定的密碼 (可以不換)
+      - MYSQL_DATABASE=OBS  # 啟動時自動建立名為 OBS 的資料庫
+    volumes:
+      - db_data:/var/lib/mysql  # 將資料庫檔案持久化儲存，避免容器重啟後資料遺失
+
+volumes:
+  db_data: # 定義一個具名 volume 來儲存資料庫資料
