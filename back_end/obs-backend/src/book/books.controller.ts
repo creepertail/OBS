@@ -1,5 +1,5 @@
 // src/book/books.controller.ts
-import { Controller, Get, Post, Body, Patch, Param, Delete, ValidationPipe, UseInterceptors, UploadedFile, BadRequestException, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ValidationPipe, UseInterceptors, UploadedFile, BadRequestException, UseGuards, Request, Query } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
@@ -65,6 +65,29 @@ export class BooksController {
     // 從 JWT token 的 sub 欄位取得 merchantId
     const merchantId = req.user.sub;
     return this.booksService.create(createBookDto, merchantId);
+  }
+
+  /**
+   * GET /books/search - 根據條件搜尋書籍（支援模糊搜尋）
+   * Query 參數：isbn, name, author, publisher, merchantName, status
+   */
+  @Get('search')
+  search(
+    @Query('isbn') isbn?: string,
+    @Query('name') name?: string,
+    @Query('author') author?: string,
+    @Query('publisher') publisher?: string,
+    @Query('merchantName') merchantName?: string,
+    @Query('status') status?: string,
+  ) {
+    return this.booksService.search({
+      isbn,
+      name,
+      author,
+      publisher,
+      merchantName,
+      status: status ? parseInt(status) : undefined,
+    });
   }
 
   /**

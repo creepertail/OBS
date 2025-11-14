@@ -6,6 +6,8 @@ import { Book } from './entityies/book.entity';
 import { BookImage } from './entityies/book-image.entity';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
+import { Member } from '../member/entities/member.entity';
+import { MemberType } from '../member/member-type.enum';
 
 @Injectable()
 export class BooksService {
@@ -14,6 +16,8 @@ export class BooksService {
     private booksRepository: Repository<Book>,
     @InjectRepository(BookImage)
     private bookImagesRepository: Repository<BookImage>,
+    @InjectRepository(Member)
+    private memberRepository: Repository<Member>,
   ) {}
 
   /**
@@ -163,5 +167,67 @@ export class BooksService {
     }
 
     await this.bookImagesRepository.remove(image);
+  }
+
+  /**
+   * 根據多個條件搜尋書籍（模糊搜尋）
+   */
+  async search(params: {
+    isbn?: string;
+    name?: string;
+    author?: string;
+    publisher?: string;
+    merchantName?: string;
+    status?: number;
+  }): Promise<Book[]> {
+    const queryBuilder = this.booksRepository
+      .createQueryBuilder('book')
+      .leftJoinAndSelect('book.images', 'images');
+
+    // 根據提供的參數動態建立查詢條件
+    if (params.isbn) {
+      queryBuilder.andWhere('book.ISBN LIKE :isbn', { isbn: `%${params.isbn}%` });
+    }
+
+    if (params.name) {
+      queryBuilder.andWhere('book.name LIKE :name', { name: `%${params.name}%` });
+    }
+
+    if (params.author) {
+      queryBuilder.andWhere('book.author LIKE :author', { author: `%${params.author}%` });
+    }
+
+    if (params.publisher) {
+      queryBuilder.andWhere('book.publisher LIKE :publisher', { publisher: `%${params.publisher}%` });
+    }
+
+    // 如果提供商家名字，先查詢 Member 表找出對應的商家 ID
+    if (params.merchantName) {
+      // 查詢 type 是 merchant 且名字接近的商家
+      const merchants = await this.memberRepository
+        .createQueryBuilder('member')
+        .where('member.type = :type', { type: MemberType.Merchant })
+        .andWhere('member.merchantName LIKE :merchantName', { merchantName: `%${params.merchantName}%` })
+        .getMany();
+
+      if (merchants.length === 0) {
+        // 如果找不到符合的商家，回傳空陣列
+        return [];
+      }
+
+      // 取得所有符合的商家 ID
+      const merchantIds = merchants.map(merchant => merchant.member_id);
+
+      // 用這些 ID 查詢書籍
+      queryBuilder.andWhere('book.merchantId IN (:...merchantIds)', { merchantIds });
+    }
+
+    if (params.status !== undefined) {
+      queryBuilder.andWhere('book.status = :status', { status: params.status });
+    }
+
+    return await queryBuilder
+      .orderBy('book.createdAt', 'DESC')
+      .getMany();
   }
 }
