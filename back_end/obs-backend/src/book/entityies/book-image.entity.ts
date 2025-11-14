@@ -20,7 +20,7 @@ export class BookImage {
   // 去使用整個book
   // 不過DB內紀錄的東西還是bookID
   // 使用上可以直接使用Book
-  @ManyToOne(() => Book, (book) => book.images, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Book, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'bookID', referencedColumnName: 'bookID' })
   book: Book;
 

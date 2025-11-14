@@ -1,5 +1,5 @@
 // src/book/dto/create-book.dto.ts
-import { IsString, IsInt, IsOptional, Min, Length, IsArray, ValidateNested, IsBoolean } from 'class-validator';
+import { IsString, IsInt, IsOptional, Min, Length, IsArray, ValidateNested, IsBoolean, IsUUID } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateBookImageDto {
@@ -53,6 +53,6 @@ export class CreateBookDto {
   @Length(1, 50)
   Publisher: string;
 
-  @IsString()
+  @IsUUID('4', { message: 'MerchantID must be a valid UUID' })
   MerchantID: string;
 }

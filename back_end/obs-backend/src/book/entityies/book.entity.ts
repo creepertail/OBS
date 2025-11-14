@@ -1,6 +1,5 @@
 // src/book/entities/book.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne, JoinColumn} from 'typeorm';
-import { BookImage } from './book-image.entity';
 import { BelongsTo } from './belongs-to.entity';
 // import { Favorite } from '../../favorite/entities/favorite.entity';
 // import { AddsToCart } from '../../cart/entities/adds-to-cart.entity';
@@ -18,12 +17,6 @@ export class Book {
 
   @Column({ type: 'varchar', length: 100, nullable: false })
   name: string;
-
-  @Column({ type: 'varchar', length: 400, nullable: false, default: '' })
-  image: string;
-
-  @OneToMany(() => BookImage, (image) => image.book, { cascade: true })
-  images: BookImage[];
 
   @OneToMany(() => BelongsTo, (connection) => connection.book, { cascade: true })
   belongsToConnections: BelongsTo[];
