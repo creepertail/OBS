@@ -117,6 +117,9 @@ describe('MemberService', () => {
       // Arrange (安排): 設定模擬物件的行為
       repository.findOne.mockReturnValue(createMemberDto); // 模擬 findOne 找到已存在的會員
 
+      // 重新 mock ensureUniqueFields，讓它拋出 ConflictException
+      jest.spyOn(service as any, 'ensureUniqueFields').mockRejectedValue(new ConflictException('Account already exists'));
+
       // Act & Assert (行動與斷言): 預期呼叫 create 會拋出 ConflictException
       await expect(service.create(createMemberDto)).rejects.toThrow(ConflictException); // 斷言：拋出 ConflictException
     });

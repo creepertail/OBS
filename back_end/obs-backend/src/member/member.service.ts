@@ -35,7 +35,8 @@ export class MemberService {
     return member.type;
   }
 
-  async create(createMemberDto: CreateMemberDto): Promise<Member> {
+  // Omit<Member, 'password'> => member 去掉 password
+  async create(createMemberDto: CreateMemberDto): Promise<Omit<Member, 'password'>> {
     await this.ensureUniqueFields(createMemberDto);
 
     const member = this.memberRepository.create({
@@ -43,7 +44,10 @@ export class MemberService {
       password: await bcrypt.hash(createMemberDto.password, 10),
     });
 
-    return this.memberRepository.save(member);
+    const rtn_member = await this.memberRepository.save(member);
+    const { password: _, ...memberWithoutPassword } = rtn_member;
+
+    return memberWithoutPassword;
   }
 
   // id 為 被改動的人
