@@ -20,14 +20,6 @@ export class BooksService {
    * 建立新書籍（包含圖片）
    */
   async create(createBookDto: CreateBookDto): Promise<Book> {
-    // 檢查 ISBN 是否已存在
-    const existingBook = await this.booksRepository.findOne({
-      where: { ISBN: createBookDto.ISBN },
-    });
-    if (existingBook) {
-      throw new ConflictException('ISBN already exists');
-    }
-
     // 驗證價格和庫存
     if (createBookDto.Price <= 0) {
       throw new BadRequestException('Price must be greater than 0');
