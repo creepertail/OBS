@@ -4,13 +4,13 @@ import { Member } from '../../member/entities/member.entity';
 
 @Entity('Subscribes')
 export class Subscribes {
-  @PrimaryColumn({ type: 'char', length: 36 })
+  @PrimaryColumn({ type: 'char', length: 36, name: 'UserID' })
   userID: string;
 
-  @PrimaryColumn({ type: 'char', length: 36 })
+  @PrimaryColumn({ type: 'char', length: 36, name: 'MerchantID' })
   merchantID: string;
 
-  @Column({ type: 'int', default: 0, nullable: false })
+  @Column({ type: 'int', default: 0, nullable: false, name: 'State' })
   state: number;
 
   @ManyToOne(() => Member, { onDelete: 'CASCADE' })
