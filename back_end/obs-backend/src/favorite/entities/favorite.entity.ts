@@ -4,10 +4,10 @@ import { Member } from '../../member/entities/member.entity';
 
 @Entity('Favorite')
 export class Favorite {
-  @PrimaryColumn({ type: 'char', length: 36 })
+  @PrimaryColumn({ type: 'char', length: 36, name: 'UserID' })
   userID: string;
 
-  @PrimaryColumn({ type: 'char', length: 36 })
+  @PrimaryColumn({ type: 'char', length: 36, name: 'BookID' })
   bookID: string;
 
   @ManyToOne(() => Member, { onDelete: 'CASCADE' })
