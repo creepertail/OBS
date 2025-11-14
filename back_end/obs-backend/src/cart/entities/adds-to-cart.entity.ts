@@ -5,13 +5,13 @@ import { Member } from '../../member/entities/member.entity';
 
 @Entity('Add_To_Cart')
 export class AddsToCart {
-  @PrimaryColumn({ type: 'char', length: 36 })
+  @PrimaryColumn({ type: 'char', length: 36, name: 'UserID' })
   userID: string;
 
-  @PrimaryColumn({ type: 'char', length: 36 })
+  @PrimaryColumn({ type: 'char', length: 36, name: 'BookID' })
   bookID: string;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', nullable: false, name: 'Amount' })
   amount: number;
 
   @ManyToOne(() => Member, { onDelete: 'CASCADE' })
