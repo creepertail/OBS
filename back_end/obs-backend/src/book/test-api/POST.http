@@ -1,0 +1,179 @@
+#  /**
+#    * API 功能：
+#    *
+#    * POST url/books/upload-image + file  => 上傳圖片，回傳圖片 URL
+#    *   - 使用 multipart/form-data 格式
+#    *   - 欄位名稱：file
+#    *   - 支援格式：jpg, jpeg, png, gif, webp
+#    *   - 檔案大小限制：5MB
+#    *
+#    * POST url/books + body     => 新增書籍資料，並回傳書籍資訊
+#    *   - ISBN Name Status ProductDescription InventoryQuantity Price Author Publisher MerchantID
+#    *   - images (可選): 圖片陣列，包含 imageUrl、displayOrder、isCover
+#    *
+#    * POST url/books/:id/images + body   => 為指定書籍新增圖片
+#    *   - body :
+#    *   - imageUrl displayOrder isCover
+#    */
+
+# ----------
+#  使用流程：
+#  1. 先使用 POST /books/upload-image 上傳圖片，取得 URL
+#  2. 再使用 POST /books 建立書籍，將圖片 URL 放入 images 陣列或 image 欄位
+#  若某資料不符合驗證規則會回覆錯誤訊息
+#  ISBN 必須為 13 個字元
+#  Price 和 InventoryQuantity 必須大於 0
+# ----------
+@baseUrl = http://localhost:3000
+
+# ========================================
+# 步驟一：上傳圖片
+# ========================================
+
+### 上傳書籍封面圖片
+# 注意：需要將 < 後面的路徑替換成你本地的圖片檔案路徑
+# 例如：C:/Users/YourName/Pictures/book-cover.jpg
+POST http://localhost:3000/books/upload-image
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="book-cover.jpg"
+Content-Type: image/jpg
+
+< .\images\book-cover.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### 上傳書籍背面圖片
+POST http://localhost:3000/books/upload-image
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="book-back.jpg"
+Content-Type: image/jpg
+
+< ./test-images/book-back.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+# ========================================
+# 步驟二：使用取得的圖片 URL 建立書籍
+# ========================================
+# 說明：先執行上面的「上傳書籍封面圖片」，複製回傳的 URL
+# 再將 URL 貼到下面的 imageUrl 欄位中
+
+### 測試建立新書籍（不含圖片）
+POST http://localhost:3000/books
+Content-Type: application/json
+
+{
+  "ISBN": "9789571234567",
+  "Name": "測試書籍：TypeScript 完全指南",
+  "Status": 1,
+  "ProductDescription": "這是一本深入淺出介紹 TypeScript 的書籍，適合初學者到進階開發者閱讀。",
+  "InventoryQuantity": 100,
+  "Price": 450,
+  "Author": "張三",
+  "Publisher": "博碩出版社",
+  "MerchantID": "0281a18a-b682-40ae-bff3-bddaf041fa57"
+}
+
+### 測試建立新書籍（含圖片）
+# 說明：將上面上傳圖片後取得的 URL 填入 imageUrl 欄位
+# 例如：http://localhost:3000/uploads/books/book-1763100775663-508802595.jpg
+POST http://localhost:3000/books
+Content-Type: application/json
+
+{
+  "ISBN": "9789571345678",
+  "Name": "測試書籍：NestJS 實戰開發",
+  "Status": 1,
+  "ProductDescription": "從零開始學習 NestJS 框架，打造企業級後端應用程式。",
+  "InventoryQuantity": 50,
+  "Price": 520,
+  "Author": "李四",
+  "Publisher": "碁峰資訊",
+  "MerchantID": "merchant-uuid-002",
+  "images": [
+    {
+      "imageUrl": "/uploads/books/book-1763100775663-508802595.jpg",
+      "displayOrder": 1,
+      "isCover": true
+    }
+  ]
+}
+
+### 測試建立新書籍（另一本）
+POST http://localhost:3000/books
+Content-Type: application/json
+
+{
+  "ISBN": "9789862019876",
+  "Name": "測試書籍：JavaScript 設計模式",
+  "Status": 1,
+  "ProductDescription": "學習經典的設計模式，提升程式碼品質與可維護性。",
+  "InventoryQuantity": 75,
+  "Price": 380,
+  "Author": "王五",
+  "Publisher": "天瓏出版社",
+  "MerchantID": "merchant-uuid-001"
+}
+
+### 測試驗證失敗 - ISBN 長度不正確（少於 13 字元）
+POST http://localhost:3000/books
+Content-Type: application/json
+
+{
+  "ISBN": "978957123",
+  "Name": "測試書籍",
+  "Status": 1,
+  "ProductDescription": "這是一本測試書籍",
+  "InventoryQuantity": 10,
+  "Price": 300,
+  "Author": "測試作者",
+  "Publisher": "測試出版社",
+  "MerchantID": "merchant-uuid-001"
+}
+
+### 測試驗證失敗 - 價格為 0（必須大於 0）
+POST http://localhost:3000/books
+Content-Type: application/json
+
+{
+  "ISBN": "9789571234567",
+  "Name": "測試書籍",
+  "Status": 1,
+  "ProductDescription": "這是一本測試書籍",
+  "InventoryQuantity": 10,
+  "Price": 0,
+  "Author": "測試作者",
+  "Publisher": "測試出版社",
+  "MerchantID": "merchant-uuid-001"
+}
+
+### 測試驗證失敗 - 缺少必要欄位（沒有 ISBN）
+POST http://localhost:3000/books
+Content-Type: application/json
+
+{
+  "Name": "測試書籍",
+  "Status": 1,
+  "ProductDescription": "這是一本測試書籍",
+  "InventoryQuantity": 10,
+  "Price": 300,
+  "Author": "測試作者",
+  "Publisher": "測試出版社",
+  "MerchantID": "merchant-uuid-001"
+}
+
+### 為指定書籍新增圖片（需要先建立書籍並取得 book_id）
+# 使用步驟：
+# 1. 先使用上面的「上傳書籍圖片」API 上傳圖片，取得 URL
+# 2. 將下面的 {book-id} 替換成實際的書籍 ID（從建立書籍的回應中取得）
+# 3. 將 imageUrl 替換成剛才上傳取得的 URL
+POST http://localhost:3000/books/{book-id}/images
+Content-Type: application/json
+
+{
+  "imageUrl": "http://localhost:3000/uploads/books/book-xxxxx.jpg",
+  "displayOrder": 3,
+  "isCover": false
+}
