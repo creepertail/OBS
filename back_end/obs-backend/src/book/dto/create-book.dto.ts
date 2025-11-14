@@ -21,7 +21,7 @@ export class CreateBookDto {
 
   @IsString()
   @Length(1, 100)
-  Name: string;
+  name: string;
 
   @IsArray()
   @ValidateNested({ each: true })
@@ -31,28 +31,28 @@ export class CreateBookDto {
 
   @IsInt()
   @Min(0)
-  Status: number;
+  status: number;
 
   @IsString()
   @Length(1, 500)
-  ProductDescription: string;
+  productDescription: string;
 
   @IsInt()
   @Min(1, { message: 'InventoryQuantity must be greater than 0' })
-  InventoryQuantity: number;
+  inventoryQuantity: number;
 
   @IsInt()
   @Min(1, { message: 'Price must be greater than 0' })
-  Price: number;
+  price: number;
 
   @IsString()
   @Length(1, 200)
-  Author: string;
+  author: string;
 
   @IsString()
   @Length(1, 50)
-  Publisher: string;
+  publisher: string;
 
   @IsUUID('4', { message: 'MerchantID must be a valid UUID' })
-  MerchantID: string;
+  merchantId: string;
 }
