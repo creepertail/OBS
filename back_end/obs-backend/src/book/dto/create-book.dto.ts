@@ -54,5 +54,6 @@ export class CreateBookDto {
   publisher: string;
 
   @IsUUID('4', { message: 'MerchantID must be a valid UUID' })
-  merchantId: string;
+  @IsOptional()
+  merchantId?: string;
 }

@@ -1,11 +1,12 @@
 // src/book/books.controller.ts
-import { Controller, Get, Post, Body, Patch, Param, Delete, ValidationPipe, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ValidationPipe, UseInterceptors, UploadedFile, BadRequestException, UseGuards, Request } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
+import { JwtAuthGuard } from '../member/guards/jwt-auth.guard';
 
 @Controller('books')
 export class BooksController {
@@ -59,8 +60,11 @@ export class BooksController {
    */
   // ValidationPipe 會自動檢查 request body 的資料是否符合 CreateBookDto 的驗證規則
   @Post()
-  create(@Body(new ValidationPipe()) createBookDto: CreateBookDto) {
-    return this.booksService.create(createBookDto);
+  @UseGuards(JwtAuthGuard)
+  create(@Body(new ValidationPipe()) createBookDto: CreateBookDto, @Request() req) {
+    // 從 JWT token 的 sub 欄位取得 merchantId
+    const merchantId = req.user.sub;
+    return this.booksService.create(createBookDto, merchantId);
   }
 
   /**

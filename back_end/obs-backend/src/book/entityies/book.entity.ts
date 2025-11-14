@@ -1,6 +1,7 @@
 // src/book/entities/book.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne, JoinColumn} from 'typeorm';
 import { BelongsTo } from './belongs-to.entity';
+import { BookImage } from './book-image.entity';
 // import { Favorite } from '../../favorite/entities/favorite.entity';
 // import { AddsToCart } from '../../cart/entities/adds-to-cart.entity';
 // import { Review } from '../../review/entities/review.entity';
@@ -20,6 +21,9 @@ export class Book {
 
   @OneToMany(() => BelongsTo, (connection) => connection.book, { cascade: true })
   belongsToConnections: BelongsTo[];
+
+  @OneToMany(() => BookImage, (image) => image.book, { cascade: true })
+  images: BookImage[];
 
   // TODO: Uncomment when Category entity is available
   // @OneToMany(() => Favorite, (favorite) => favorite.book)

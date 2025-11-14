@@ -19,17 +19,21 @@ export class BooksService {
   /**
    * 建立新書籍（包含圖片）
    */
-  async create(createBookDto: CreateBookDto): Promise<Book> {
+  async create(createBookDto: CreateBookDto, merchantId: string): Promise<Book> {
     // 驗證價格和庫存
-    if (createBookDto.Price <= 0) {
+    if (createBookDto.price <= 0) {
       throw new BadRequestException('Price must be greater than 0');
     }
-    if (createBookDto.InventoryQuantity <= 0) {
+    if (createBookDto.inventoryQuantity <= 0) {
       throw new BadRequestException('InventoryQuantity must be greater than 0');
     }
 
     // 建立書籍（cascade: true 會自動儲存 images）
-    const book = this.booksRepository.create(createBookDto);
+    // merchantId 從 JWT token 取得，覆寫 DTO 中的值
+    const book = this.booksRepository.create({
+      ...createBookDto,
+      merchantId,
+    });
     return await this.booksRepository.save(book);
   }
 
@@ -84,12 +88,12 @@ export class BooksService {
     const book = await this.findByID(id);
 
     // 驗證價格
-    if (updateBookDto.Price !== undefined && updateBookDto.Price <= 0) {
+    if (updateBookDto.price !== undefined && updateBookDto.price <= 0) {
       throw new BadRequestException('Price must be greater than 0');
     }
 
     // 驗證庫存
-    if (updateBookDto.InventoryQuantity !== undefined && updateBookDto.InventoryQuantity <= 0) {
+    if (updateBookDto.inventoryQuantity !== undefined && updateBookDto.inventoryQuantity <= 0) {
       throw new BadRequestException('InventoryQuantity must be greater than 0');
     }
 
