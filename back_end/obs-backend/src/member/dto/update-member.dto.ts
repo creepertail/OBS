@@ -41,18 +41,18 @@ export class UpdateMemberDto extends PartialType(CreateMemberDto) {
   @IsString()
   @MaxLength(20)
   @IsOptional()
-  merchantsName?: string;
+  merchantName?: string;
 
   @IsInt()
   @IsOptional()
-  merchantsState?: number;
+  merchantState?: number;
 
   @IsString()
   @MaxLength(100)
   @IsOptional()
-  address?: string;
+  merchantAddress?: string;
 
   @IsInt()
   @IsOptional()
-  subscriberCount?: number;
+  merchantSubscriberCount?: number;
 }
