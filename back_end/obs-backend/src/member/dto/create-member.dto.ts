@@ -48,9 +48,9 @@ export class CreateMemberDto {
 
   @IsString()
   @IsOptional()
-  address?: string;
+  merchantAddress?: string;
 
   @IsInt()
   @IsOptional()
-  subscriberCount?: number;
+  merchantSubscriberCount?: number;
 }
