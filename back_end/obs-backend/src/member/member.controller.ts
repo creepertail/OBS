@@ -5,6 +5,7 @@ import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
 import { LoginMemberDto } from './dto/login-member.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { CurrentUser } from './decorators/current-user.decorator';
 
 @Controller('members')
 export class MemberController {
@@ -71,8 +72,12 @@ export class MemberController {
   // PATCH url/members/:id + body
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMemberDto: UpdateMemberDto) {
-    return this.memberService.update(id, updateMemberDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateMemberDto: UpdateMemberDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.memberService.update(id, updateMemberDto, user);
   }
 
   // DELETE url/members/:id
