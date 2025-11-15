@@ -70,13 +70,13 @@ export class MemberService {
       if (updateMemberDto.merchantName !== undefined) {
         throw new ConflictException('Since the type is Admin, the MerchantName cannot be modified.');
       }
-      if (updateMemberDto.merchantsState !== undefined) {
-        throw new ConflictException('Since the type is Admin, the MerchantsState cannot be modified.');
+      if (updateMemberDto.merchantState !== undefined) {
+        throw new ConflictException('Since the type is Admin, the MerchantState cannot be modified.');
       }
-      if (updateMemberDto.address !== undefined) {
+      if (updateMemberDto.merchantAddress !== undefined) {
         throw new ConflictException('Since the type is Admin, the Address cannot be modified.');
       }
-      if (updateMemberDto.subscriberCount !== undefined) {
+      if (updateMemberDto.merchantSubscriberCount !== undefined) {
         throw new ConflictException('Since the type is Admin, the SubscriberCount cannot be modified.');
       }
     }
@@ -85,13 +85,13 @@ export class MemberService {
       if (updateMemberDto.merchantName !== undefined) {
         throw new ConflictException('Since the type is User, the MerchantName cannot be modified.');
       }
-      if (updateMemberDto.merchantsState !== undefined) {
-        throw new ConflictException('Since the type is User, the MerchantsState cannot be modified.');
+      if (updateMemberDto.merchantState !== undefined) {
+        throw new ConflictException('Since the type is User, the MerchantState cannot be modified.');
       }
-      if (updateMemberDto.address !== undefined) {
+      if (updateMemberDto.merchantAddress !== undefined) {
         throw new ConflictException('Since the type is User, the Address cannot be modified.');
       }
-      if (updateMemberDto.subscriberCount !== undefined) {
+      if (updateMemberDto.merchantSubscriberCount !== undefined) {
         throw new ConflictException('Since the type is User, the SubscriberCount cannot be modified.');
       }
     }

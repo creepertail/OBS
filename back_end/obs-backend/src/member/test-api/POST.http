@@ -4,7 +4,7 @@
 #    * POST url/members + body     => 新增member資料，並回傳member
 #    *   - email account password phoneNumber type              => member皆有，type = "admin" or "user" or "merchant"
 #    *   - username level                                       => type = "user" 會有的
-#    *   - merchantsName address => type = "merchant" 會有的    => type = "merchant" 會有的
+#    *   - merchantName merchantAddress => type = "merchant" 會有的    => type = "merchant" 會有的
 #    * 
 #    * POST url/members/login + body   => 登入member，回傳JWT access token和會員資料
 #    *   - body :
@@ -53,8 +53,22 @@ Content-Type: application/json
   "password": "0000",
   "phoneNumber": "0944555666",
   "type": "merchant",
-  "merchantsName": "Merchant1",
-  "address": "New TaipeiCity"
+  "merchantName": "Merchant1",
+  "merchantAddress": "New TaipeiCity"
+}
+
+### 測試建立新第二個merchant
+POST http://localhost:3000/members
+Content-Type: application/json
+
+{
+  "email": "test-merchant2@example.com",
+  "account": "merchant-test-2",
+  "password": "0000",
+  "phoneNumber": "0912345678",
+  "type": "merchant",
+  "merchantName": "Merchant2",
+  "merchantAddress": "New TaipeiCity"
 }
 
 
