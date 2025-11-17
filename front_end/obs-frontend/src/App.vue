@@ -11,7 +11,7 @@ const isLogin = computed(() => route.meta.isLogin)
 <template>
   <header v-if="!hideLayout">
     <RouterLink :to="{name: 'home'}" class="homeButton">
-      <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" /> <!-- TODO: change img -->
+      <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="80" height="80" /> <!-- TODO: change img -->
       <h1>Online Bookstore System</h1>
     </RouterLink>
 
@@ -22,12 +22,14 @@ const isLogin = computed(() => route.meta.isLogin)
     </div>
   </header>
 
-  <RouterView />
+  <div>
+    <RouterView />
+  </div>
 </template>
 
 <style scoped>
 header {
-  position: absolute;
+  position: fixed;
   display: flex;
   gap: 2rem;
   align-items: center;
@@ -36,7 +38,7 @@ header {
   width: 100%;
   z-index: 1000;
   line-height: 1.5;
-  max-height: 20vh;
+  max-height: 15vh;
   background-color: gray;
 }
 
