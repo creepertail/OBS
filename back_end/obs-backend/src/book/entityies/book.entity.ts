@@ -8,7 +8,7 @@ import { BookImage } from './book-image.entity';
 // import { Contains } from '../../order/entities/contains.entity';
 import { Member } from '../../member/entities/member.entity';
 
-@Entity('Book')
+@Entity('book')
 export class Book {
   @PrimaryGeneratedColumn('uuid')
   bookID: string;

@@ -3,7 +3,7 @@ import { Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { Book } from './book.entity';
 // import { Category } from '../../category/entities/categories.entity';
 
-@Entity('Belong_To')
+@Entity('belong_to')
 export class BelongsTo {
   @PrimaryColumn({ type: 'char', length: 36 })
   bookID: string;

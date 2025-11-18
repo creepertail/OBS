@@ -28,8 +28,11 @@ export class BooksService {
     if (createBookDto.price <= 0) {
       throw new BadRequestException('Price must be greater than 0');
     }
-    if (createBookDto.inventoryQuantity <= 0) {
+    if (createBookDto.inventoryQuantity < 0) {
       throw new BadRequestException('InventoryQuantity must be greater than 0');
+    }
+    else if(createBookDto.inventoryQuantity === 0){
+      createBookDto.status = 0;
     }
 
     // 建立書籍（cascade: true 會自動儲存 images）
@@ -88,8 +91,13 @@ export class BooksService {
   /**
    * 更新書籍資訊
    */
-  async update(id: string, updateBookDto: UpdateBookDto): Promise<Book> {
+  async update(id: string, updateBookDto: UpdateBookDto, merchantId: string): Promise<Book> {
     const book = await this.findByID(id);
+
+    // 驗證是否為書籍擁有者
+    if (book.merchantId !== merchantId) {
+      throw new BadRequestException('Access denied: You can only update your own books');
+    }
 
     // 驗證價格
     if (updateBookDto.price !== undefined && updateBookDto.price <= 0) {
@@ -97,8 +105,13 @@ export class BooksService {
     }
 
     // 驗證庫存
-    if (updateBookDto.inventoryQuantity !== undefined && updateBookDto.inventoryQuantity <= 0) {
-      throw new BadRequestException('InventoryQuantity must be greater than 0');
+    if (updateBookDto.inventoryQuantity !== undefined) {
+      if (updateBookDto.inventoryQuantity < 0) {
+        throw new BadRequestException('InventoryQuantity must be greater than 0');
+      }
+      else if(updateBookDto.inventoryQuantity === 0){
+        updateBookDto.status = 0;
+      }
     }
 
     // 如果要更新 ISBN，檢查是否重複
@@ -127,8 +140,13 @@ export class BooksService {
   /**
    * 更新書籍狀態（上架/下架）
    */
-  async updateStatus(id: string, status: number): Promise<Book> {
+  async updateStatus(id: string, status: number, merchantId: string): Promise<Book> {
     const book = await this.findByID(id);
+
+    // 驗證是否為書籍擁有者
+    if (book.merchantId !== merchantId) {
+      throw new BadRequestException('Access denied: You can only update your own books');
+    }
 
     if (status !== 0 && status !== 1) {
       throw new BadRequestException('Status must be 0 (sold out) or 1 (available)');

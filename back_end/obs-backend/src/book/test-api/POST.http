@@ -29,7 +29,7 @@
 # ----------
 @baseUrl = http://localhost:3000
 # 請先執行登入 API 取得 access_token，然後將 token 貼到下面
-@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhNTEwM2ViZS1kYWUyLTQzZmUtOWQ2Zi0yOTBhMmMyZGZhY2MiLCJhY2NvdW50IjoibWVyY2hhbnQtdGVzdC0xIiwidHlwZSI6Im1lcmNoYW50IiwiaWF0IjoxNzYzMTI3NTU0LCJleHAiOjE3NjMyMTM5NTR9.VOgR7HgZkogBXwWwdI3nuaryJ1Vpdp08teyZPULTTQo
+@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NTg1NzQyYy1jYmFlLTQzN2YtYmZiMi0wMGU1MWIzNmI2OGUiLCJhY2NvdW50IjoibWVyY2hhbnQtdGVzdC0xIiwidHlwZSI6Im1lcmNoYW50IiwiaWF0IjoxNzYzNDY4NDg0LCJleHAiOjE3NjM1NTQ4ODR9.im52tPcEfl4_Hkqgk2fya9WkPXUD1n6IM5-zODKZLkM
 
 # ========================================
 # 步驟一：上傳圖片
@@ -99,12 +99,12 @@ Authorization: Bearer {{accessToken}}
   "publisher": "碁峰資訊",
   "images": [
     {
-      "imageUrl": "/uploads/books/book-1763117403912-543051078.jpg",
+      "imageUrl": "/uploads/books/book-1763468622971-157382679.jpg",
       "displayOrder": 1,
       "isCover": true
     },
     {
-      "imageUrl": "/uploads/books/book-1763128012157-765391078.jpg",
+      "imageUrl": "/uploads/books/book-1763468574193-625116524.jpg",
       "displayOrder": 2,
       "isCover": false
     }

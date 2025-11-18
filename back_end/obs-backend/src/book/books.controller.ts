@@ -118,22 +118,30 @@ export class BooksController {
    * PATCH /books/:id - 更新書籍資訊
    */
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   update(
     @Param('id') id: string,
-    @Body(new ValidationPipe()) updateBookDto: UpdateBookDto
+    @Body(new ValidationPipe()) updateBookDto: UpdateBookDto,
+    @Request() req
   ) {
-    return this.booksService.update(id, updateBookDto);
+    // 從 JWT token 的 sub 欄位取得 merchantId
+    const merchantId = req.user.sub;
+    return this.booksService.update(id, updateBookDto, merchantId);
   }
 
   /**
    * PATCH /books/:id/status - 更新書籍狀態
    */
   @Patch(':id/status')
+  @UseGuards(JwtAuthGuard)
   updateStatus(
     @Param('id') id: string,
-    @Body('status') status: number
+    @Body('status') status: number,
+    @Request() req
   ) {
-    return this.booksService.updateStatus(id, status);
+    // 從 JWT token 的 sub 欄位取得 merchantId
+    const merchantId = req.user.sub;
+    return this.booksService.updateStatus(id, status, merchantId);
   }
 
   /**
