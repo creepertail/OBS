@@ -2,7 +2,7 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 // import { BelongsTo } from '../../book/entityies/belongs-to.entity';
 
-@Entity('Category')
+@Entity('category')
 export class Category {
   @PrimaryGeneratedColumn('uuid', { name: 'ID' })
   categoryID: string;
