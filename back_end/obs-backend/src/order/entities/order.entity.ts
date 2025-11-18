@@ -5,7 +5,7 @@ import { Member } from '../../member/entities/member.entity';
 import { Contains } from './contains.entity';
 import { Control } from './control.entity';
 
-@Entity('Order')
+@Entity('order')
 export class Order {
   @PrimaryGeneratedColumn('uuid')
   orderId: string;

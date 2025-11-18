@@ -3,7 +3,7 @@ import { Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { Member } from '../../member/entities/member.entity';
 import { Order } from './order.entity';
 
-@Entity('Control')
+@Entity('control')
 export class Control {
   @PrimaryColumn({ type: 'char', length: 36 })
   merchantId: string;

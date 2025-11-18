@@ -3,7 +3,7 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { Order } from './order.entity';
 // import { Book } from '../../book/entityies/book.entity';
 
-@Entity('Contain')
+@Entity('contain')
 export class Contains {
   @PrimaryColumn({ type: 'char', length: 36 })
   orderId: string;
