@@ -4,7 +4,7 @@ import { Member } from '../../member/entities/member.entity';
 import { Manage } from './manage.entity';
 // import { Order } from '../../order/entities/order.entity';
 
-@Entity('Coupon')
+@Entity('coupon')
 export class Coupon {
   @PrimaryGeneratedColumn('uuid')
   couponID: string;
