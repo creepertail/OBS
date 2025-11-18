@@ -132,8 +132,14 @@ export class BooksService {
   /**
    * 刪除書籍（會自動刪除關聯的圖片，因為 onDelete: CASCADE）
    */
-  async remove(id: string): Promise<void> {
+  async remove(id: string, merchantId: string): Promise<void> {
     const book = await this.findByID(id);
+
+    // 驗證是否為書籍擁有者
+    if (book.merchantId !== merchantId) {
+      throw new BadRequestException('Access denied: You can only delete your own books');
+    }
+
     await this.booksRepository.remove(book);
   }
 

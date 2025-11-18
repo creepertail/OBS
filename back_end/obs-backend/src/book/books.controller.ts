@@ -148,8 +148,11 @@ export class BooksController {
    * DELETE /books/:id - 刪除書籍
    */
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.booksService.remove(id);
+  @UseGuards(JwtAuthGuard)
+  remove(@Param('id') id: string, @Request() req) {
+    // 從 JWT token 的 sub 欄位取得 merchantId
+    const merchantId = req.user.sub;
+    return this.booksService.remove(id, merchantId);
   }
 
   /**
