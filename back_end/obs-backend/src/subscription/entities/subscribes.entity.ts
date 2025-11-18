@@ -2,7 +2,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { Member } from '../../member/entities/member.entity';
 
-@Entity('Subscribes')
+@Entity('subscribes')
 export class Subscribes {
   @PrimaryColumn({ type: 'char', length: 36, name: 'UserID' })
   userID: string;
