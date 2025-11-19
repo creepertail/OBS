@@ -1,0 +1,403 @@
+#  /**
+#    * PATCH API 測試檔案
+#    *
+#    * API 功能：
+#    *
+#    * PATCH /books/:id          => 更新書籍資訊（部分或全部欄位）（需要 JWT 認證）
+#    * PATCH /books/:id/status   => 更新書籍狀態（上架/下架）（需要 JWT 認證）
+#    *
+#    * 說明：
+#    * - PATCH /books/:id 使用 UpdateBookDto（PartialType），所有欄位都是可選的
+#    * - 可以只更新需要修改的欄位，不需要提供全部欄位
+#    * - Price 和 InventoryQuantity 如果提供，必須大於 0
+#    * - 更新 ISBN 時會檢查是否與其他書籍重複
+#    * - 需要 JWT 認證：只有書籍的擁有者（merchantId 相同）才能更新
+#    * - 如果嘗試更新不屬於自己的書籍，會回傳 "Access denied: You can only update your own books"
+#    */
+
+# ----------
+#  使用流程：
+#  0. 先登入取得 JWT token（使用 POST /member/login），將 access_token 貼到下面的 @accessToken 變數
+#  1. 先使用 POST /books 建立書籍，取得書籍 ID
+#  2. 將書籍 ID 填入下面的 @bookId 變數
+#  3. 執行 PATCH 請求更新書籍資訊（需要帶 Authorization header）
+#  4. 更新後可使用 GET /books/:id 確認更新結果
+#  5. 測試權限：使用另一個商家的 token 嘗試更新的話，會被拒絕
+# ----------
+@baseUrl = http://localhost:3000
+# 請將此 ID 替換為實際的書籍 ID（從建立書籍的回應中取得）
+@bookId = 75b50a22-7e92-430e-9d47-db43414d3298
+# 商家 1 的 JWT token（請先執行登入 API 取得 access_token）
+@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NTg1NzQyYy1jYmFlLTQzN2YtYmZiMi0wMGU1MWIzNmI2OGUiLCJhY2NvdW50IjoibWVyY2hhbnQtdGVzdC0xIiwidHlwZSI6Im1lcmNoYW50IiwiaWF0IjoxNzYzNDY4NDg0LCJleHAiOjE3NjM1NTQ4ODR9.im52tPcEfl4_Hkqgk2fya9WkPXUD1n6IM5-zODKZLkM
+# 商家 2 的 JWT token（用於測試權限拒絕，請使用另一個商家帳號登入取得）
+@accessToken2 = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiOGJjNWZmYy1kODBiLTRmMjktYThkZS00OWZhNWFlNDQwMjYiLCJhY2NvdW50IjoibWVyY2hhbnQtdGVzdC0yIiwidHlwZSI6Im1lcmNoYW50IiwiaWF0IjoxNzYzNDcwMTI2LCJleHAiOjE3NjM1NTY1MjZ9.qPlPylkP2xK62iCIiLTyFF2ofCvupvKDJlnnENCygPA
+
+# ========================================
+# 1. 更新書籍的單一欄位
+# ========================================
+
+### 更新書籍名稱
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "更新後的書名：TypeScript 進階指南"
+}
+
+### 更新書籍價格
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "price": 499
+}
+
+### 更新庫存數量
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "inventoryQuantity": 200
+}
+
+### 更新商品描述
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "productDescription": "這是更新後的商品描述，內容更加詳細且吸引人。"
+}
+
+### 更新作者
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "author": "王大明"
+}
+
+### 更新出版社
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "publisher": "新出版社"
+}
+
+# ========================================
+# 2. 更新書籍的多個欄位
+# ========================================
+
+### 同時更新書名、價格和庫存
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "TypeScript 完全攻略 (第二版)",
+  "price": 550,
+  "inventoryQuantity": 150
+}
+
+### 同時更新作者、出版社和描述
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "author": "李小華、王大明",
+  "publisher": "博碩文化",
+  "productDescription": "本書由兩位資深工程師共同撰寫，內容涵蓋 TypeScript 所有重要主題。"
+}
+
+### 更新所有基本資訊（不含 ISBN）
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "NestJS 企業級開發實戰",
+  "author": "陳大寶",
+  "publisher": "碁峰資訊",
+  "productDescription": "從基礎到進階，全方位學習 NestJS 框架開發。",
+  "price": 680,
+  "inventoryQuantity": 80,
+  "status": 1
+}
+
+# ========================================
+# 3. 更新書籍 ISBN（需謹慎使用）
+# ========================================
+
+### 更新 ISBN（確保新的 ISBN 不與其他書籍重複）
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "ISBN": "9789862019999"
+}
+
+# ========================================
+# 4. 更新書籍狀態（上架/下架）
+# ========================================
+
+### 更新狀態為上架 (status = 1)
+PATCH {{baseUrl}}/books/{{bookId}}/status
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "status": 1
+}
+
+### 更新狀態為下架/缺貨 (status = 0)
+PATCH {{baseUrl}}/books/{{bookId}}/status
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "status": 0
+}
+
+# ========================================
+# 5. 更新書籍圖片資訊
+# ========================================
+
+### 更新書籍時一併更新圖片
+# 注意：這會替換整個圖片陣列
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "images": [
+    {
+      "imageUrl": "/uploads/books/book-new-cover.jpg",
+      "displayOrder": 1,
+      "isCover": true
+    },
+    {
+      "imageUrl": "/uploads/books/book-new-image1.jpg",
+      "displayOrder": 2,
+      "isCover": false
+    }
+  ]
+}
+
+# ========================================
+# 6. 測試驗證規則
+# ========================================
+
+### 測試失敗：價格為 0（必須大於 0）
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "price": 0
+}
+
+### 測試失敗：價格為負數
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "price": -100
+}
+
+### 測試失敗：庫存為 0 => status = 0
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "inventoryQuantity": 0
+}
+
+### 測試失敗：庫存為負數
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "inventoryQuantity": -50
+}
+
+### 測試失敗：ISBN 長度不正確（必須為 13 字元）
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "ISBN": "978123"
+}
+
+### 測試失敗：書名超過長度限制（最多 100 字元）
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "這是一個超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級長的書名，超過了一百個字元的限制，應該會驗證失敗"
+}
+
+### 測試失敗：商品描述超過長度限制（最多 500 字元）
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "productDescription": "這是一段超級長的商品描述，內容重複很多次來測試長度限制。這是一段超級長的商品描述，內容重複很多次來測試長度限制。這是一段超級長的商品描述，內容重複很多次來測試長度限制。這是一段超級長的商品描述，內容重複很多次來測試長度限制。這是一段超級長的商品描述，內容重複很多次來測試長度限制。這是一段超級長的商品描述，內容重複很多次來測試長度限制。這是一段超級長的商品描述，內容重複很多次來測試長度限制。這是一段超級長的商品描述，內容重複很多次來測試長度限制。這是一段超級長的商品描述，內容重複很多次來測試長度限制。這是一段超級長的商品描述，內容重複很多次來測試長度限制。"
+}
+
+### 測試失敗：更新 ISBN 為已存在的 ISBN（會產生衝突）
+# 說明：將 ISBN 更新為資料庫中已存在的另一本書的 ISBN
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "ISBN": "9789571234567"
+}
+
+### 測試失敗：狀態值不正確（只能是 0 或 1）
+PATCH {{baseUrl}}/books/{{bookId}}/status
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "status": 2
+}
+
+### 測試失敗：狀態值為負數
+PATCH {{baseUrl}}/books/{{bookId}}/status
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "status": -1
+}
+
+# ========================================
+# 7. 測試 JWT 認證和權限
+# ========================================
+
+### 測試失敗：沒有提供 JWT token（應該回傳 401 Unauthorized）
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+
+{
+  "name": "測試書名"
+}
+
+### 測試失敗：使用無效的 JWT token（應該回傳 401 Unauthorized）
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer invalid-token-here
+
+{
+  "name": "測試書名"
+}
+
+### 測試失敗：使用另一個商家的 token 更新不屬於自己的書籍（應該回傳 400 Bad Request: Access denied）
+# 說明：先用商家 1 的帳號建立書籍，然後用商家 2 的 token 嘗試更新
+# 預期錯誤訊息："Access denied: You can only update your own books"
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken2}}
+
+{
+  "name": "嘗試用別人的帳號更新書籍"
+}
+
+### 測試失敗：使用另一個商家的 token 更新書籍狀態（應該回傳 400 Bad Request: Access denied）
+PATCH {{baseUrl}}/books/{{bookId}}/status
+Content-Type: application/json
+Authorization: Bearer {{accessToken2}}
+
+{
+  "status": 0
+}
+
+# ========================================
+# 8. 測試錯誤處理
+# ========================================
+
+### 測試失敗：更新不存在的書籍（應該回傳 404 Not Found）
+PATCH {{baseUrl}}/books/00000000-0000-0000-0000-000000000000
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "測試書名"
+}
+
+### 測試失敗：使用無效的書籍 ID 格式
+PATCH {{baseUrl}}/books/invalid-id-format
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "測試書名"
+}
+
+### 測試成功：空的更新請求（不提供任何欄位）
+# 說明：技術上這是允許的，因為所有欄位都是可選的，但不會有任何變更
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+}
+
+# ========================================
+# 9. 實際使用範例
+# ========================================
+
+### 範例：書籍價格調整（促銷活動）
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "price": 399,
+  "productDescription": "限時特價！原價 550 元，現在只要 399 元！"
+}
+
+### 範例：書籍補貨
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "inventoryQuantity": 500,
+  "status": 1
+}
+
+### 範例：書籍下架（缺貨）
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "status": 0,
+  "inventoryQuantity": 0
+}
+
+### 範例：更正書籍資訊錯誤
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "author": "正確的作者名稱",
+  "publisher": "正確的出版社名稱"
+}

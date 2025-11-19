@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
-// import { BooksModule } from '../../tem/book/books.module';
+import { BooksModule } from './book/books.module';
 import { MemberModule } from './member/member.module';
 
 @Module({
@@ -20,11 +20,12 @@ import { MemberModule } from './member/member.module';
       password: process.env.DB_PASSWORD || '',
       database: process.env.DB_DATABASE || 'OBS',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],  // 這行會自動掃描所有 .entity.ts 檔案
-      synchronize: true, // 暫時關閉自動同步，避免重複建表錯誤
-      // 注意：當你新增或修改 Entity 時，需要改回 true 或手動執行 SQL
+      synchronize: true, // 關閉自動同步，避免重複建表錯誤
+      // 注意：當你新增或修改 Entity 時，需要手動執行 SQL 或使用 migration
+      // logging: ['query', 'error', 'schema'],
     }),
     UsersModule,
-    // BooksModule,
+    BooksModule,
     MemberModule,
   ],
   controllers: [AppController],

@@ -81,12 +81,29 @@ Content-Type: application/json
   "password": "0000"
 }
 ### Admin 登入 API 測試
-
 POST http://localhost:3000/members/login
 Content-Type: application/json
 
 {
   "account": "admin-test-1",
+  "password": "0000"
+}
+
+### Merchant1 登入 API 測試
+POST http://localhost:3000/members/login
+Content-Type: application/json
+
+{
+  "account": "merchant-test-1",
+  "password": "0000"
+}
+
+### Merchant2 登入 API 測試
+POST http://localhost:3000/members/login
+Content-Type: application/json
+
+{
+  "account": "merchant-test-2",
   "password": "0000"
 }
 
