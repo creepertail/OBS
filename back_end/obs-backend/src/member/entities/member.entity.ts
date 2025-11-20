@@ -24,7 +24,7 @@ export class Member {
   type: MemberType;
 
   @Column({ type: 'varchar', length: 20, nullable: true })
-  username?: string;
+  userName?: string;
 
   @Column({ type: 'int', nullable: true, default: 0 })
   userLevel?: number;

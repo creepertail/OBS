@@ -28,7 +28,7 @@ export class UpdateMemberDto extends PartialType(CreateMemberDto) {
   @IsString()
   @MaxLength(20)
   @IsOptional()
-  username?: string;
+  userName?: string;
 
   @IsInt()
   @IsOptional()

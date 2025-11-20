@@ -9,13 +9,13 @@
 #    * GET url/members/:id/type   => 用id找member的type
 #    * POST url/members + body     => 新增member資料，並回傳member
 #    *   - email account password phoneNumber type              => member皆有，type = "admin" or "user" or "merchant"
-#    *   - username level                                       => type = "user" 會有的
+#    *   - userName level                                       => type = "user" 會有的
 #    *   - merchantName merchantAddress => type = "merchant" 會有的    => type = "merchant" 會有的
 #    *
 #    * PATCH url/members/:id + body    => 用memberID找到member，修改其資料，並回傳member
 #    *   - "membertype" is necessary
 #    *   - email account password phoneNumber
-#    *   - username level userState (when membertype is user)
+#    *   - userName level userState (when membertype is user)
 #    *   - merchantName merchantState merchantAddress merchantSubscriberCount(when membertype is merchant)
 #    *
 #    * DELETE url/members/:id     => 刪掉某id member

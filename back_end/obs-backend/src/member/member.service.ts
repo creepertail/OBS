@@ -58,8 +58,8 @@ export class MemberService {
 
     // 根據目標會員的類型進行欄位驗證（防止修改不屬於該類型的欄位）
     if (member.type === MemberType.Admin) {
-      if (updateMemberDto.username !== undefined) {
-        throw new ConflictException('Since the type is Admin, the Username cannot be modified.');
+      if (updateMemberDto.userName !== undefined) {
+        throw new ConflictException('Since the type is Admin, the UserName cannot be modified.');
       }
       if (updateMemberDto.level !== undefined) {
         throw new ConflictException('Since the type is Admin, the Level cannot be modified.');
@@ -97,8 +97,8 @@ export class MemberService {
     }
 
     if (member.type === MemberType.Merchant) {
-      if (updateMemberDto.username !== undefined) {
-        throw new ConflictException('Since the type is Merchant, the Username cannot be modified.');
+      if (updateMemberDto.userName !== undefined) {
+        throw new ConflictException('Since the type is Merchant, the UserName cannot be modified.');
       }
       if (updateMemberDto.level !== undefined) {
         throw new ConflictException('Since the type is Merchant, the Level cannot be modified.');
