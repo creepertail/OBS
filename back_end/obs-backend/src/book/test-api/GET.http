@@ -1,0 +1,123 @@
+#  /**
+#    * GET API 測試檔案
+#    *
+#    * API 功能：
+#    *
+#    * GET /books                => 取得所有書籍資料（包含圖片）
+#    * GET /books/:id            => 根據書籍 ID 取得詳細資訊
+#    * GET /books/isbn/:isbn     => 根據 ISBN 查詢書籍
+#    * GET /books/search?params  => 根據多個條件搜尋書籍（支援模糊搜尋）
+#    *   - 可用參數：isbn, name, author, publisher, merchantName, status
+#    *   - 所有參數都是可選的，可以組合使用
+#    *   - isbn, name, author, publisher, merchantName 支援模糊搜尋（部分符合即可）
+#    *   - status 為精確比對
+#    */
+
+# ----------
+#  說明：
+#  - 所有 GET API 都不需要 JWT 認證
+#  - 查詢結果會包含書籍的圖片資訊
+#  - search API 可以靈活組合多個搜尋條件
+#  - merchantName 搜尋會先在 Member 表中找出 type="merchant" 且名字接近的商家，然後回傳這些商家的所有書籍
+# ----------
+@baseUrl = http://localhost:3000
+
+# ========================================
+# 1. 取得所有書籍
+# ========================================
+
+### 取得所有書籍（包含圖片）
+GET {{baseUrl}}/books
+
+# ========================================
+# 2. 根據 ID 查詢書籍
+# ========================================
+
+### 根據書籍 ID 查詢（需替換成實際的 book ID）
+# 說明：將 {book-id} 替換成實際的書籍 UUID
+@bookId = b316330a-a386-4d97-8e3d-8092bc2bb4b3
+GET {{baseUrl}}/books/{{bookId}}
+
+### 範例：使用特定 ID 查詢
+# GET {{baseUrl}}/books/a1b2c3d4-e5f6-7890-abcd-ef1234567890
+
+# ========================================
+# 3. 根據 ISBN 查詢書籍
+# ========================================
+
+### 根據 ISBN 查詢書籍（精確查詢）
+GET {{baseUrl}}/books/isbn/9789571234567
+
+### 查詢另一本書的 ISBN
+GET {{baseUrl}}/books/isbn/9789571345678
+
+# ========================================
+# 4. 多條件搜尋書籍（模糊搜尋）
+# ========================================
+
+### 搜尋：根據書名模糊搜尋
+# 說明：只要書名中包含 "TypeScript" 就會被找到
+GET {{baseUrl}}/books/search?name=TypeScript
+
+### 搜尋：根據作者模糊搜尋
+GET {{baseUrl}}/books/search?author=張三
+
+### 搜尋：根據出版社模糊搜尋
+GET {{baseUrl}}/books/search?publisher=博碩
+
+### 搜尋：根據 ISBN 模糊搜尋
+# 說明：只要 ISBN 中包含這些數字就會被找到
+GET {{baseUrl}}/books/search?isbn=97895712
+
+### 搜尋：根據商家名字查詢（模糊搜尋）
+# 說明：查詢商家名字包含指定關鍵字的所有書籍
+# 系統會先在 Member 表中找出 type 是 merchant 且名字接近的商家，然後回傳這些商家的所有書籍
+GET {{baseUrl}}/books/search?merchantName=測試商家
+
+### 搜尋：根據書籍狀態查詢
+# status: 0 = 已下架/缺貨, 1 = 上架中/可購買
+GET {{baseUrl}}/books/search?status=1
+
+### 搜尋：組合多個條件
+# 說明：查詢商家名字包含 "測試" 的、書名包含 "TypeScript" 的、上架中的書籍
+GET {{baseUrl}}/books/search?merchantName=測試&name=TypeScript&status=1
+
+### 搜尋：組合作者和出版社
+GET {{baseUrl}}/books/search?author=李四&publisher=碁峰
+
+### 搜尋：查詢所有包含 "JavaScript" 且狀態為上架的書
+GET {{baseUrl}}/books/search?name=JavaScript&status=1
+
+# ========================================
+# 5. 進階搜尋範例
+# ========================================
+
+### 範例：找出商家名字包含 "test" 的所有上架書籍
+GET {{baseUrl}}/books/search?merchantName=test&status=1
+
+### 範例：搜尋書名或作者包含 "NestJS" 的書（需要發兩次請求）
+# 第一次：搜尋書名
+GET {{baseUrl}}/books/search?name=NestJS
+
+### 第二次：搜尋作者
+GET {{baseUrl}}/books/search?author=張
+
+### 範例：搜尋特定出版社的所有書籍，並只顯示上架的
+GET {{baseUrl}}/books/search?publisher=天瓏&status=1
+
+### 範例：搜尋商家名字包含 "Merchant" 的所有書籍
+# 說明：這會找出所有商家名字中包含 "Merchant" 的商家（例如 "Merchant1", "TestMerchant" 等），然後回傳這些商家的所有書籍
+GET {{baseUrl}}/books/search?merchantName=Merchant
+
+# ========================================
+# 6. 測試錯誤處理
+# ========================================
+
+### 測試：查詢不存在的 ID（應該回傳 404）
+GET {{baseUrl}}/books/00000000-0000-0000-0000-000000000000
+
+### 測試：查詢不存在的 ISBN（應該回傳 404）
+GET {{baseUrl}}/books/isbn/0000000000000
+
+### 測試：使用無效的 ID 格式（應該回傳錯誤）
+GET {{baseUrl}}/books/invalid-id-format
