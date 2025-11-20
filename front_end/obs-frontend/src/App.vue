@@ -2,10 +2,12 @@
 import { RouterLink, RouterView, useRoute  } from 'vue-router'
 import { computed } from 'vue'
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/solid'
+import { useAuthStore } from "./stores/auth";
 
 const route = useRoute()
 const hideLayout = computed(() => route.meta.hideLayout)
-const isLogin = computed(() => route.meta.isLogin)
+const auth = useAuthStore();
+const isLogin = computed(() => auth.isLogin);
 </script>
 
 <template>
@@ -76,7 +78,7 @@ header {
 }
 
 h1 {
-  font-size: 3em;
+  font-size: 2em;
 }
 
 /* nav {
