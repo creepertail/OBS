@@ -60,7 +60,7 @@ export class Book {
   merchantId: string;
 
   @ManyToOne(() => Member, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'merchantId', referencedColumnName: 'member_id' })
+  @JoinColumn({ name: 'merchantId', referencedColumnName: 'memberID' })
   merchant: Member;
 
   @CreateDateColumn()

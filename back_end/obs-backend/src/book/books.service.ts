@@ -240,7 +240,7 @@ export class BooksService {
       }
 
       // 取得所有符合的商家 ID
-      const merchantIds = merchants.map(merchant => merchant.member_id);
+      const merchantIds = merchants.map(merchant => merchant.memberID);
 
       // 用這些 ID 查詢書籍
       queryBuilder.andWhere('book.merchantId IN (:...merchantIds)', { merchantIds });
