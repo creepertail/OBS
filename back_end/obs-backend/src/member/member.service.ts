@@ -23,7 +23,7 @@ export class MemberService {
   }
 
   async findByID(id: string): Promise<Member> {
-    const member = await this.memberRepository.findOne({ where: { member_id: id } });
+    const member = await this.memberRepository.findOne({ where: { memberID: id } });
     if (!member) {
       throw new NotFoundException(`Member with ID ${id} not found`);
     }
@@ -108,7 +108,7 @@ export class MemberService {
       }
     }
 
-    await this.ensureUniqueFields(updateMemberDto, member.member_id);
+    await this.ensureUniqueFields(updateMemberDto, member.memberID);
 
     if (updateMemberDto.password) {
       updateMemberDto.password = await bcrypt.hash(updateMemberDto.password, 10);
@@ -120,7 +120,7 @@ export class MemberService {
 
   async remove(id: string): Promise<void> {
     await this.findByID(id);
-    await this.memberRepository.delete({ member_id: id });
+    await this.memberRepository.delete({ memberID: id });
   }
 
   async login(loginMemberDto: LoginMemberDto): Promise<{ access_token: string; member: Omit<Member, 'password'> }> {
@@ -142,7 +142,7 @@ export class MemberService {
 
     // 生成 JWT token
     const payload = {
-      sub: member.member_id,
+      sub: member.memberID,
       account: member.account,
       type: member.type,
     };
@@ -164,28 +164,28 @@ export class MemberService {
   ): Promise<void> {
     if (dto.email) {
       const existingByEmail = await this.memberRepository.findOne({ where: { email: dto.email } });
-      if (existingByEmail && existingByEmail.member_id !== currentId) {
+      if (existingByEmail && existingByEmail.memberID !== currentId) {
         throw new ConflictException('Email already exists');
       }
     }
 
     if (dto.account) {
       const existingByAccount = await this.memberRepository.findOne({ where: { account: dto.account } });
-      if (existingByAccount && existingByAccount.member_id !== currentId) {
+      if (existingByAccount && existingByAccount.memberID !== currentId) {
         throw new ConflictException('Account already exists');
       }
     }
 
     if (dto.phoneNumber && dto.type != MemberType.Admin) {
       const existingByPhone = await this.memberRepository.findOne({ where: { phoneNumber: dto.phoneNumber } });
-      if (existingByPhone && existingByPhone.member_id !== currentId) {
+      if (existingByPhone && existingByPhone.memberID !== currentId) {
         throw new ConflictException('Phone number already exists');
       }
     }
     
     if(dto.type === MemberType.Merchant){
       const existingByMerchantName = await this.memberRepository.findOne({where: { type: MemberType.Merchant, merchantName: dto.merchantName }});
-      if(existingByMerchantName && existingByMerchantName.member_id !== currentId){
+      if(existingByMerchantName && existingByMerchantName.memberID !== currentId){
         throw new ConflictException('Merchant name already exists');
       }
     }

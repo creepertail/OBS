@@ -5,7 +5,7 @@ import { MemberType } from '../member-type.enum';
 @Entity('member')
 export class Member {
   @PrimaryGeneratedColumn('uuid')
-  member_id: string;
+  memberID: string;
 
   @Column({ type: 'varchar', length: 40, unique: true, nullable: false })
   email: string;
