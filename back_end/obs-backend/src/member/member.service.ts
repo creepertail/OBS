@@ -1,5 +1,5 @@
 // src/member/member.service.ts
-import { ConflictException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -36,6 +36,9 @@ export class MemberService {
   }
 
   async create(createMemberDto: CreateMemberDto): Promise<Member> {
+    // 驗證共用必填欄位
+    this.validateRequiredFields(createMemberDto);
+
     await this.ensureUniqueFields(createMemberDto);
 
     const member = this.memberRepository.create({
@@ -44,6 +47,41 @@ export class MemberService {
     });
 
     return this.memberRepository.save(member);
+  }
+
+  private validateRequiredFields(dto: CreateMemberDto): void {
+    // 共用必填欄位驗證
+    if (!dto.email || dto.email.trim() === '') {
+      throw new BadRequestException('Email is required');
+    }
+    if (!dto.account || dto.account.trim() === '') {
+      throw new BadRequestException('Account is required');
+    }
+    if (!dto.password || dto.password.trim() === '') {
+      throw new BadRequestException('Password is required');
+    }
+    if (!dto.phoneNumber || dto.phoneNumber.trim() === '') {
+      throw new BadRequestException('Phone number is required');
+    }
+    if (!dto.type) {
+      throw new BadRequestException('Member type is required');
+    }
+
+    // 根據會員類型驗證特定欄位
+    if (dto.type === MemberType.User) {
+      if (!dto.userName || dto.userName.trim() === '') {
+        throw new BadRequestException('User name is required for User type');
+      }
+    }
+
+    if (dto.type === MemberType.Merchant) {
+      if (!dto.merchantName || dto.merchantName.trim() === '') {
+        throw new BadRequestException('Merchant name is required for Merchant type');
+      }
+      if (!dto.merchantAddress || dto.merchantAddress.trim() === '') {
+        throw new BadRequestException('Merchant address is required for Merchant type');
+      }
+    }
   }
 
   // id 為 被改動的人
