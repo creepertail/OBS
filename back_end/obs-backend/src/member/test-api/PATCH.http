@@ -3,7 +3,7 @@
 #    * PATCH url/members/:id + body    => 用memberID找到member，修改其資料，並回傳member
 #    *   - "membertype" is necessary
 #    *   - email account password phoneNumber
-#    *   - username level userState (when membertype is user)
+#    *   - userName level userState (when membertype is user)
 #    *   - merchantName merchantState merchantAddress merchantSubscriberCount(when membertype is merchant)
 #    * 
 #    */
@@ -12,7 +12,7 @@
 # throw 錯誤說不能修改
 # "Since the type is xxx, the oooo cannot be modified."
 # xxx => Admin, User, Merchant
-# oooo => username, level, userState, merchantName, merchantState, merchantAddress, merchantSubscriberCount
+# oooo => userName, level, userState, merchantName, merchantState, merchantAddress, merchantSubscriberCount
 
 
 @admin_id = 81dc3b42-d706-4b88-8e79-4f1ed93b56e6

@@ -1,5 +1,5 @@
 // src/member/member.service.ts
-import { ConflictException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -23,7 +23,7 @@ export class MemberService {
   }
 
   async findByID(id: string): Promise<Member> {
-    const member = await this.memberRepository.findOne({ where: { member_id: id } });
+    const member = await this.memberRepository.findOne({ where: { memberID: id } });
     if (!member) {
       throw new NotFoundException(`Member with ID ${id} not found`);
     }
@@ -36,6 +36,9 @@ export class MemberService {
   }
 
   async create(createMemberDto: CreateMemberDto): Promise<Member> {
+    // 驗證共用必填欄位
+    this.validateRequiredFields(createMemberDto);
+
     await this.ensureUniqueFields(createMemberDto);
 
     const member = this.memberRepository.create({
@@ -44,6 +47,41 @@ export class MemberService {
     });
 
     return this.memberRepository.save(member);
+  }
+
+  private validateRequiredFields(dto: CreateMemberDto): void {
+    // 共用必填欄位驗證
+    if (!dto.email || dto.email.trim() === '') {
+      throw new BadRequestException('Email is required');
+    }
+    if (!dto.account || dto.account.trim() === '') {
+      throw new BadRequestException('Account is required');
+    }
+    if (!dto.password || dto.password.trim() === '') {
+      throw new BadRequestException('Password is required');
+    }
+    if (!dto.phoneNumber || dto.phoneNumber.trim() === '') {
+      throw new BadRequestException('Phone number is required');
+    }
+    if (!dto.type) {
+      throw new BadRequestException('Member type is required');
+    }
+
+    // 根據會員類型驗證特定欄位
+    if (dto.type === MemberType.User) {
+      if (!dto.userName || dto.userName.trim() === '') {
+        throw new BadRequestException('User name is required for User type');
+      }
+    }
+
+    if (dto.type === MemberType.Merchant) {
+      if (!dto.merchantName || dto.merchantName.trim() === '') {
+        throw new BadRequestException('Merchant name is required for Merchant type');
+      }
+      if (!dto.merchantAddress || dto.merchantAddress.trim() === '') {
+        throw new BadRequestException('Merchant address is required for Merchant type');
+      }
+    }
   }
 
   // id 為 被改動的人
@@ -58,8 +96,8 @@ export class MemberService {
 
     // 根據目標會員的類型進行欄位驗證（防止修改不屬於該類型的欄位）
     if (member.type === MemberType.Admin) {
-      if (updateMemberDto.username !== undefined) {
-        throw new ConflictException('Since the type is Admin, the Username cannot be modified.');
+      if (updateMemberDto.userName !== undefined) {
+        throw new ConflictException('Since the type is Admin, the UserName cannot be modified.');
       }
       if (updateMemberDto.level !== undefined) {
         throw new ConflictException('Since the type is Admin, the Level cannot be modified.');
@@ -97,8 +135,8 @@ export class MemberService {
     }
 
     if (member.type === MemberType.Merchant) {
-      if (updateMemberDto.username !== undefined) {
-        throw new ConflictException('Since the type is Merchant, the Username cannot be modified.');
+      if (updateMemberDto.userName !== undefined) {
+        throw new ConflictException('Since the type is Merchant, the UserName cannot be modified.');
       }
       if (updateMemberDto.level !== undefined) {
         throw new ConflictException('Since the type is Merchant, the Level cannot be modified.');
@@ -108,7 +146,7 @@ export class MemberService {
       }
     }
 
-    await this.ensureUniqueFields(updateMemberDto, member.member_id);
+    await this.ensureUniqueFields(updateMemberDto, member.memberID);
 
     if (updateMemberDto.password) {
       updateMemberDto.password = await bcrypt.hash(updateMemberDto.password, 10);
@@ -120,7 +158,7 @@ export class MemberService {
 
   async remove(id: string): Promise<void> {
     await this.findByID(id);
-    await this.memberRepository.delete({ member_id: id });
+    await this.memberRepository.delete({ memberID: id });
   }
 
   async login(loginMemberDto: LoginMemberDto): Promise<{ access_token: string; member: Omit<Member, 'password'> }> {
@@ -142,7 +180,7 @@ export class MemberService {
 
     // 生成 JWT token
     const payload = {
-      sub: member.member_id,
+      sub: member.memberID,
       account: member.account,
       type: member.type,
     };
@@ -164,28 +202,28 @@ export class MemberService {
   ): Promise<void> {
     if (dto.email) {
       const existingByEmail = await this.memberRepository.findOne({ where: { email: dto.email } });
-      if (existingByEmail && existingByEmail.member_id !== currentId) {
+      if (existingByEmail && existingByEmail.memberID !== currentId) {
         throw new ConflictException('Email already exists');
       }
     }
 
     if (dto.account) {
       const existingByAccount = await this.memberRepository.findOne({ where: { account: dto.account } });
-      if (existingByAccount && existingByAccount.member_id !== currentId) {
+      if (existingByAccount && existingByAccount.memberID !== currentId) {
         throw new ConflictException('Account already exists');
       }
     }
 
     if (dto.phoneNumber && dto.type != MemberType.Admin) {
       const existingByPhone = await this.memberRepository.findOne({ where: { phoneNumber: dto.phoneNumber } });
-      if (existingByPhone && existingByPhone.member_id !== currentId) {
+      if (existingByPhone && existingByPhone.memberID !== currentId) {
         throw new ConflictException('Phone number already exists');
       }
     }
     
     if(dto.type === MemberType.Merchant){
       const existingByMerchantName = await this.memberRepository.findOne({where: { type: MemberType.Merchant, merchantName: dto.merchantName }});
-      if(existingByMerchantName && existingByMerchantName.member_id !== currentId){
+      if(existingByMerchantName && existingByMerchantName.memberID !== currentId){
         throw new ConflictException('Merchant name already exists');
       }
     }
