@@ -1,5 +1,5 @@
 // src/subscription/dto/create-subscription.dto.ts
-import { IsIn, IsInt, IsUUID } from 'class-validator';
+import { IsBoolean, IsOptional, IsUUID } from 'class-validator';
 
 export class CreateSubscriptionDto {
   @IsUUID()
@@ -8,8 +8,8 @@ export class CreateSubscriptionDto {
   @IsUUID()
   merchantID: string;
 
-  @IsInt()
-  @IsIn([0, 1])
-  state: number;
+  @IsBoolean()
+  @IsOptional()
+  notificationEnabled?: boolean; // 預設為 false
 }
 

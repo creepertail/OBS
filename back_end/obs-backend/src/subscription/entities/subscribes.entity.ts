@@ -10,8 +10,9 @@ export class Subscribes {
   @PrimaryColumn({ type: 'char', length: 36, name: 'MerchantID' })
   merchantID: string;
 
-  @Column({ type: 'int', default: 0, nullable: false, name: 'State' })
-  state: number;
+  // 是否開啟通知
+  @Column({ type: 'boolean', default: false, nullable: false, name: 'NotificationEnabled' })
+  notificationEnabled: boolean;
 
   @ManyToOne(() => Member, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'UserID', referencedColumnName: 'member_id' })
