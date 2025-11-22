@@ -2,9 +2,12 @@
 import UserRegister from '../components/register/UserRegister.vue';
 import MerchantRegister from '../components/register/MerchantRegister.vue';
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 const userRef = ref<InstanceType<typeof UserRegister> | null>(null);
+const router = useRouter();
 const switchToUser = ref(true)
+const successRegister = ref(false);
 const pw = ref("");
 const pw2 = ref("");
 const error = ref("");
@@ -29,7 +32,11 @@ async function handleRegister() {
   }
   error.value = "";
   if (switchToUser.value) {
-    userRef.value?.handleRegister();
+    successRegister.value = await userRef.value?.handleRegister() ?? false;
+  }
+
+  if (successRegister.value) {
+    router.push({ name: 'login' });
   }
 }
 </script>
