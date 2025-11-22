@@ -5,6 +5,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const userRef = ref<InstanceType<typeof UserRegister> | null>(null);
+const merchantRef = ref<InstanceType<typeof MerchantRegister> | null>(null);
 const router = useRouter();
 const switchToUser = ref(true)
 const successRegister = ref(false);
@@ -21,18 +22,30 @@ const checkPassword = (password: string, password2: string): boolean => {
 }
 
 async function handleRegister() {
-  if (switchToUser.value) {
-    pw.value = userRef.value?.getPassword() ?? "";
-    pw2.value = userRef.value?.getPassword2() ?? "";
+  pw.value = switchToUser.value ? userRef.value?.getPassword() ?? "" : merchantRef.value?.getPassword() ?? "";
+  pw2.value = switchToUser.value ? userRef.value?.getPassword2() ?? "" : merchantRef.value?.getPassword2() ?? "";
+  if (!checkPassword(pw.value, pw2.value)) {
+    switchToUser.value ? userRef.value!.setError(error.value) : merchantRef.value!.setError(error.value);
+    return;
+  }
+  else{
+    error.value = "";
   }
 
   if (!checkPassword(pw.value, pw2.value)) {
     userRef.value!.setError(error.value);
+    merchantRef.value!.setError(error.value);
     return;
   }
-  error.value = "";
+  else{
+    error.value = "";
+  }
+
   if (switchToUser.value) {
     successRegister.value = await userRef.value?.handleRegister() ?? false;
+  }
+  else {
+    successRegister.value = await merchantRef.value?.handleRegister() ?? false;
   }
 
   if (successRegister.value) {
@@ -47,7 +60,7 @@ async function handleRegister() {
       切換至{{ switchToUser ? 'Merchant' : 'User' }}註冊
     </button>
     <UserRegister v-show="switchToUser" ref="userRef" />
-    <MerchantRegister v-show="!switchToUser" />
+    <MerchantRegister v-show="!switchToUser" ref="merchantRef" />
     <button @click="handleRegister" class="btn">Register</button>
   </main>
 </template>

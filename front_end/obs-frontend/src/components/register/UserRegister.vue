@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import axios from "axios";
-import { fa } from 'element-plus/es/locales.mjs';
 
 const email = ref("");
 const account = ref("");
@@ -75,8 +74,8 @@ defineExpose({
         </div>
 
         <div class="form-row">
-            <label for="username">User name:</label>
-            <input id="username" type="text" v-model="userName" placeholder="Enter user name" />
+            <label for="userName">User name:</label>
+            <input id="userName" type="text" v-model="userName" placeholder="Enter user name" />
             <div class="error" v-if="error.includes('User name')" style="color:red">{{ error }}</div>
         </div>
     </div>
