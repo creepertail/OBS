@@ -43,6 +43,19 @@ Content-Type: application/json
   "userName": "User1"
 }
 
+### 測試建立新第二個user
+POST http://localhost:3000/members
+Content-Type: application/json
+
+{
+  "email": "test-user2@example.com",
+  "account": "user-test-2",
+  "password": "0000",
+  "phoneNumber": "0966777888",
+  "type": "user",
+  "username": "User2"
+}
+
 ### 測試建立新merchant
 POST http://localhost:3000/members
 Content-Type: application/json
@@ -80,6 +93,17 @@ Content-Type: application/json
   "account": "user-test-1",
   "password": "0000"
 }
+
+### User2 登入 API 測試
+POST http://localhost:3000/members/login
+Content-Type: application/json
+
+{
+  "account": "user-test-2",
+  "password": "0000"
+}
+
+
 ### Admin 登入 API 測試
 POST http://localhost:3000/members/login
 Content-Type: application/json

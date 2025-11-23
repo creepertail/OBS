@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { BooksModule } from './book/books.module';
 import { MemberModule } from './member/member.module';
+import { SubscriptionModule } from './subscription/subscription.module';
 import { CategoryModule } from './category/category.module';
 import { BelongsToModule } from './belongs-to/belongs-to.module';
 
@@ -29,6 +30,7 @@ import { BelongsToModule } from './belongs-to/belongs-to.module';
     UsersModule,
     BooksModule,
     MemberModule,
+    SubscriptionModule,
     CategoryModule,
     BelongsToModule,
   ],

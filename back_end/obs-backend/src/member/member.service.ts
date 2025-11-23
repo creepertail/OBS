@@ -8,6 +8,7 @@ import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
 import { LoginMemberDto } from './dto/login-member.dto';
 import { Member } from './entities/member.entity';
+import { Subscribes } from '../subscription/entities/subscribes.entity';
 import { MemberType } from './member-type.enum';
 
 @Injectable()
@@ -15,6 +16,8 @@ export class MemberService {
   constructor(
     @InjectRepository(Member)
     private readonly memberRepository: Repository<Member>,
+    @InjectRepository(Subscribes)
+    private readonly subscribesRepository: Repository<Subscribes>,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -27,6 +30,18 @@ export class MemberService {
     if (!member) {
       throw new NotFoundException(`Member with ID ${id} not found`);
     }
+
+    // 若是 Merchant，則更新訂閱者數量
+    if (member.type === MemberType.Merchant) {
+      const subscriberCount = await this.subscribesRepository.count({
+        where: { merchantID: id },
+      });
+      if (member.merchantSubscriberCount !== subscriberCount) {
+        member.merchantSubscriberCount = subscriberCount;
+        await this.memberRepository.save(member);
+      }
+    }
+
     return member;
   }
 
