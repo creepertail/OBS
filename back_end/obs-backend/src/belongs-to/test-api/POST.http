@@ -1,0 +1,158 @@
+#   /**
+#    * BelongsTo POST API：
+#    *
+#    * POST url/belongs-to + body                => 將書籍加入分類（需認證，僅書籍擁有者或 Admin）
+#    *   - bookID: 書籍 UUID（必填）
+#    *   - categoryId: 分類 ID（必填，整數）
+#    *
+#    * POST url/belongs-to/batch + body          => 批次將書籍加入多個分類
+#    *   - bookID: 書籍 UUID（必填）
+#    *   - categoryIds: 分類 ID 陣列（必填）
+#    *
+#    * 需要登入，且必須是該書籍的商家（merchant）或 Admin
+#    */
+
+@baseUrl = http://localhost:3000
+
+# ===========================================
+# 請先登入取得 Token，然後替換下方的 token
+# Merchant 可以操作自己的書籍，Admin 可以操作所有書籍
+# ===========================================
+@merchantToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0NjkyYThhOC01Mjg0LTRjOTktOGE4YS04Y2YyYzExNjE5M2EiLCJhY2NvdW50IjoibWVyY2hhbnQtdGVzdC0xIiwidHlwZSI6Im1lcmNoYW50IiwiaWF0IjoxNzYzODQ3ODA3LCJleHAiOjE3NjM5MzQyMDd9.rnKFcQDblrCbOkBlZHLgdK26CTbOAu1V7cLLuDHUqjU
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlMzFmMDExMi01NjMwLTRkZGYtOGIzNS04NDQ4YWMxNmQ3YTIiLCJhY2NvdW50IjoiYWRtaW4tdGVzdC0xIiwidHlwZSI6ImFkbWluIiwiaWF0IjoxNzYzODQ2NzAyLCJleHAiOjE3NjM5MzMxMDJ9.D2ft_GMLkhEwbMHylkS_YazAGOS6N6Qgxkk8iVxS7rs
+@bookId = a05bf19c-fb8f-4819-b507-207e62410f31
+
+### 將書籍加入分類1（使用 Merchant Token）
+POST {{baseUrl}}/belongs-to
+Content-Type: application/json
+Authorization: Bearer {{merchantToken}}
+
+{
+  "bookID": "{{bookId}}",
+  "categoryId": 1
+}
+
+### 將書籍加入分類2（使用 Merchant Token）
+POST {{baseUrl}}/belongs-to
+Content-Type: application/json
+Authorization: Bearer {{merchantToken}}
+
+{
+  "bookID": "{{bookId}}",
+  "categoryId": 2
+}
+
+### 將書籍加入分類3（使用 Admin Token）
+POST {{baseUrl}}/belongs-to
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "bookID": "{{bookId}}",
+  "categoryId": 3
+}
+
+### 批次將書籍加入多個分類
+POST {{baseUrl}}/belongs-to/batch
+Content-Type: application/json
+Authorization: Bearer {{merchantToken}}
+
+{
+  "bookID": "{{bookId}}",
+  "categoryIds": [1, 2, 3]
+}
+
+# ===========================================
+# 錯誤測試
+# ===========================================
+
+### 測試重複加入相同分類（應該回傳 409 Conflict）
+POST {{baseUrl}}/belongs-to
+Content-Type: application/json
+Authorization: Bearer {{merchantToken}}
+
+{
+  "bookID": "{{bookId}}",
+  "categoryId": 1
+}
+
+### 測試書籍不存在
+POST {{baseUrl}}/belongs-to
+Content-Type: application/json
+Authorization: Bearer {{merchantToken}}
+
+{
+  "bookID": "00000000-0000-0000-0000-000000000000",
+  "categoryId": 1
+}
+
+### 測試分類不存在
+POST {{baseUrl}}/belongs-to
+Content-Type: application/json
+Authorization: Bearer {{merchantToken}}
+
+{
+  "bookID": "{{bookId}}",
+  "categoryId": 99999
+}
+
+### 測試沒有 Token（應該回傳 401）
+POST {{baseUrl}}/belongs-to
+Content-Type: application/json
+
+{
+  "bookID": "{{bookId}}",
+  "categoryId": 1
+}
+
+### 測試操作別人的書籍（應該回傳 403）
+# 請使用另一個 Merchant 的 Token
+@otherMerchantToken = OTHER_MERCHANT_TOKEN_HERE
+
+POST {{baseUrl}}/belongs-to
+Content-Type: application/json
+Authorization: Bearer {{otherMerchantToken}}
+
+{
+  "bookID": "{{bookId}}",
+  "categoryId": 1
+}
+
+### 測試缺少 bookID
+POST {{baseUrl}}/belongs-to
+Content-Type: application/json
+Authorization: Bearer {{merchantToken}}
+
+{
+  "categoryId": 1
+}
+
+### 測試缺少 categoryId
+POST {{baseUrl}}/belongs-to
+Content-Type: application/json
+Authorization: Bearer {{merchantToken}}
+
+{
+  "bookID": "{{bookId}}"
+}
+
+### 測試無效的 bookID 格式
+POST {{baseUrl}}/belongs-to
+Content-Type: application/json
+Authorization: Bearer {{merchantToken}}
+
+{
+  "bookID": "invalid-uuid",
+  "categoryId": 1
+}
+
+### 測試無效的 categoryId 格式
+POST {{baseUrl}}/belongs-to
+Content-Type: application/json
+Authorization: Bearer {{merchantToken}}
+
+{
+  "bookID": "{{bookId}}",
+  "categoryId": "abc"
+}
+
