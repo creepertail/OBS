@@ -1,0 +1,29 @@
+#   /**
+#    * Category GET API：
+#    *
+#    * GET url/categories              => 取得所有分類
+#    * GET url/categories/:id          => 用 id 取得單一分類
+#    * GET url/categories/search?name=xxx => 根據名稱搜尋分類（模糊搜尋）
+#    * GET url/categories/statistics   => 取得分類統計資訊（用於類別分析）
+#    */
+
+@baseUrl = http://localhost:3000
+
+### 取得所有分類
+GET {{baseUrl}}/categories
+
+### 取得單一分類（請替換為實際的 category ID）
+GET {{baseUrl}}/categories/1
+
+### 根據名稱搜尋分類（模糊搜尋）
+GET {{baseUrl}}/categories/search?name=小說
+
+### 取得分類統計資訊（用於類別分析）
+GET {{baseUrl}}/categories/statistics
+
+### 搜尋空字串（回傳所有分類）
+GET {{baseUrl}}/categories/search?name=
+
+### 測試不存在的分類 ID
+GET {{baseUrl}}/categories/99999
+
