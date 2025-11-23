@@ -7,14 +7,14 @@ const account = ref("");
 const phoneNumber = ref("");
 const password = ref("");
 const password2 = ref("");
-const username = ref("");
+const userName = ref("");
 const error = ref("");
 
 const getPassword = () => password.value;
 const getPassword2 = () => password2.value;
 const setError = (errorMessage: string) => error.value = errorMessage;
 
-async function handleRegister() {
+async function handleRegister(): Promise<boolean> {
     try {
         const res = await axios.post("http://localhost:3000/members", {
             email: email.value,
@@ -22,11 +22,12 @@ async function handleRegister() {
             password: password.value,
             phoneNumber: phoneNumber.value,
             type: "user",
-            username: username.value
+            userName: userName.value
         });
-        alert("註冊成功："+ res.data);
+        return true;
     } catch (err) {
-        alert("註冊失敗："+ err);
+        error.value = err.response?.data?.message;
+        return false;
     }
 }
 
@@ -45,16 +46,19 @@ defineExpose({
         <div class="form-row">
             <label for="account">Account:</label>
             <input id="account" type="text" v-model="account" placeholder="Enter account" />
+            <div class="error" v-if="error.includes('Account')" style="color:red">{{ error }}</div>
         </div>
 
         <div class="form-row">
             <label for="email">Email:</label>
             <input id="email" type="email" v-model="email" placeholder="Enter email" />
+            <div class="error" v-if="error.includes('Email')" style="color:red">{{ error }}</div>
         </div>
 
         <div class="form-row">
             <label for="password">Password:</label>
             <input id="password" type="password" v-model="password" placeholder="Enter password" />
+            <div class="error" v-if="error.includes('Password')" style="color:red">{{ error }}</div>
         </div>
 
         <div class="form-row">
@@ -66,11 +70,13 @@ defineExpose({
         <div class="form-row">
             <label for="phoneNumber">Phone number:</label>
             <input id="phoneNumber" type="tel" v-model="phoneNumber" placeholder="Enter phone number" />
+            <div class="error" v-if="error.includes('Phone number')" style="color:red">{{ error }}</div>
         </div>
 
         <div class="form-row">
-            <label for="username">User name:</label>
-            <input id="username" type="text" v-model="username" placeholder="Enter user name" />
+            <label for="userName">User name:</label>
+            <input id="userName" type="text" v-model="userName" placeholder="Enter user name" />
+            <div class="error" v-if="error.includes('User name')" style="color:red">{{ error }}</div>
         </div>
     </div>
 </template>
