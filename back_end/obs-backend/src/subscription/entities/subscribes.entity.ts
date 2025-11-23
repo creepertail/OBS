@@ -15,10 +15,10 @@ export class Subscribes {
   notificationEnabled: boolean;
 
   @ManyToOne(() => Member, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'UserID', referencedColumnName: 'member_id' })
+  @JoinColumn({ name: 'UserID', referencedColumnName: 'memberID' })
   user: Member;
 
   @ManyToOne(() => Member, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'MerchantID', referencedColumnName: 'member_id' })
+  @JoinColumn({ name: 'MerchantID', referencedColumnName: 'memberID' })
   merchant: Member;
 }

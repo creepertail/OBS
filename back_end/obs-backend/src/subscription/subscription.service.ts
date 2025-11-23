@@ -22,7 +22,7 @@ export class SubscriptionService {
   private formatResponse(subscription: Subscribes): SubscriptionResponseDto {
     return {
       userID: subscription.userID,
-      userName: subscription.user?.username || '',
+      userName: subscription.user?.userName || '',
       merchantID: subscription.merchantID,
       merchantName: subscription.merchant?.merchantName || '',
       notificationEnabled: subscription.notificationEnabled,
@@ -91,7 +91,7 @@ export class SubscriptionService {
     }
 
     // 驗證 User 存在且類型為 User
-    const user = await this.memberRepository.findOne({ where: { member_id: userID } });
+    const user = await this.memberRepository.findOne({ where: { memberID: userID } });
     if (!user) {
       throw new NotFoundException(`User with ID ${userID} not found`);
     }
@@ -100,7 +100,7 @@ export class SubscriptionService {
     }
 
     // 驗證 Merchant 存在且類型為 Merchant
-    const merchant = await this.memberRepository.findOne({ where: { member_id: merchantID } });
+    const merchant = await this.memberRepository.findOne({ where: { memberID: merchantID } });
     if (!merchant) {
       throw new NotFoundException(`Merchant with ID ${merchantID} not found`);
     }
@@ -126,7 +126,7 @@ export class SubscriptionService {
     // 回傳格式化資料
     return {
       userID,
-      userName: user.username || '',
+      userName: user.userName || '',
       merchantID,
       merchantName: merchant.merchantName || '',
       notificationEnabled: createSubscriptionDto.notificationEnabled ?? false,
@@ -157,7 +157,7 @@ export class SubscriptionService {
     await this.subscriptionRepository.delete({ userID, merchantID });
 
     // 更新 Merchant 的訂閱者數量
-    const merchant = await this.memberRepository.findOne({ where: { member_id: merchantID } });
+    const merchant = await this.memberRepository.findOne({ where: { memberID: merchantID } });
     if (merchant && merchant.merchantSubscriberCount && merchant.merchantSubscriberCount > 0) {
       merchant.merchantSubscriberCount -= 1;
       await this.memberRepository.save(merchant);
