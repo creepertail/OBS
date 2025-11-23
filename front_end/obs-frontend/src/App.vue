@@ -2,16 +2,18 @@
 import { RouterLink, RouterView, useRoute  } from 'vue-router'
 import { computed } from 'vue'
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/solid'
+import { useAuthStore } from "./stores/auth";
 
 const route = useRoute()
 const hideLayout = computed(() => route.meta.hideLayout)
-const isLogin = computed(() => route.meta.isLogin)
+const auth = useAuthStore();
+const isLogin = computed(() => auth.isLogin);
 </script>
 
 <template>
   <header v-if="!hideLayout">
     <RouterLink :to="{name: 'home'}" class="homeButton">
-      <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" /> <!-- TODO: change img -->
+      <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="80" height="80" /> <!-- TODO: change img -->
       <h1>Online Bookstore System</h1>
     </RouterLink>
 
@@ -22,12 +24,14 @@ const isLogin = computed(() => route.meta.isLogin)
     </div>
   </header>
 
-  <RouterView />
+  <div>
+    <RouterView />
+  </div>
 </template>
 
 <style scoped>
 header {
-  position: absolute;
+  position: fixed;
   display: flex;
   gap: 2rem;
   align-items: center;
@@ -36,7 +40,7 @@ header {
   width: 100%;
   z-index: 1000;
   line-height: 1.5;
-  max-height: 20vh;
+  max-height: 15vh;
   background-color: gray;
 }
 
@@ -74,7 +78,7 @@ header {
 }
 
 h1 {
-  font-size: 3em;
+  font-size: 2em;
 }
 
 /* nav {

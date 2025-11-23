@@ -3,7 +3,7 @@ import TheWelcome from '../components/TheWelcome.vue'
 </script>
 
 <template>
-  <main>
+  <main style="padding-top: 100px;">
     <TheWelcome />
   </main>
 </template>

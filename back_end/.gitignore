@@ -9,3 +9,6 @@ codex
 
 BR_dev
 tem_unchecked_files
+
+# 上傳的檔案
+obs-backend/uploads/
