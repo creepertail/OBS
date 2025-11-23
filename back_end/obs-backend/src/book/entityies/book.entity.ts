@@ -1,6 +1,6 @@
 // src/book/entities/book.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne, JoinColumn} from 'typeorm';
-import { BelongsTo } from './belongs-to.entity';
+import { BelongsTo } from '../../belongs-to/entities/belongs-to.entity';
 import { BookImage } from './book-image.entity';
 // import { Favorite } from '../../favorite/entities/favorite.entity';
 // import { AddsToCart } from '../../cart/entities/adds-to-cart.entity';

@@ -29,7 +29,7 @@
 # ----------
 @baseUrl = http://localhost:3000
 # 請先執行登入 API 取得 access_token，然後將 token 貼到下面
-@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NTg1NzQyYy1jYmFlLTQzN2YtYmZiMi0wMGU1MWIzNmI2OGUiLCJhY2NvdW50IjoibWVyY2hhbnQtdGVzdC0xIiwidHlwZSI6Im1lcmNoYW50IiwiaWF0IjoxNzYzNDY4NDg0LCJleHAiOjE3NjM1NTQ4ODR9.im52tPcEfl4_Hkqgk2fya9WkPXUD1n6IM5-zODKZLkM
+@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0NjkyYThhOC01Mjg0LTRjOTktOGE4YS04Y2YyYzExNjE5M2EiLCJhY2NvdW50IjoibWVyY2hhbnQtdGVzdC0xIiwidHlwZSI6Im1lcmNoYW50IiwiaWF0IjoxNzYzODQ3ODA3LCJleHAiOjE3NjM5MzQyMDd9.rnKFcQDblrCbOkBlZHLgdK26CTbOAu1V7cLLuDHUqjU
 
 # ========================================
 # 步驟一：上傳圖片
