@@ -1,0 +1,87 @@
+#   /**
+#    * Category PATCH API：
+#    *
+#    * PATCH url/categories/:id + body => 更新分類（僅限 Admin）
+#    *   - name: 分類名稱（選填）
+#    *   - description: 分類描述（選填）
+#    *
+#    * 需要 Admin JWT Token
+#    */
+
+@baseUrl = http://localhost:3000
+
+# ===========================================
+# 請先登入 Admin 取得 Token，然後替換下方的 token
+# ===========================================
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlMzFmMDExMi01NjMwLTRkZGYtOGIzNS04NDQ4YWMxNmQ3YTIiLCJhY2NvdW50IjoiYWRtaW4tdGVzdC0xIiwidHlwZSI6ImFkbWluIiwiaWF0IjoxNzYzODQ2NzAyLCJleHAiOjE3NjM5MzMxMDJ9.D2ft_GMLkhEwbMHylkS_YazAGOS6N6Qgxkk8iVxS7rs
+
+
+### 更新分類名稱和描述
+PATCH {{baseUrl}}/categories/1
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "小說類",
+  "description": "更新後的描述"
+}
+
+### 只更新描述
+PATCH {{baseUrl}}/categories/1
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "description": "只更新描述內容"
+}
+
+### 只更新名稱
+PATCH {{baseUrl}}/categories/1
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "新小說"
+}
+
+# ===========================================
+# 錯誤測試
+# ===========================================
+
+### 測試更新不存在的分類
+PATCH {{baseUrl}}/categories/99999
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "測試"
+}
+
+### 測試更新為重複的名稱（假設 ID 2 的分類名稱為「科技」）
+PATCH {{baseUrl}}/categories/1
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "科技"
+}
+
+### 測試沒有 Token（應該回傳 401）
+PATCH {{baseUrl}}/categories/1
+Content-Type: application/json
+
+{
+  "name": "測試"
+}
+
+### 測試使用 User Token（應該回傳 403）
+@userToken = YOUR_USER_TOKEN_HERE
+
+PATCH {{baseUrl}}/categories/1
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "name": "測試"
+}
+

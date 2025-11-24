@@ -1,0 +1,128 @@
+#   /**
+#    * Category POST API：
+#    *
+#    * POST url/categories + body      => 新增分類（僅限 Admin）
+#    *   - name: 分類名稱（必填，最長 20 字元）
+#    *   - description: 分類描述（選填，最長 100 字元）
+#    *
+#    * 需要 Admin JWT Token
+#    */
+
+@baseUrl = http://localhost:3000
+
+# ===========================================
+# 請先登入 Admin 取得 Token，然後替換下方的 token
+# ===========================================
+@access_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlMzFmMDExMi01NjMwLTRkZGYtOGIzNS04NDQ4YWMxNmQ3YTIiLCJhY2NvdW50IjoiYWRtaW4tdGVzdC0xIiwidHlwZSI6ImFkbWluIiwiaWF0IjoxNzYzODQ2NzAyLCJleHAiOjE3NjM5MzMxMDJ9.D2ft_GMLkhEwbMHylkS_YazAGOS6N6Qgxkk8iVxS7rs
+
+### 新增分類 - 小說
+POST {{baseUrl}}/categories
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name": "小說",
+  "description": "各類小說書籍"
+}
+
+### 新增分類 - 科技
+POST {{baseUrl}}/categories
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name": "科技",
+  "description": "科技與程式設計相關書籍"
+}
+
+### 新增分類 - 文學
+POST {{baseUrl}}/categories
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name": "文學",
+  "description": "經典文學與散文"
+}
+
+### 新增分類 - 商業
+POST {{baseUrl}}/categories
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name": "商業",
+  "description": "商業管理與投資理財"
+}
+
+### 新增分類 - 只有名稱（無描述）
+POST {{baseUrl}}/categories
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name": "其他"
+}
+
+# ===========================================
+# 錯誤測試
+# ===========================================
+
+### 測試缺少 name
+POST {{baseUrl}}/categories
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "description": "這是描述"
+}
+
+### 測試 name 為空字串
+POST {{baseUrl}}/categories
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name": "",
+  "description": "這是描述"
+}
+
+### 測試 name 超過 20 字元
+POST {{baseUrl}}/categories
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name": "這是一個超過二十個字元的分類名稱測試"
+}
+
+### 測試重複的分類名稱（需先建立「小說」分類）
+POST {{baseUrl}}/categories
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name": "小說",
+  "description": "重複的分類"
+}
+
+### 測試沒有 Token（應該回傳 401）
+POST {{baseUrl}}/categories
+Content-Type: application/json
+
+{
+  "name": "測試分類"
+}
+
+### 測試使用 User Token（應該回傳 403）
+# 請替換為 User 的 Token
+@userToken = YOUR_USER_TOKEN_HERE
+
+POST {{baseUrl}}/categories
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "name": "測試分類"
+}
+

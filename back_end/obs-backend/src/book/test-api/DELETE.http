@@ -1,0 +1,119 @@
+#  /**
+#    * DELETE API 測試檔案
+#    *
+#    * API 功能：
+#    *
+#    * DELETE /books/:id   => 刪除書籍（需要 JWT 認證）
+#    *
+#    * 說明：
+#    * - 刪除書籍會同時刪除關聯的圖片（因為 onDelete: CASCADE）
+#    * - 需要 JWT 認證：只有書籍的擁有者（merchantId 相同）才能刪除
+#    * - 如果嘗試刪除不屬於自己的書籍，會回傳 "Access denied: You can only delete your own books"
+#    * - 刪除成功後回傳 HTTP 200 OK
+#    * - 刪除不存在的書籍會回傳 404 Not Found
+#    */
+
+# ----------
+#  使用流程：
+#  0. 先登入取得 JWT token（使用 POST /member/login），將 access_token 貼到下面的 @accessToken 變數
+#  1. 先使用 POST /books 建立書籍，取得書籍 ID
+#  2. 將書籍 ID 填入下面的 @bookId 變數
+#  3. 執行 DELETE 請求刪除書籍（需要帶 Authorization header）
+#  4. 刪除後可使用 GET /books/:id 確認書籍已被刪除（會回傳 404）
+#  5. 測試權限：使用另一個商家的 token 嘗試刪除的話，會被拒絕
+# ----------
+@baseUrl = http://localhost:3000
+# 請將此 ID 替換為實際的書籍 ID（從建立書籍的回應中取得）
+@bookId = 75b50a22-7e92-430e-9d47-db43414d3298
+# 商家 1 的 JWT token（請先執行登入 API 取得 access_token）
+@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NTg1NzQyYy1jYmFlLTQzN2YtYmZiMi0wMGU1MWIzNmI2OGUiLCJhY2NvdW50IjoibWVyY2hhbnQtdGVzdC0xIiwidHlwZSI6Im1lcmNoYW50IiwiaWF0IjoxNzYzNDY4NDg0LCJleHAiOjE3NjM1NTQ4ODR9.im52tPcEfl4_Hkqgk2fya9WkPXUD1n6IM5-zODKZLkM
+# 商家 2 的 JWT token（用於測試權限拒絕，請使用另一個商家帳號登入取得）
+@accessToken2 = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiOGJjNWZmYy1kODBiLTRmMjktYThkZS00OWZhNWFlNDQwMjYiLCJhY2NvdW50IjoibWVyY2hhbnQtdGVzdC0yIiwidHlwZSI6Im1lcmNoYW50IiwiaWF0IjoxNzYzNDcwMTI2LCJleHAiOjE3NjM1NTY1MjZ9.qPlPylkP2xK62iCIiLTyFF2ofCvupvKDJlnnENCygPA
+
+# ========================================
+# 1. 刪除書籍（正常流程）
+# ========================================
+
+### 刪除書籍（使用擁有者的 token）
+DELETE {{baseUrl}}/books/{{bookId}}
+Authorization: Bearer {{accessToken}}
+
+# ========================================
+# 2. 測試 JWT 認證
+# ========================================
+
+### 測試失敗：沒有提供 JWT token（應該回傳 401 Unauthorized）
+DELETE {{baseUrl}}/books/{{bookId}}
+
+### 測試失敗：使用無效的 JWT token（應該回傳 401 Unauthorized）
+DELETE {{baseUrl}}/books/{{bookId}}
+Authorization: Bearer invalid-token-here
+
+# ========================================
+# 3. 測試權限驗證
+# ========================================
+
+### 測試失敗：使用另一個商家的 token 刪除不屬於自己的書籍（應該回傳 400 Bad Request: Access denied）
+# 說明：先用商家 1 的帳號建立書籍，然後用商家 2 的 token 嘗試刪除
+# 預期錯誤訊息：「Access denied: You can only delete your own books」
+DELETE {{baseUrl}}/books/{{bookId}}
+Authorization: Bearer {{accessToken2}}
+
+# ========================================
+# 4. 測試錯誤處理
+# ========================================
+
+### 測試失敗：刪除不存在的書籍（應該回傳 404 Not Found）
+DELETE {{baseUrl}}/books/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{accessToken}}
+
+### 測試失敗：使用無效的書籍 ID 格式（應該回傳錯誤）
+DELETE {{baseUrl}}/books/invalid-id-format
+Authorization: Bearer {{accessToken}}
+
+# ========================================
+# 5. 驗證刪除結果
+# ========================================
+
+### 確認書籍已被刪除（應該回傳 404 Not Found）
+# 說明：在成功刪除書籍後，嘗試查詢該書籍應該會回傳 404
+GET {{baseUrl}}/books/{{bookId}}
+
+# ========================================
+# 6. 實際使用範例
+# ========================================
+
+### 範例：刪除過期或下架的書籍
+# 說明：商家可能想要永久移除某些不再銷售的書籍
+# 步驟：
+# 1. 先建立一本測試書籍
+# 2. 將書籍 ID 填入 @bookId
+# 3. 執行 DELETE 請求
+# 4. 使用 GET 確認書籍已被刪除
+
+### 範例：批次刪除前的測試
+# 說明：在實作批次刪除功能前，先測試單一刪除的權限控制
+# 注意：確保只有書籍擁有者才能刪除，避免誤刪他人的書籍
+DELETE {{baseUrl}}/books/{{bookId}}
+Authorization: Bearer {{accessToken}}
+
+# ========================================
+# 7. 測試級聯刪除（Cascade Delete）
+# ========================================
+
+### 測試：刪除有圖片的書籍（圖片應該一併被刪除）
+# 說明：
+# 1. 先建立一本書籍並上傳圖片
+# 2. 刪除書籍
+# 3. 嘗試查詢書籍的圖片，應該也找不到（因為 onDelete: CASCADE）
+DELETE {{baseUrl}}/books/{{bookId}}
+Authorization: Bearer {{accessToken}}
+
+# ========================================
+# 注意事項
+# ========================================
+# 1. 刪除操作無法復原，請謹慎使用
+# 2. 刪除書籍會同時刪除所有關聯的圖片
+# 3. 建議在刪除前先備份重要資料
+# 4. 如果書籍有相關訂單，可能需要軟刪除（soft delete）而非硬刪除
+# 5. 實際應用中，可能需要改為軟刪除（設置 deletedAt 欄位）以保留歷史記錄
