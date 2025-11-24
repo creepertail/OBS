@@ -12,7 +12,7 @@ export class Manage {
   couponID: string;
 
   @ManyToOne(() => Member, { onDelete: 'CASCADE' })
-  @JoinColumn({ referencedColumnName: 'member_id' })
+  @JoinColumn({ referencedColumnName: 'memberID' })
   admin: Member;
 
   @ManyToOne(() => Coupon, (coupon) => coupon.managedBy, { onDelete: 'CASCADE' })

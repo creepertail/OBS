@@ -25,7 +25,7 @@ export class Coupon {
   memberID: string;
 
   @ManyToOne(() => Member, { onDelete: 'CASCADE' })
-  @JoinColumn({ referencedColumnName: 'member_id' })
+  @JoinColumn({ referencedColumnName: 'memberID' })
   owner: Member;
 
   @OneToMany(() => Manage, (management) => management.coupon)
