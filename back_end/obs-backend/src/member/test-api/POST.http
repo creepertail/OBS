@@ -3,7 +3,7 @@
 #    *
 #    * POST url/members + body     => 新增member資料，並回傳member
 #    *   - email account password phoneNumber type              => member皆有，type = "admin" or "user" or "merchant"
-#    *   - username level                                       => type = "user" 會有的
+#    *   - userName level                                       => type = "user" 會有的
 #    *   - merchantName merchantAddress => type = "merchant" 會有的    => type = "merchant" 會有的
 #    * 
 #    * POST url/members/login + body   => 登入member，回傳JWT access token和會員資料
@@ -40,7 +40,20 @@ Content-Type: application/json
   "password": "0000",
   "phoneNumber": "0911222333",
   "type": "user",
-  "username": "User1"
+  "userName": "User1"
+}
+
+### 測試建立新第二個user
+POST http://localhost:3000/members
+Content-Type: application/json
+
+{
+  "email": "test-user2@example.com",
+  "account": "user-test-2",
+  "password": "0000",
+  "phoneNumber": "0966777888",
+  "type": "user",
+  "username": "User2"
 }
 
 ### 測試建立新merchant
@@ -80,13 +93,41 @@ Content-Type: application/json
   "account": "user-test-1",
   "password": "0000"
 }
-### Admin 登入 API 測試
 
+### User2 登入 API 測試
+POST http://localhost:3000/members/login
+Content-Type: application/json
+
+{
+  "account": "user-test-2",
+  "password": "0000"
+}
+
+
+### Admin 登入 API 測試
 POST http://localhost:3000/members/login
 Content-Type: application/json
 
 {
   "account": "admin-test-1",
+  "password": "0000"
+}
+
+### Merchant1 登入 API 測試
+POST http://localhost:3000/members/login
+Content-Type: application/json
+
+{
+  "account": "merchant-test-1",
+  "password": "0000"
+}
+
+### Merchant2 登入 API 測試
+POST http://localhost:3000/members/login
+Content-Type: application/json
+
+{
+  "account": "merchant-test-2",
   "password": "0000"
 }
 
@@ -106,4 +147,159 @@ Content-Type: application/json
 {
   "account": "nonexistuser",
   "password": "0000"
+}
+
+# ===========================================
+# 欄位驗證測試 - BadRequestException
+# ===========================================
+
+### 測試缺少 email
+POST http://localhost:3000/members
+Content-Type: application/json
+
+{
+  "account": "test-no-email",
+  "password": "0000",
+  "phoneNumber": "0912345678",
+  "type": "user",
+  "userName": "TestUser"
+}
+
+### 測試 email 為空字串
+POST http://localhost:3000/members
+Content-Type: application/json
+
+{
+  "email": "",
+  "account": "test-empty-email",
+  "password": "0000",
+  "phoneNumber": "0912345678",
+  "type": "user",
+  "userName": "TestUser"
+}
+
+### 測試缺少 account
+POST http://localhost:3000/members
+Content-Type: application/json
+
+{
+  "email": "test-no-account@example.com",
+  "password": "0000",
+  "phoneNumber": "0912345678",
+  "type": "user",
+  "userName": "TestUser"
+}
+
+### 測試缺少 password
+POST http://localhost:3000/members
+Content-Type: application/json
+
+{
+  "email": "test-no-password@example.com",
+  "account": "test-no-password",
+  "phoneNumber": "0912345678",
+  "type": "user",
+  "userName": "TestUser"
+}
+
+### 測試缺少 phoneNumber
+POST http://localhost:3000/members
+Content-Type: application/json
+
+{
+  "email": "test-no-phone@example.com",
+  "account": "test-no-phone",
+  "password": "0000",
+  "type": "user",
+  "userName": "TestUser"
+}
+
+### 測試缺少 type
+POST http://localhost:3000/members
+Content-Type: application/json
+
+{
+  "email": "test-no-type@example.com",
+  "account": "test-no-type",
+  "password": "0000",
+  "phoneNumber": "0912345678"
+}
+
+### 測試 User 類型缺少 userName
+POST http://localhost:3000/members
+Content-Type: application/json
+
+{
+  "email": "test-user-no-name@example.com",
+  "account": "test-user-no-name",
+  "password": "0000",
+  "phoneNumber": "0912345678",
+  "type": "user"
+}
+
+### 測試 User 類型 userName 為空字串
+POST http://localhost:3000/members
+Content-Type: application/json
+
+{
+  "email": "test-user-empty-name@example.com",
+  "account": "test-user-empty-name",
+  "password": "0000",
+  "phoneNumber": "0912345678",
+  "type": "user",
+  "userName": ""
+}
+
+### 測試 Merchant 類型缺少 merchantName
+POST http://localhost:3000/members
+Content-Type: application/json
+
+{
+  "email": "test-merchant-no-name@example.com",
+  "account": "test-merchant-no-name",
+  "password": "0000",
+  "phoneNumber": "0912345678",
+  "type": "merchant",
+  "merchantAddress": "Test Address"
+}
+
+### 測試 Merchant 類型缺少 merchantAddress
+POST http://localhost:3000/members
+Content-Type: application/json
+
+{
+  "email": "test-merchant-no-addr@example.com",
+  "account": "test-merchant-no-addr",
+  "password": "0000",
+  "phoneNumber": "0912345678",
+  "type": "merchant",
+  "merchantName": "TestMerchant"
+}
+
+### 測試 Merchant 類型 merchantName 為空字串
+POST http://localhost:3000/members
+Content-Type: application/json
+
+{
+  "email": "test-merchant-empty-name@example.com",
+  "account": "test-merchant-empty-name",
+  "password": "0000",
+  "phoneNumber": "0912345678",
+  "type": "merchant",
+  "merchantName": "",
+  "merchantAddress": "Test Address"
+}
+
+### 測試 Merchant 類型 merchantAddress 為空字串
+POST http://localhost:3000/members
+Content-Type: application/json
+
+{
+  "email": "test-merchant-empty-addr@example.com",
+  "account": "test-merchant-empty-addr",
+  "password": "0000",
+  "phoneNumber": "0912345678",
+  "type": "merchant",
+  "merchantName": "TestMerchant",
+  "merchantAddress": ""
 }

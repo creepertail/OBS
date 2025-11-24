@@ -1,0 +1,36 @@
+#   /**
+#    * Category DELETE API：
+#    *
+#    * DELETE url/categories/:id       => 刪除分類（僅限 Admin）
+#    *
+#    * 需要 Admin JWT Token
+#    */
+
+@baseUrl = http://localhost:3000
+
+# ===========================================
+# 請先登入 Admin 取得 Token，然後替換下方的 token
+# ===========================================
+@adminToken = YOUR_ADMIN_TOKEN_HERE
+
+### 刪除分類（請替換為實際的 category ID）
+DELETE {{baseUrl}}/categories/1
+Authorization: Bearer {{adminToken}}
+
+# ===========================================
+# 錯誤測試
+# ===========================================
+
+### 測試刪除不存在的分類
+DELETE {{baseUrl}}/categories/99999
+Authorization: Bearer {{adminToken}}
+
+### 測試沒有 Token（應該回傳 401）
+DELETE {{baseUrl}}/categories/1
+
+### 測試使用 User Token（應該回傳 403）
+@userToken = YOUR_USER_TOKEN_HERE
+
+DELETE {{baseUrl}}/categories/1
+Authorization: Bearer {{userToken}}
+
