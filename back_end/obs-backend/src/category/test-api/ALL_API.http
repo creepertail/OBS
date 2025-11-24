@@ -1,0 +1,24 @@
+# // @url = http://localhost:3000
+#   /**
+#    * Category API 功能：
+#    *
+#    * GET url/categories              => 取得所有分類
+#    * GET url/categories/:id          => 用 id 取得單一分類
+#    * GET url/categories/search?name=xxx => 根據名稱搜尋分類（模糊搜尋）
+#    * GET url/categories/statistics   => 取得分類統計資訊（用於類別分析）
+#    *
+#    * POST url/categories + body      => 新增分類（僅限 Admin）
+#    *   - name: 分類名稱（必填，最長 20 字元）
+#    *   - description: 分類描述（選填，最長 100 字元）
+#    *
+#    * PATCH url/categories/:id + body => 更新分類（僅限 Admin）
+#    *   - name: 分類名稱（選填）
+#    *   - description: 分類描述（選填）
+#    *
+#    * DELETE url/categories/:id       => 刪除分類（僅限 Admin）
+#    *
+#    * 權限說明：
+#    *   - GET 操作：公開，不需要認證
+#    *   - POST/PATCH/DELETE 操作：需要 Admin 權限，請在 Header 加上 Authorization: Bearer <admin_token>
+#    */
+
