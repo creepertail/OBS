@@ -1,0 +1,63 @@
+#   /**
+#    * BelongsTo DELETE API：
+#    *
+#    * DELETE url/belongs-to?bookID=xxx&categoryId=1 => 將書籍從分類移除
+#    *
+#    * 需要登入，且必須是該書籍的商家（merchant）或 Admin
+#    */
+
+@baseUrl = http://localhost:3000
+
+# ===========================================
+# 請先登入取得 Token，然後替換下方的 token
+# Merchant 可以操作自己的書籍，Admin 可以操作所有書籍
+# ===========================================
+@merchantToken = YOUR_MERCHANT_TOKEN_HERE
+@adminToken = YOUR_ADMIN_TOKEN_HERE
+@bookId = YOUR_BOOK_UUID_HERE
+
+### 將書籍從分類移除（使用 Merchant Token）
+DELETE {{baseUrl}}/belongs-to?bookID={{bookId}}&categoryId=1
+Authorization: Bearer {{merchantToken}}
+
+### 將書籍從分類移除（使用 Admin Token）
+DELETE {{baseUrl}}/belongs-to?bookID={{bookId}}&categoryId=2
+Authorization: Bearer {{adminToken}}
+
+# ===========================================
+# 錯誤測試
+# ===========================================
+
+### 測試移除不存在的關聯（應該回傳 404）
+DELETE {{baseUrl}}/belongs-to?bookID={{bookId}}&categoryId=99999
+Authorization: Bearer {{merchantToken}}
+
+### 測試書籍不存在
+DELETE {{baseUrl}}/belongs-to?bookID=00000000-0000-0000-0000-000000000000&categoryId=1
+Authorization: Bearer {{merchantToken}}
+
+### 測試沒有 Token（應該回傳 401）
+DELETE {{baseUrl}}/belongs-to?bookID={{bookId}}&categoryId=1
+
+### 測試操作別人的書籍（應該回傳 403）
+@otherMerchantToken = OTHER_MERCHANT_TOKEN_HERE
+
+DELETE {{baseUrl}}/belongs-to?bookID={{bookId}}&categoryId=1
+Authorization: Bearer {{otherMerchantToken}}
+
+### 測試缺少 bookID 參數
+DELETE {{baseUrl}}/belongs-to?categoryId=1
+Authorization: Bearer {{merchantToken}}
+
+### 測試缺少 categoryId 參數
+DELETE {{baseUrl}}/belongs-to?bookID={{bookId}}
+Authorization: Bearer {{merchantToken}}
+
+### 測試無效的 bookID 格式
+DELETE {{baseUrl}}/belongs-to?bookID=invalid-uuid&categoryId=1
+Authorization: Bearer {{merchantToken}}
+
+### 測試無效的 categoryId 格式
+DELETE {{baseUrl}}/belongs-to?bookID={{bookId}}&categoryId=abc
+Authorization: Bearer {{merchantToken}}
+

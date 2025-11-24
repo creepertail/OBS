@@ -1,0 +1,23 @@
+# // @url = http://localhost:3000
+#   /**
+#    * API 功能：
+#    *
+#    * GET url/subscriptions                         => 取得所有訂閱關係
+#    * GET url/subscriptions/user/:userID            => 取得某 User 的所有訂閱
+#    * GET url/subscriptions/merchant/:merchantID    => 取得某 Merchant 的所有訂閱者
+#    * GET url/subscriptions/:userID/:merchantID     => 取得特定訂閱關係
+#    *
+#    * POST url/subscriptions + body                 => 建立訂閱 (需要 JWT 認證，只能為自己訂閱)
+#    *   - body: { userID, merchantID, notificationEnabled? }
+#    *   - notificationEnabled: true 或 false (預設 false，是否開啟通知)
+#    *
+#    * PATCH url/subscriptions/:userID/:merchantID + body => 更新通知設定 (需要 JWT 認證，只能更新自己的訂閱)
+#    *   - body: { notificationEnabled }
+#    *
+#    * DELETE url/subscriptions/:userID/:merchantID  => 刪除訂閱 (需要 JWT 認證，只能刪除自己的訂閱)
+#    *
+#    * 權限說明：
+#    *   - User: 只能為自己訂閱/更新/刪除
+#    *   - Admin: 可以為任何人訂閱/更新/刪除
+#    */
+
