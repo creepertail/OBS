@@ -12,7 +12,7 @@ export class Control {
   orderId: string;
 
   @ManyToOne(() => Member, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'merchantId', referencedColumnName: 'member_id' })
+  @JoinColumn({ name: 'merchantId', referencedColumnName: 'memberID' })
   merchant: Member;
 
   @ManyToOne(() => Order, (order) => order.controls, { onDelete: 'CASCADE' })

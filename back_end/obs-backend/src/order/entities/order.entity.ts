@@ -32,14 +32,14 @@ export class Order {
   userId: string;
 
   @ManyToOne(() => Member, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'userId', referencedColumnName: 'member_id' })
+  @JoinColumn({ name: 'userId', referencedColumnName: 'memberID' })
   user: Member;
 
   @Column({ type: 'char', length: 36, nullable: false })
   merchantId: string;
 
   @ManyToOne(() => Member, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'merchantId', referencedColumnName: 'member_id' })
+  @JoinColumn({ name: 'merchantId', referencedColumnName: 'memberID' })
   merchant: Member;
 
   @Column({ type: 'char', length: 36, nullable: true })
