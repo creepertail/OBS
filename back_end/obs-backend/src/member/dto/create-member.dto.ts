@@ -28,7 +28,7 @@ export class CreateMemberDto {
   @IsString()
   @IsOptional()
   @MaxLength(20)
-  username?: string;
+  userName?: string;
 
   @IsInt()
   @IsOptional()

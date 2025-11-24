@@ -20,7 +20,7 @@ export class MemberController {
    * GET url/members/:id/type   => 用id找member的type
    * POST url/members + body     => 新增member資料，並回傳member
    *   - email account password phoneNumber type              => member皆有，type = "admin" or "user" or "merchant"
-   *   - username level                                       => type = "user" 會有的
+   *   - userName level                                       => type = "user" 會有的
    *   - merchantsName address => type = "merchant" 會有的    => type = "merchant" 會有的
    * 
    * POST url/members/login + body   => 登入member，回傳JWT access token和會員資料
@@ -32,7 +32,7 @@ export class MemberController {
    *  - body :
    *   - "membertype" is necessary
    *   - email account password phoneNumber
-   *   - username level userState (when membertype is user)
+   *   - userName level userState (when membertype is user)
    *   - merchantsName merchantsState address subscriberCount(when membertype is merchant)
    *
    * DELETE url/members/:id     => 刪掉某id member

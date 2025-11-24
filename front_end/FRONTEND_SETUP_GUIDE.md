@@ -33,23 +33,8 @@
 
 ### Step 1: 使用 Vite 建立 Vue 3 專案
 
-```bash
-# 使用 npm 建立專案
-npm create vue@latest
-
-# 互動式問答選擇：
-# ✔ Project name: obs-frontend
-# ✔ Add TypeScript? Yes
-# ✔ Add JSX Support? No
-# ✔ Add Vue Router for Single Page Application development? Yes
-# ✔ Add Pinia for state management? Yes
-# ✔ Add Vitest for Unit Testing? No (可選)
-# ✔ Add an End-to-End Testing Solution? No (可選)
-# ✔ Add ESLint for code quality? Yes
-# ✔ Add Prettier for code formatting? Yes
-
 # 進入專案目錄
-cd obs-frontend
+cd /front_end/obs-frontend
 ```
 
 ### Step 2: 安裝必要套件
@@ -61,25 +46,21 @@ npm install
 # 安裝 HTTP 請求套件
 npm install axios
 
-# 安裝 UI 框架 (選擇其中一個)
-# 方案 1: Element Plus (推薦，功能完整)
+# 安裝 UI 框架
+# Element Plus
 npm install element-plus @element-plus/icons-vue
-
-# 方案 2: Naive UI (輕量級)
-npm install naive-ui
-
-# 方案 3: 使用 Tailwind CSS (自訂性高)
-npm install -D tailwindcss postcss autoprefixer
-npx tailwindcss init -p
 
 # 安裝日期處理套件
 npm install dayjs
 
 # 安裝表單驗證
 npm install vee-validate yup
+
+# 安裝icon
+npm install @heroicons/vue
 ```
 
-### Step 3: 設定環境變數
+### Step 3: 設定環境變數(已經有了，可以跳過)
 
 建立 `.env.development` 檔案（開發環境）：
 ```env
