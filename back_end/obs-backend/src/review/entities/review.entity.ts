@@ -20,7 +20,7 @@ export class Review {
   description: string;
 
   @ManyToOne(() => Member, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'UserID', referencedColumnName: 'member_id' })
+  @JoinColumn({ name: 'UserID', referencedColumnName: 'memberID' })
   user: Member;
 
   // @ManyToOne(() => Book, { onDelete: 'CASCADE' })
