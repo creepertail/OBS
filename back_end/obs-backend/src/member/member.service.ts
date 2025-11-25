@@ -176,7 +176,7 @@ export class MemberService {
     await this.memberRepository.delete({ memberID: id });
   }
 
-  async login(loginMemberDto: LoginMemberDto): Promise<{ access_token: string; member: Omit<Member, 'password'> }> {
+  async login(loginMemberDto: LoginMemberDto): Promise<{ access_token: string }> {
     const { account, password } = loginMemberDto;
 
     // 使用 account 找到會員
@@ -202,12 +202,10 @@ export class MemberService {
 
     const access_token = await this.jwtService.signAsync(payload);
 
-    // 回傳 token 和會員資料（不包含密碼）
-    const { password: _, ...memberWithoutPassword } = member;
+    // 回傳 token 
 
     return {
-      access_token,
-      member: memberWithoutPassword,
+      access_token
     };
   }
 
