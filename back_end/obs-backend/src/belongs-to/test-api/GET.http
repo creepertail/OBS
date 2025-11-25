@@ -1,0 +1,33 @@
+#   /**
+#    * BelongsTo GET API：
+#    *
+#    * GET url/belongs-to                        => 取得所有書籍分類關聯
+#    * GET url/belongs-to/book/:bookId           => 查詢某本書的所有分類
+#    * GET url/belongs-to/category/:categoryId   => 查詢某分類下的所有書籍
+#    */
+
+@baseUrl = http://localhost:3000
+
+### 取得所有書籍分類關聯
+GET {{baseUrl}}/belongs-to
+
+### 查詢某本書的所有分類（請替換為實際的 book UUID）
+@bookId = a05bf19c-fb8f-4819-b507-207e62410f31
+
+GET {{baseUrl}}/belongs-to/book/{{bookId}}
+
+### 查詢某分類下的所有書籍（請替換為實際的 category ID）
+GET {{baseUrl}}/belongs-to/category/1
+
+### 測試查詢不存在的書籍
+GET {{baseUrl}}/belongs-to/book/00000000-0000-0000-0000-000000000000
+
+### 測試查詢不存在的分類
+GET {{baseUrl}}/belongs-to/category/99999
+
+### 測試無效的 book UUID 格式
+GET {{baseUrl}}/belongs-to/book/invalid-uuid
+
+### 測試無效的 category ID 格式
+GET {{baseUrl}}/belongs-to/category/abc
+

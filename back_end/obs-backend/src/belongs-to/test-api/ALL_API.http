@@ -1,0 +1,23 @@
+# // @url = http://localhost:3000
+#   /**
+#    * BelongsTo API 功能（書籍-分類關聯）：
+#    *
+#    * GET url/belongs-to                        => 取得所有書籍分類關聯
+#    * GET url/belongs-to/book/:bookId           => 查詢某本書的所有分類
+#    * GET url/belongs-to/category/:categoryId   => 查詢某分類下的所有書籍
+#    *
+#    * POST url/belongs-to + body                => 將書籍加入分類（需認證，僅書籍擁有者或 Admin）
+#    *   - bookID: 書籍 UUID（必填）
+#    *   - categoryId: 分類 ID（必填，整數）
+#    *
+#    * POST url/belongs-to/batch + body          => 批次將書籍加入多個分類（需認證，僅書籍擁有者或 Admin）
+#    *   - bookID: 書籍 UUID（必填）
+#    *   - categoryIds: 分類 ID 陣列（必填）
+#    *
+#    * DELETE url/belongs-to?bookID=xxx&categoryId=1 => 將書籍從分類移除（需認證，僅書籍擁有者或 Admin）
+#    *
+#    * 權限說明：
+#    *   - GET 操作：公開，不需要認證
+#    *   - POST/DELETE 操作：需要登入，且必須是該書籍的商家（merchant）或 Admin
+#    */
+

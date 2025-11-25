@@ -1,6 +1,8 @@
 import { defineStore } from "pinia";
-interface User {
-  id: string;
+
+export interface Member {
+  accessToken: string;
+  memberID: string;
   email: string;
   account: string;
   phoneNumber: string;
@@ -9,7 +11,8 @@ interface User {
   userLevel: Int16Array;
   userState: Int16Array;
   merchantName: string;
-  merchanState: Int16Array;
+  merchantState: Int16Array;
+  merchantAddress: string;
   merchantSubscriberCount: Int16Array;
   createdAt: string;
   updatedAt: string;
@@ -18,10 +21,10 @@ interface User {
 export const useAuthStore = defineStore("auth", {
   state: () => ({
     isLogin: false,
-    user: null as User | null
+    user: null as Member | null
   }),
   actions: {
-    login(userData: User) {
+    login(userData: Member) {
       this.isLogin = true;
       this.user = userData;
     },
