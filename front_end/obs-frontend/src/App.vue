@@ -2,12 +2,10 @@
 import { RouterLink, RouterView, useRoute  } from 'vue-router'
 import { computed } from 'vue'
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/solid'
-import { useAuthStore } from "./stores/auth";
 
 const route = useRoute()
 const hideLayout = computed(() => route.meta.hideLayout)
-const auth = useAuthStore();
-const isLogin = computed(() => auth.isLogin);
+const isLogin = computed(() => localStorage.getItem("isLogin") === "true");
 </script>
 
 <template>
