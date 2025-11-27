@@ -12,13 +12,15 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   image: { type: String, required: true },
   title: { type: String, required: true },
   author: { type: String, required: true },
   publisher: { type: String, required: true },
   price: { type: Number, required: true }
 });
+
+console.log("image =", props.image);
 </script>
 
 <style scoped>
@@ -42,7 +44,7 @@ defineProps({
 .book-image {
   width: 100%;
   height: 200px;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 4px;
 }
 

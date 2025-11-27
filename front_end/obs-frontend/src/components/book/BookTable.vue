@@ -2,7 +2,7 @@
   <div class="book-table">
     <BookCard
       v-for="book in books"
-      :key="book.id"
+      :key="book.bookID"
       v-bind="book"
     />
   </div>

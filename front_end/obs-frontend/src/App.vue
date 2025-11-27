@@ -22,9 +22,7 @@ const isLogin = computed(() => localStorage.getItem("isLogin") === "true");
     </div>
   </header>
 
-  <div class="test111">
-    <RouterView />
-  </div>
+  <RouterView />
 </template>
 
 <style scoped>
