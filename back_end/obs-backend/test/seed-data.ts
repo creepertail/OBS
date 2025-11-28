@@ -2,6 +2,8 @@
 import { DataSource } from 'typeorm';
 import { config } from 'dotenv';
 import * as bcrypt from 'bcrypt';
+import * as fs from 'fs';
+import * as path from 'path';
 import { Member } from '../src/member/entities/member.entity';
 import { MemberType } from '../src/member/member-type.enum';
 import { Category } from '../src/category/entities/categories.entity';
@@ -26,10 +28,47 @@ const AppDataSource = new DataSource({
 });
 
 async function seedData() {
+  // 輔助函數：複製圖片到 uploads 資料夾並回傳 URL
+  const copyImageToUploads = (sourceRelativePath: string): string => {
+    const sourcePath = path.join(__dirname, sourceRelativePath);
+    const uploadsDir = path.join(__dirname, '../uploads/books');
+
+    // 確保 uploads/books 資料夾存在
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+
+    // 檢查來源檔案是否存在
+    if (!fs.existsSync(sourcePath)) {
+      console.warn(`⚠️  警告：圖片檔案不存在：${sourcePath}`);
+      return '';
+    }
+
+    // 產生唯一檔名（與上傳 API 格式一致）
+    const ext = path.extname(sourcePath);
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const filename = `book-${uniqueSuffix}${ext}`;
+    const destPath = path.join(uploadsDir, filename);
+
+    // 複製檔案
+    try {
+      fs.copyFileSync(sourcePath, destPath);
+      console.log(`✅ 已複製圖片：${sourceRelativePath} -> ${filename}`);
+    } catch (error) {
+      console.error(`❌ 複製圖片失敗：${sourceRelativePath}`, error);
+      return '';
+    }
+
+    // 回傳相對 URL（與上傳 API 格式一致）
+    return `/uploads/books/${filename}`;
+  };
+
   try {
     console.log('🚀 開始連接資料庫...');
     await AppDataSource.initialize();
     console.log('✅ 資料庫連接成功！');
+
+    console.log('\n📸 準備複製本地圖片到 uploads/books 資料夾...');
 
     // 清空現有數據（可選）
     console.log('\n🗑️  清空現有測試數據...');
@@ -167,6 +206,10 @@ async function seedData() {
         name: '旅遊',
         description: '旅遊指南、遊記',
       },
+      {
+        name: '其他',
+        description: '其他',
+      },
     ]);
 
     console.log(`✅ 創建了 ${categories.length} 個分類`);
@@ -177,29 +220,56 @@ async function seedData() {
     const bookImageRepo = AppDataSource.getRepository(BookImage);
     const belongsToRepo = AppDataSource.getRepository(BelongsTo);
 
-    // 程式設計類書籍
+    // 第一本 - 程式設計類
     const book1 = await bookRepo.save({
-      ISBN: '9789571234567',
-      name: 'Node.js 實戰開發',
-      productDescription: '深入淺出學習 Node.js 後端開發，從零開始打造企業級應用。本書涵蓋 Express、資料庫整合、RESTful API 設計等核心主題。',
-      price: 450,
+      ISBN: '9786263294622',
+      name: '電腦&程式設計知識圖鑑: 0基礎也好懂! 科技素養與邏輯力躍進的第一步!',
+      productDescription: 'AI時代不可不知的知識\n' +
+        'AI是什麼？究竟什麼是程式設計？' +
+        '程式語言有何區別？' +
+        '最輕鬆、易懂的電腦＆程式設計圖鑑！',
+      price: 360,
       inventoryQuantity: 100,
       status: 1,
-      author: '張三',
-      publisher: '碁峰資訊',
+      author: '石戶奈奈子/ 監修',
+      publisher: '台灣東販股份有限公司',
       merchantId: merchant1.memberID,
     });
 
     await bookImageRepo.save([
       {
-        imageUrl: 'https://via.placeholder.com/300x400/4A90E2/ffffff?text=Node.js',
+        imageUrl: copyImageToUploads('BookImage-Demo/1/1.jpg'),
         displayOrder: 0,
         isCover: true,
         book: book1,
       },
       {
-        imageUrl: 'https://via.placeholder.com/300x400/4A90E2/ffffff?text=Back',
+        imageUrl: copyImageToUploads('BookImage-Demo/1/2.jpg'),
         displayOrder: 1,
+        isCover: false,
+        book: book1,
+      },
+      {
+        imageUrl: copyImageToUploads('BookImage-Demo/1/3.jpg'),
+        displayOrder: 2,
+        isCover: false,
+        book: book1,
+      },
+      {
+        imageUrl: copyImageToUploads('BookImage-Demo/1/4.jpg'),
+        displayOrder: 3,
+        isCover: false,
+        book: book1,
+      },
+      {
+        imageUrl: copyImageToUploads('BookImage-Demo/1/5.jpg'),
+        displayOrder: 4,
+        isCover: false,
+        book: book1,
+      },
+      {
+        imageUrl: copyImageToUploads('BookImage-Demo/1/6.jpg'),
+        displayOrder: 5,
         isCover: false,
         book: book1,
       },
@@ -210,100 +280,121 @@ async function seedData() {
       categoryId: categories[0].categoryID,
     });
 
+    // 第二本 - 商業管理
     const book2 = await bookRepo.save({
-      ISBN: '9787115556789',
-      name: 'TypeScript 完全指南',
-      productDescription: 'TypeScript 從入門到精通，掌握現代前端開發技術。包含型別系統、裝飾器、泛型等進階主題。',
-      price: 520,
+      ISBN: '9786263439894',
+      name: '商業管理萃思 (TRIZ)理論與實務: 讓你發明新的服務',
+      productDescription: '商業管理萃思是一種從傳統技術萃思（TRIZ）理論轉化調整，使更適用於商業管理情境問題處理的系統化創新方法，可以說是系統化的商業管理創新方法，也可以說是一種讓你發明新服務的方法。系統化商業管理創新是將商業管理創新結構化，建立一系列的流程步驟以完成商業管理創新的任務。目前這種方法問世將近20年，是...',
+      price: 540,
       inventoryQuantity: 75,
       status: 1,
-      author: '李四',
-      publisher: '電子工業出版社',
+      author: '林永禎',
+      publisher: '五南圖書出版股份有限公司',
       merchantId: merchant1.memberID,
     });
 
     await bookImageRepo.save([
       {
-        imageUrl: 'https://via.placeholder.com/300x400/50C878/ffffff?text=TypeScript',
+        imageUrl: copyImageToUploads('BookImage-Demo/2.jpg'),
         displayOrder: 0,
         isCover: true,
+        book: book2,
+      },
+      {
+        imageUrl: copyImageToUploads('BookImage-Demo/2/2.jpg'),
+        displayOrder: 1,
+        isCover: false,
+        book: book2,
+      },
+      {
+        imageUrl: copyImageToUploads('BookImage-Demo/2/3.jpg'),
+        displayOrder: 2,
+        isCover: false,
         book: book2,
       },
     ]);
 
     await belongsToRepo.save({
       bookID: book2.bookID,
-      categoryId: categories[0].categoryID,
-    });
-
-    const book3 = await bookRepo.save({
-      ISBN: '9789864344567',
-      name: 'React 全面解析',
-      productDescription: '全面掌握 React 18 最新特性，包含 Hooks、Context、Redux 狀態管理、效能優化等實戰技巧。',
-      price: 580,
-      inventoryQuantity: 60,
-      status: 1,
-      author: '王五',
-      publisher: '旗標出版',
-      merchantId: merchant2.memberID,
-    });
-
-    await bookImageRepo.save([
-      {
-        imageUrl: 'https://via.placeholder.com/300x400/61DAFB/000000?text=React',
-        displayOrder: 0,
-        isCover: true,
-        book: book3,
-      },
-    ]);
-
-    await belongsToRepo.save({
-      bookID: book3.bookID,
-      categoryId: categories[0].categoryID,
-    });
-
-    // 商業管理類書籍
-    const book4 = await bookRepo.save({
-      ISBN: '9789573285540',
-      name: '精實創業',
-      productDescription: '如何運用精實創業方法快速驗證商業模式，降低創業風險。創業者必讀經典。',
-      price: 380,
-      inventoryQuantity: 120,
-      status: 1,
-      author: 'Eric Ries',
-      publisher: '遠流出版',
-      merchantId: merchant2.memberID,
-    });
-
-    await bookImageRepo.save([
-      {
-        imageUrl: 'https://via.placeholder.com/300x400/FF6B6B/ffffff?text=Lean+Startup',
-        displayOrder: 0,
-        isCover: true,
-        book: book4,
-      },
-    ]);
-
-    await belongsToRepo.save({
-      bookID: book4.bookID,
       categoryId: categories[1].categoryID,
     });
 
+    // 第三本 - 文學小說
+    const book3 = await bookRepo.save({
+      ISBN: '9789864344567',
+      name: '臺灣原住民文學選集．小說 4冊套書 (4冊合售)',
+      productDescription: '睽違20年，新編．臺灣原住民文學選集\n' +
+        ' 原住民族委員會 × 山海文化雜誌30週年 × 聯經出版 50 週年',
+      price: 1300,
+      inventoryQuantity: 60,
+      status: 1,
+      author: '孫大川',
+      publisher: '聯經出版事業股份有限公司',
+      merchantId: merchant2.memberID,
+    });
+
+    for (let i = 0; i < 10; i++) {
+      await bookImageRepo.save({
+        imageUrl: copyImageToUploads(`BookImage-Demo/3/${i + 1}.jpg`),
+        displayOrder: i,
+        isCover: i === 0,
+        book: book3,
+      });
+    }
+
+    await belongsToRepo.save({
+      bookID: book3.bookID,
+      categoryId: categories[2].categoryID,
+    });
+
+    // 第四本 - 心理勵志
+    const book4 = await bookRepo.save({
+      ISBN: '9786267074220',
+      name: '一日一樹一故事: 每天用一棵樹讓自己沉浸在大自然裡',
+      productDescription: '本書是獻給所有大自然愛好者的最佳禮物！\n' +
+        '這是一本關於樹木與人的故事，也是一本樹的日曆\n' +
+        '一年有365天，四季有春夏秋冬的變化，從1月到12月',
+      price: 149,
+      inventoryQuantity: 120,
+      status: 1,
+      author: '艾米-珍．必爾',
+      publisher: '本事出版',
+      merchantId: merchant2.memberID,
+    });
+
+    for (let i = 0; i < 5; i++) {
+      await bookImageRepo.save({
+        imageUrl: copyImageToUploads(`BookImage-Demo/4/${i + 1}.jpg`),
+        displayOrder: i,
+        isCover: i === 0,
+        book: book4,
+      });
+    }
+
+    await belongsToRepo.save({
+      bookID: book4.bookID,
+      categoryId: categories[3].categoryID,
+    });
+
+    // 第五本 - 藝術設計
     const book5 = await bookRepo.save({
-      ISBN: '9789864777235',
-      name: '從 0 到 1：打開世界運作的未知秘密',
-      productDescription: 'PayPal 創辦人 Peter Thiel 分享創業心法，如何在競爭中創造獨特價值。',
-      price: 360,
+      ISBN: '9789571182612',
+      name: '藝術設計這回事',
+      productDescription: '史論結合、以論為主。\n' +
+        '按照藝術設計的歷史流變考察其理論形態。\n' +
+        '闡述藝術設計按其自身的邏輯發展的理論。\n' +
+        '視覺傳達設計、環境設計和產品設計重要的根基。',
+      price: 300,
       inventoryQuantity: 90,
       status: 1,
-      author: 'Peter Thiel',
-      publisher: '天下雜誌',
+      author: '凌繼堯',
+      publisher: '五南圖書出版股份有限公司',
       merchantId: merchant3.memberID,
     });
 
     await bookImageRepo.save([
       {
-        imageUrl: 'https://via.placeholder.com/300x400/FFA500/ffffff?text=Zero+to+One',
+        imageUrl: copyImageToUploads('BookImage-Demo/5/1.jpg'),
         displayOrder: 0,
         isCover: true,
         book: book5,
@@ -312,78 +403,84 @@ async function seedData() {
 
     await belongsToRepo.save({
       bookID: book5.bookID,
-      categoryId: categories[1].categoryID,
+      categoryId: categories[4].categoryID,
     });
 
-    // 文學小說類書籍
+    // 第六本 - 科學科普
     const book6 = await bookRepo.save({
-      ISBN: '9789573337584',
-      name: '人生自古誰不廢',
-      productDescription: '暢銷作家敏鎬的最新作品，用幽默筆觸描繪現代人的生活困境與自我探索。',
-      price: 320,
+      ISBN: '9789573537584',
+      name: '小小科學人每天10分鐘200個科普大發現: 科學、數碼 (2冊合售)',
+      productDescription: '100% 超酷知識 X 100% 幽默好玩 X 100% 難以忘記暢銷全球的小小科學人系列\n' +
+        '每本書囊括100個有趣知識主題，\n' +
+        '每天只要10分鐘',
+      price: 758,
       inventoryQuantity: 150,
       status: 1,
-      author: '金敏鎬',
-      publisher: '圓神出版',
-      merchantId: merchant1.memberID,
-    });
-
-    await bookImageRepo.save([
-      {
-        imageUrl: 'https://via.placeholder.com/300x400/9B59B6/ffffff?text=Novel',
-        displayOrder: 0,
-        isCover: true,
-        book: book6,
-      },
-    ]);
-
-    await belongsToRepo.save({
-      bookID: book6.bookID,
-      categoryId: categories[2].categoryID,
-    });
-
-    // 心理勵志類書籍
-    const book7 = await bookRepo.save({
-      ISBN: '9789869596336',
-      name: '原子習慣',
-      productDescription: '細微改變帶來巨大成就的實證法則。每天進步 1%，一年後你會進步 37 倍！',
-      price: 330,
-      inventoryQuantity: 200,
-      status: 1,
-      author: 'James Clear',
-      publisher: '方智出版',
+      author: '張容瑱(譯者)',
+      publisher: '小天下出版',
       merchantId: merchant2.memberID,
     });
 
-    await bookImageRepo.save([
-      {
-        imageUrl: 'https://via.placeholder.com/300x400/3498DB/ffffff?text=Atomic+Habits',
-        displayOrder: 0,
-        isCover: true,
+    for (let i = 0; i < 6; i++) {
+      await bookImageRepo.save({
+        imageUrl: copyImageToUploads(`BookImage-Demo/6/${i + 1}.jpg`),
+        displayOrder: i,
+        isCover: i === 0,
+        book: book6,
+      });
+    }
+
+    await belongsToRepo.save({
+      bookID: book6.bookID,
+      categoryId: categories[5].categoryID,
+    });
+
+    // 第七本 - 語言學習
+    const book7 = await bookRepo.save({
+      ISBN: '9789861755458',
+      name: '學外語就像學母語: 25語台灣郎的沉浸式語言習得',
+      productDescription: '這位土生土長的台灣郎，竟會說25種語言？！' +
+        '多語達人Terry親身試驗，歸納出人人都能學會外語的終極方法，' +
+        '比起上語言課、出國留學、定居國外，更經濟實惠、快速，保證100%有效！',
+      price: 330,
+      inventoryQuantity: 200,
+      status: 1,
+      author: 'Terry (謝智翔)',
+      publisher: '方智出版社股份有限公司',
+      merchantId: merchant2.memberID,
+    });
+
+    for (let i = 0; i < 6; i++) {
+      await bookImageRepo.save({
+        imageUrl: copyImageToUploads(`BookImage-Demo/7/${i + 1}.jpg`),
+        displayOrder: i,
+        isCover: i === 0,
         book: book7,
-      },
-    ]);
+      });
+    }
 
     await belongsToRepo.save({
       bookID: book7.bookID,
-      categoryId: categories[3].categoryID,
+      categoryId: categories[6].categoryID,
     });
 
+    // 第八本 - 旅遊
     const book8 = await bookRepo.save({
       ISBN: '9789863594475',
-      name: '刻意練習',
-      productDescription: '原創者全面解析，比天賦更關鍵的學習法。任何人都可以透過正確的練習方法成為專家。',
-      price: 360,
+      name: '環遊世界200國: 一本帶你走遍世界的旅遊書 (最新版)',
+      productDescription: '準備好開始一場令人難以置信、充滿刺激的旅程，跨越我們的地球。這本書會以洲為單位，帶你走遍世界上的每個國家。' +
+        '涵蓋了成千上萬從神奇的動物、壯麗的景點、有趣的節慶到美味的食物，本書是用來了解我們多樣與',
+      price: 380,
       inventoryQuantity: 110,
       status: 1,
-      author: 'Anders Ericsson',
-      publisher: '方智出版',
+      author: 'Malcolm Croft',
+      publisher: '五南圖書出版股份有限公司',
       merchantId: merchant3.memberID,
     });
 
     await bookImageRepo.save([
       {
-        imageUrl: 'https://via.placeholder.com/300x400/E74C3C/ffffff?text=Peak',
+        imageUrl: copyImageToUploads('BookImage-Demo/8/1.jpg'),
         displayOrder: 0,
         isCover: true,
         book: book8,
@@ -392,146 +489,39 @@ async function seedData() {
 
     await belongsToRepo.save({
       bookID: book8.bookID,
-      categoryId: categories[3].categoryID,
-    });
-
-    // 藝術設計類書籍
-    const book9 = await bookRepo.save({
-      ISBN: '9789571375823',
-      name: '設計的法則',
-      productDescription: '125 個影響認知、增加美感的關鍵法則。設計師與創意工作者必備參考書。',
-      price: 480,
-      inventoryQuantity: 65,
-      status: 1,
-      author: 'William Lidwell',
-      publisher: '時報出版',
-      merchantId: merchant1.memberID,
-    });
-
-    await bookImageRepo.save([
-      {
-        imageUrl: 'https://via.placeholder.com/300x400/F39C12/ffffff?text=Design',
-        displayOrder: 0,
-        isCover: true,
-        book: book9,
-      },
-    ]);
-
-    await belongsToRepo.save({
-      bookID: book9.bookID,
-      categoryId: categories[4].categoryID,
-    });
-
-    // 科學科普類書籍
-    const book10 = await bookRepo.save({
-      ISBN: '9789571368641',
-      name: '人類大歷史',
-      productDescription: '從野獸到扮演上帝。暢銷全球的人類簡史，重新思考人類文明的發展軌跡。',
-      price: 450,
-      inventoryQuantity: 130,
-      status: 1,
-      author: 'Yuval Noah Harari',
-      publisher: '天下文化',
-      merchantId: merchant2.memberID,
-    });
-
-    await bookImageRepo.save([
-      {
-        imageUrl: 'https://via.placeholder.com/300x400/16A085/ffffff?text=Sapiens',
-        displayOrder: 0,
-        isCover: true,
-        book: book10,
-      },
-    ]);
-
-    await belongsToRepo.save({
-      bookID: book10.bookID,
-      categoryId: categories[5].categoryID,
-    });
-
-    // 語言學習類書籍
-    const book11 = await bookRepo.save({
-      ISBN: '9789575324765',
-      name: '英文寫作聖經',
-      productDescription: '《The Elements of Style》中文版，英文寫作的必備經典，讓你的英文寫作更精準有力。',
-      price: 280,
-      inventoryQuantity: 95,
-      status: 1,
-      author: 'William Strunk Jr.',
-      publisher: '五南出版',
-      merchantId: merchant3.memberID,
-    });
-
-    await bookImageRepo.save([
-      {
-        imageUrl: 'https://via.placeholder.com/300x400/2ECC71/ffffff?text=English',
-        displayOrder: 0,
-        isCover: true,
-        book: book11,
-      },
-    ]);
-
-    await belongsToRepo.save({
-      bookID: book11.bookID,
-      categoryId: categories[6].categoryID,
-    });
-
-    // 旅遊類書籍
-    const book12 = await bookRepo.save({
-      ISBN: '9789864084067',
-      name: '日本深度旅遊',
-      productDescription: '超過 200 個日本私房景點，帶你深入探索日本文化與美食，規劃最完美的日本之旅。',
-      price: 420,
-      inventoryQuantity: 80,
-      status: 1,
-      author: '陳美娟',
-      publisher: '墨刻出版',
-      merchantId: merchant1.memberID,
-    });
-
-    await bookImageRepo.save([
-      {
-        imageUrl: 'https://via.placeholder.com/300x400/E67E22/ffffff?text=Travel+Japan',
-        displayOrder: 0,
-        isCover: true,
-        book: book12,
-      },
-    ]);
-
-    await belongsToRepo.save({
-      bookID: book12.bookID,
       categoryId: categories[7].categoryID,
     });
 
-    // 創建一本庫存較少的書（測試缺貨情況）
-    const book13 = await bookRepo.save({
-      ISBN: '9789862139585',
-      name: 'Python 深度學習',
-      productDescription: '使用 TensorFlow 和 Keras 構建深度學習模型，從基礎到實戰應用。',
-      price: 680,
-      inventoryQuantity: 5,
+    // 第九本 - 其他 運動
+    const book9 = await bookRepo.save({
+      ISBN: '9786263204133',
+      name: '運動中的物理學: 用物理角度解讀44項運動競技, 讓你紀錄再突破! 看賽事更有趣!',
+      productDescription: '兼具趣味與實用性的物理知識，讓你找到運動技能的訣竅',
+      price: 280,
+      inventoryQuantity: 65,
       status: 1,
-      author: 'François Chollet',
-      publisher: '博碩文化',
-      merchantId: merchant2.memberID,
+      author: '望月修',
+      publisher: '晨星出版有限公司',
+      merchantId: merchant1.memberID,
     });
 
-    await bookImageRepo.save([
-      {
-        imageUrl: 'https://via.placeholder.com/300x400/8E44AD/ffffff?text=Deep+Learning',
-        displayOrder: 0,
-        isCover: true,
-        book: book13,
-      },
-    ]);
+    for (let i = 0; i < 6; i++) {
+      await bookImageRepo.save({
+        imageUrl: copyImageToUploads(`BookImage-Demo/9/${i + 1}.jpg`),
+        displayOrder: i,
+        isCover: i === 0,
+        book: book9,
+      });
+    }
 
     await belongsToRepo.save({
-      bookID: book13.bookID,
-      categoryId: categories[0].categoryID,
+      bookID: book9.bookID,
+      categoryId: categories[8].categoryID,
     });
 
+
     // 創建一本已下架的書（測試下架狀態）
-    const book14 = await bookRepo.save({
+    const book10 = await bookRepo.save({
       ISBN: '9789571359564',
       name: 'JavaScript 基礎教程（舊版）',
       productDescription: '這是舊版的 JavaScript 教程，已被新版取代。',
@@ -543,22 +533,14 @@ async function seedData() {
       merchantId: merchant3.memberID,
     });
 
-    await bookImageRepo.save([
-      {
-        imageUrl: 'https://via.placeholder.com/300x400/95A5A6/ffffff?text=Old+Version',
-        displayOrder: 0,
-        isCover: true,
-        book: book14,
-      },
-    ]);
 
     await belongsToRepo.save({
-      bookID: book14.bookID,
-      categoryId: categories[0].categoryID,
+      bookID: book10.bookID,
+      categoryId: categories[8].categoryID,
     });
 
     // 創建一本多分類的書
-    const book15 = await bookRepo.save({
+    const book12 = await bookRepo.save({
       ISBN: '9789863207290',
       name: '設計師的 UI/UX 入門課',
       productDescription: '結合設計美學與程式實作，打造優秀的使用者介面與體驗。適合設計師與前端工程師。',
@@ -570,28 +552,19 @@ async function seedData() {
       merchantId: merchant1.memberID,
     });
 
-    await bookImageRepo.save([
-      {
-        imageUrl: 'https://via.placeholder.com/300x400/1ABC9C/ffffff?text=UI+UX',
-        displayOrder: 0,
-        isCover: true,
-        book: book15,
-      },
-    ]);
-
     // 這本書同時屬於程式設計和藝術設計分類
     await belongsToRepo.save([
       {
-        bookID: book15.bookID,
+        bookID: book12.bookID,
         categoryId: categories[0].categoryID,
       },
       {
-        bookID: book15.bookID,
+        bookID: book12.bookID,
         categoryId: categories[4].categoryID,
       },
     ]);
 
-    console.log('✅ 創建了 15 本書籍');
+    console.log('✅ 創建了 12 本書籍');
 
     // 顯示統計資訊
     console.log('\n📊 數據統計：');

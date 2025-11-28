@@ -6,3 +6,5 @@ SELECT *
 FROM obs.category;
 SELECT *
 FROM obs.belong_to;
+SELECT *
+FROM obs.book_images;
