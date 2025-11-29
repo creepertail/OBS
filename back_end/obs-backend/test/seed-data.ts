@@ -59,8 +59,8 @@ async function seedData() {
       return '';
     }
 
-    // 回傳相對 URL（與上傳 API 格式一致）
-    return `/uploads/books/${filename}`;
+    // 回傳完整 URL（與上傳 API 格式一致）
+    return `http://localhost:3000/uploads/books/${filename}`;
   };
 
   try {
