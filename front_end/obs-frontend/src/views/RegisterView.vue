@@ -62,12 +62,12 @@ async function handleRegister() {
 <template>
   <div class="register-page">
     <form class="register-form" @submit.prevent="handleRegister">
+      <UserRegister v-if="switchToUser" ref="userRef" />
+      <MerchantRegister v-if="!switchToUser" ref="merchantRef" />
+      <button type="submit" class="button">Register</button>
       <button type="button" @click="switchToUser = !switchToUser" class="button">
         切換至{{ switchToUser ? 'Merchant' : 'User' }}註冊
       </button>
-      <UserRegister v-if="switchToUser" ref="userRef" />
-      <MerchantRegister v-if="!switchToUser" ref="merchantRef" />
-      <button class="button">Register</button>
     </form>
   </div>
 </template>
@@ -79,6 +79,7 @@ async function handleRegister() {
   align-items: center;
   min-height: 100vh;
   font-family: "Inter", sans-serif;
+  padding-top: 120px;
 }
 
 .register-form {
@@ -102,6 +103,7 @@ async function handleRegister() {
   border: none;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.1s;
+  margin: 4px 0;
 }
 
 .button:hover {

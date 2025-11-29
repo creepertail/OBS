@@ -20,7 +20,11 @@ async function handleLogin() {
     accessToken.value =res.data.access_token; 
     localStorage.setItem("accessToken", accessToken.value);
     localStorage.setItem("isLogin", "true");
-    router.push({ name: 'home' });
+    // localStorage.setItem("memberId", );
+    localStorage.setItem("account", account.value);
+    router.push({ name: 'home' }).then(() => {
+      window.location.reload();
+    });
   } catch (err) {
     console.error("登入失敗：", err);
     error.value = err.response?.data?.message;
