@@ -10,7 +10,7 @@ import { JwtAuthGuard } from '../member/guards/jwt-auth.guard';
 
 @Controller('books')
 export class BooksController {
-  constructor(private readonly booksService: BooksService) {}
+  constructor(private readonly booksService: BooksService) { }
 
   /**
    * POST /books/upload-image - 上傳書籍圖片
@@ -45,7 +45,7 @@ export class BooksController {
     }
 
     // 回傳圖片 URL（相對路徑）
-    const imageUrl = `/uploads/books/${file.filename}`;
+    const imageUrl = `http://localhost:3000/uploads/books/${file.filename}`;
     return {
       url: imageUrl,
       filename: file.filename,

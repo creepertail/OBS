@@ -166,5 +166,87 @@ DELETE http://localhost:3000/books/images/{imageId}
 DELETE http://localhost:3000/books/{{bookId}}
 
 
+# ===============================================
+# 🌱 使用種子資料測試 (執行 npm run seed 後)
+# ===============================================
+
+# ------- 會員登入測試 -------
+
+### 測試商家登入 (merchant1)
+POST http://localhost:3000/member/login
+Content-Type: application/json
+
+{
+  "account": "merchant1",
+  "password": "merchant123"
+}
+
+### 測試用戶登入 (user1)
+POST http://localhost:3000/member/login
+Content-Type: application/json
+
+{
+  "account": "user1",
+  "password": "user123"
+}
+
+### 測試管理員登入 (admin)
+POST http://localhost:3000/member/login
+Content-Type: application/json
+
+{
+  "account": "admin",
+  "password": "admin123"
+}
+
+
+# ------- 分類相關測試 -------
+
+### 取得所有分類
+GET http://localhost:3000/category
+
+### 取得程式設計分類 (ID=1)
+GET http://localhost:3000/category/1
+
+### 取得程式設計分類下的所有書籍
+GET http://localhost:3000/category/1/books
+
+
+# ------- 書籍查詢測試 -------
+
+### 查詢 Node.js 相關書籍
+GET http://localhost:3000/books/isbn/9789571234567
+
+### 查詢 TypeScript 相關書籍
+GET http://localhost:3000/books/isbn/9787115556789
+
+### 查詢原子習慣
+GET http://localhost:3000/books/isbn/9789869596336
+
+### 查詢低庫存書籍 (Python 深度學習)
+GET http://localhost:3000/books/isbn/9789862139585
+
+
+# ------- 商家相關測試 -------
+
+### 取得博客來書店的所有書籍
+# 先從登入回應中取得 merchantId，或直接查詢 member 表
+GET http://localhost:3000/books?merchantId=<merchant1-uuid>
+
+
+# ------- 測試說明 -------
+#
+# 執行種子資料腳本後，你會得到：
+# - 7 個會員帳號 (3 商家 + 3 用戶 + 1 管理員)
+# - 8 個分類
+# - 15 本書籍 (含圖片、分類關聯)
+#
+# 測試帳號：
+# 商家：merchant1/2/3, 密碼：merchant123
+# 用戶：user1/2/3, 密碼：user123
+# 管理員：admin, 密碼：admin123
+#
+# 詳細資訊請參考：test/SEED_README.md
+#
 
 

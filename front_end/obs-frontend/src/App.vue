@@ -1,13 +1,39 @@
 <script setup lang="ts">
-import { RouterLink, RouterView, useRoute  } from 'vue-router'
+import { RouterLink, RouterView, useRoute, useRouter  } from 'vue-router'
 import { computed } from 'vue'
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/solid'
-import { useAuthStore } from "./stores/auth";
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 
+const router = useRouter();
 const route = useRoute()
 const hideLayout = computed(() => route.meta.hideLayout)
-const auth = useAuthStore();
-const isLogin = computed(() => auth.isLogin);
+const isLogin = computed(() => localStorage.getItem("isLogin") === "true");
+const account = computed(() => localStorage.getItem("account"));
+const isOpen = ref(false);
+const profileButton = ref<HTMLElement | null>(null);
+
+function logout() {
+  localStorage.clear();
+  router.push({ name: 'home' }).then(() => {
+    window.location.reload();
+  });
+}
+
+function handleOutsideClick(event: MouseEvent) {
+  if (profileButton.value && !profileButton.value.contains(event.target as Node)) {
+    isOpen.value = false;
+  }
+}
+
+onMounted(() => {
+  document.addEventListener("click", handleOutsideClick);
+  console.log("mounted");
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("click", handleOutsideClick);
+  console.log("unmounted");
+});
 </script>
 
 <template>
@@ -21,17 +47,22 @@ const isLogin = computed(() => auth.isLogin);
       <MagnifyingGlassIcon style="width:32px; height:32px; color:aliceblue;" />
       <RouterLink :to="{name: 'login'}" v-if="!isLogin">Login</RouterLink>
       <RouterLink :to="{name: 'register'}" v-if="!isLogin">Register</RouterLink>
+      <div class="profile-container" v-if="isLogin" ref="profileButton">
+        <button class="account textButton" @click="isOpen=!isOpen">{{ account }}</button>
+        <div class="profile-view" v-if="isOpen">
+          <button class="textButton">設置</button>
+          <button class="textButton" @click="logout">登出</button>
+        </div>
+      </div>
     </div>
   </header>
 
-  <div>
-    <RouterView />
-  </div>
+  <RouterView />
 </template>
 
 <style scoped>
 header {
-  position: fixed;
+  position: absolute;
   display: flex;
   gap: 2rem;
   align-items: center;
@@ -80,56 +111,33 @@ header {
 h1 {
   font-size: 2em;
 }
-
-/* nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
+.account {
+  color: hsla(160, 100%, 37%, 1);
 }
 
-nav a.router-link-exact-active {
-  color: var(--color-text);
+.textButton {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  cursor: pointer;
 }
 
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
+.profile-view {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  width: 100px;
+  border: 1px solid gray;
+  border-radius: 8px;
+  box-shadow: 0 0 10px black;
+  background-color: white;
+  z-index: 1000;
+  right: 5px;
 }
 
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
+.profile-view .textButton:hover {
+  background-color: lightgray;
 }
-
-nav a:first-of-type {
-  border: 0;
-} */
-
-/* @media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
-} */
 </style>

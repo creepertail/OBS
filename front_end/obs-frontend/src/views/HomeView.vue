@@ -1,9 +1,50 @@
 <script setup lang="ts">
-import TheWelcome from '../components/TheWelcome.vue'
+import Carousel from '../components/Carousel.vue'
+import LeftMenu from '../components/LeftMenu.vue'
+import BookTable from '../components/book/BookTable.vue'
+import Book from '../type/book.ts'
+import { ref, onMounted } from "vue"
+import axios from 'axios'
+
+interface BookCardData {
+  image: string
+  title: string
+  author: string
+  publisher: string
+  price: number
+}
+
+const books = ref<BookCardData[]>([])
+
+onMounted(async () => {
+  const res = await axios.get<Book[]>("http://localhost:3000/books")
+  console.log(res.data)
+  books.value = res.data.map((book: Book) => ({
+    image: book.images?.[0]?.imageUrl ?? "",
+    title: book.name,
+    author: book.author,
+    publisher: book.publisher,
+    price: book.price
+  }))
+});
 </script>
 
 <template>
-  <main style="padding-top: 100px;">
-    <TheWelcome />
+  <main>
+    <LeftMenu />
+    <Carousel />
+    
+    <div class="book-title">
+      <h1>書籍列表</h1>
+      <BookTable :books="books" />
+    </div>
   </main>
 </template>
+
+<style scoped>
+.book-title {
+  padding: 20px;
+  margin: 0 auto;
+  padding-top: 10px;
+};
+</style>

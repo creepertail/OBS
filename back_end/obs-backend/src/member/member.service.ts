@@ -19,7 +19,7 @@ export class MemberService {
     @InjectRepository(Subscribes)
     private readonly subscribesRepository: Repository<Subscribes>,
     private readonly jwtService: JwtService,
-  ) {}
+  ) { }
 
   findAll(): Promise<Member[]> {
     return this.memberRepository.find();
@@ -176,11 +176,14 @@ export class MemberService {
     await this.memberRepository.delete({ memberID: id });
   }
 
-  async login(loginMemberDto: LoginMemberDto): Promise<{ access_token: string; member: Omit<Member, 'password'> }> {
+  async login(loginMemberDto: LoginMemberDto): Promise<{ access_token: string }> {
     const { account, password } = loginMemberDto;
 
-    // 使用 account 找到會員
-    const member = await this.memberRepository.findOne({ where: { account } });
+    // 使用 account 找到會員，並額外選取 password 欄位
+    const member = await this.memberRepository.createQueryBuilder('member')
+      .where('member.account = :account', { account })
+      .addSelect('member.password')
+      .getOne();
 
     if (!member) {
       throw new UnauthorizedException('Invalid account or password');
@@ -202,12 +205,10 @@ export class MemberService {
 
     const access_token = await this.jwtService.signAsync(payload);
 
-    // 回傳 token 和會員資料（不包含密碼）
-    const { password: _, ...memberWithoutPassword } = member;
+    // 回傳 token 
 
     return {
-      access_token,
-      member: memberWithoutPassword,
+      access_token
     };
   }
 
@@ -235,10 +236,10 @@ export class MemberService {
         throw new ConflictException('Phone number already exists');
       }
     }
-    
-    if(dto.type === MemberType.Merchant){
-      const existingByMerchantName = await this.memberRepository.findOne({where: { type: MemberType.Merchant, merchantName: dto.merchantName }});
-      if(existingByMerchantName && existingByMerchantName.memberID !== currentId){
+
+    if (dto.type === MemberType.Merchant) {
+      const existingByMerchantName = await this.memberRepository.findOne({ where: { type: MemberType.Merchant, merchantName: dto.merchantName } });
+      if (existingByMerchantName && existingByMerchantName.memberID !== currentId) {
         throw new ConflictException('Merchant name already exists');
       }
     }
