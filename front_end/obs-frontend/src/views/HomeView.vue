@@ -20,7 +20,8 @@ onMounted(async () => {
   const res = await axios.get<Book[]>("http://localhost:3000/books")
   console.log(res.data)
   books.value = res.data.map((book: Book) => ({
-    image: book.images?.[0]?.imageUrl ?? "",
+    image: book.images?.find(img => img.isCover)?.imageUrl 
+       ?? "/default-book.png",
     title: book.name,
     author: book.author,
     publisher: book.publisher,
@@ -30,7 +31,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main>
+  <main style="padding-top: 100px;">
     <LeftMenu />
     <Carousel />
     
