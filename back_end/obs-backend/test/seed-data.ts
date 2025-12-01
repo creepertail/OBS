@@ -295,7 +295,7 @@ async function seedData() {
 
     await bookImageRepo.save([
       {
-        imageUrl: copyImageToUploads('BookImage-Demo/2.jpg'),
+        imageUrl: copyImageToUploads('BookImage-Demo/2/1.jpg'),
         displayOrder: 0,
         isCover: true,
         book: book2,

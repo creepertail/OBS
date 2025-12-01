@@ -21,7 +21,7 @@ onMounted(async () => {
   console.log(res.data)
   books.value = res.data.map((book: Book) => ({
     image: book.images?.find(img => img.isCover)?.imageUrl 
-       ?? "/default-book.png",
+       ?? "http://localhost:3000/uploads/defaultImages/default_book_image.png",
     title: book.name,
     author: book.author,
     publisher: book.publisher,

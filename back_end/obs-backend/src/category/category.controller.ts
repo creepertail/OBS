@@ -10,13 +10,12 @@ import {
   Query,
   ValidationPipe,
   ParseIntPipe,
-  UseGuards,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { JwtAuthGuard } from '../member/guards/jwt-auth.guard';
-import { AdminGuard } from '../member/guards/admin.guard';
+import { JWTGuard } from '../member/decorators/jwt-guard.decorator';
+import { MemberType } from '../member/member-type.enum';
 
 @Controller('categories')
 export class CategoryController {
@@ -27,7 +26,7 @@ export class CategoryController {
    * 建立新分類（僅限 Admin）
    */
   @Post()
-  @UseGuards(JwtAuthGuard, AdminGuard)
+  @JWTGuard(MemberType.Admin)
   create(@Body(new ValidationPipe()) createCategoryDto: CreateCategoryDto) {
     return this.categoryService.create(createCategoryDto);
   }
@@ -73,7 +72,7 @@ export class CategoryController {
    * 更新分類（僅限 Admin）
    */
   @Patch(':id')
-  @UseGuards(JwtAuthGuard, AdminGuard)
+  @JWTGuard(MemberType.Admin)
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body(new ValidationPipe()) updateCategoryDto: UpdateCategoryDto,
@@ -86,7 +85,7 @@ export class CategoryController {
    * 刪除分類（僅限 Admin）
    */
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, AdminGuard)
+  @JWTGuard(MemberType.Admin)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.categoryService.remove(id);
   }
