@@ -1,7 +1,7 @@
 // src/coupon/entities/coupon.entity.ts
 import {Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn} from 'typeorm';
 import { Member } from '../../member/entities/member.entity';
-import { Manage } from './manage.entity';
+import { Manage } from '../../manage/entities/manage.entity';
 // import { Order } from '../../order/entities/order.entity';
 
 @Entity('coupon')
@@ -25,7 +25,7 @@ export class Coupon {
   memberID: string;
 
   @ManyToOne(() => Member, { onDelete: 'CASCADE' })
-  @JoinColumn({ referencedColumnName: 'memberID' })
+  @JoinColumn({ name: 'memberID', referencedColumnName: 'memberID' })
   owner: Member;
 
   @OneToMany(() => Manage, (management) => management.coupon)
