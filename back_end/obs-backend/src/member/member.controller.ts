@@ -9,13 +9,14 @@ import { CurrentUser } from './decorators/current-user.decorator';
 
 @Controller('members')
 export class MemberController {
-  constructor(private readonly memberService: MemberService) {}
-  
+  constructor(private readonly memberService: MemberService) { }
+
   // @url = http://localhost:3000
   /**
    * API 功能：
    *
    * GET url/members            => 所有member
+   * GET url/members/me         => 取得自己的資料 (需帶 Access Token)
    * GET url/members/:id        => 用id找member
    * GET url/members/:id/type   => 用id找member的type
    * POST url/members + body     => 新增member資料，並回傳member
@@ -50,25 +51,32 @@ export class MemberController {
   findAll() {
     return this.memberService.findAll();
   }
-  
+
+  // GET url/members/me
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  findMe(@CurrentUser() user: any) {
+    return this.memberService.findByID(user.sub);
+  }
+
   // GET url/members/:id
   @Get(':id')
   findByID(@Param('id') id: string) {
     return this.memberService.findByID(id);
   }
-  
+
   // GET url/members/:id/type
   @Get(':id/type')
   findMemberType(@Param('id') id: string) {
     return this.memberService.findMemberType(id);
   }
-  
+
   // POST url/members + body
   @Post()
   create(@Body() createMemberDto: CreateMemberDto) {
     return this.memberService.create(createMemberDto);
   }
-  
+
   // PATCH url/members/:id + body
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
