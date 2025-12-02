@@ -62,7 +62,7 @@ onBeforeUnmount(() => {
 
 <style scoped>
 header {
-  position: absolute;
+  position: fixed;
   display: flex;
   gap: 2rem;
   align-items: center;

@@ -1,10 +1,10 @@
 // src/member/member.controller.ts
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { MemberService } from './member.service';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
 import { LoginMemberDto } from './dto/login-member.dto';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { JWTGuard } from './decorators/jwt-guard.decorator';
 import { CurrentUser } from './decorators/current-user.decorator';
 
 @Controller('members')
@@ -53,7 +53,7 @@ export class MemberController {
   }
 
   // GET url/members/me
-  @UseGuards(JwtAuthGuard)
+  @JWTGuard()
   @Get('me')
   findMe(@CurrentUser() user: any) {
     return this.memberService.findByID(user.sub);
@@ -78,7 +78,7 @@ export class MemberController {
   }
 
   // PATCH url/members/:id + body
-  @UseGuards(JwtAuthGuard)
+  @JWTGuard()
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -89,10 +89,9 @@ export class MemberController {
   }
 
   // DELETE url/members/:id
-  @UseGuards(JwtAuthGuard)
+  @JWTGuard()
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.memberService.remove(id);
   }
 }
-
