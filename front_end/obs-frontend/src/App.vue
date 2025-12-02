@@ -39,7 +39,7 @@ onBeforeUnmount(() => {
 <template>
   <header v-if="!hideLayout">
     <RouterLink :to="{name: 'home'}" class="homeButton">
-      <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="80" height="80" /> <!-- TODO: change img -->
+      <img alt="OBS logo" class="logo" src="@/assets/logo2.png" width="80" height="80" />
       <h1>Online Bookstore System</h1>
     </RouterLink>
 
