@@ -14,7 +14,7 @@ export class Member {
   account: string;
 
   // 密碼需儲存雜湊後字串，預留較長長度
-  @Column({ type: 'varchar', length: 255, nullable: false })
+  @Column({ type: 'varchar', length: 255, nullable: false, select: false })
   password: string;
 
   @Column({ type: 'varchar', length: 12, unique: true, nullable: false })

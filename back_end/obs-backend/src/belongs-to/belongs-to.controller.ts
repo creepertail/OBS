@@ -10,12 +10,11 @@ import {
   ValidationPipe,
   ParseIntPipe,
   ParseUUIDPipe,
-  UseGuards,
   Request,
 } from '@nestjs/common';
 import { BelongsToService } from './belongs-to.service';
 import { CreateBelongsToDto } from './dto/create-belongs-to.dto';
-import { JwtAuthGuard } from '../member/guards/jwt-auth.guard';
+import { JWTGuard } from '../member/decorators/jwt-guard.decorator';
 
 @Controller('belongs-to')
 export class BelongsToController {
@@ -26,13 +25,13 @@ export class BelongsToController {
    * 將書籍加入分類（需要認證，僅書籍擁有者或 Admin）
    */
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @JWTGuard()
   create(
     @Body(new ValidationPipe()) createBelongsToDto: CreateBelongsToDto,
     @Request() req,
   ) {
-    const userId = req.user.sub;
-    const userType = req.user.type;
+    const userId = req.member.sub;
+    const userType = req.member.type;
     return this.belongsToService.create(createBelongsToDto, userId, userType);
   }
 
@@ -41,14 +40,14 @@ export class BelongsToController {
    * 批次將書籍加入多個分類（需要認證，僅書籍擁有者或 Admin）
    */
   @Post('batch')
-  @UseGuards(JwtAuthGuard)
+  @JWTGuard()
   addBookToCategories(
     @Body('bookID', ParseUUIDPipe) bookID: string,
     @Body('categoryIds') categoryIds: number[],
     @Request() req,
   ) {
-    const userId = req.user.sub;
-    const userType = req.user.type;
+    const userId = req.member.sub;
+    const userType = req.member.type;
     return this.belongsToService.addBookToCategories(
       bookID,
       categoryIds,
@@ -89,14 +88,14 @@ export class BelongsToController {
    * 將書籍從分類移除（需要認證，僅書籍擁有者或 Admin）
    */
   @Delete()
-  @UseGuards(JwtAuthGuard)
+  @JWTGuard()
   remove(
     @Query('bookID', ParseUUIDPipe) bookID: string,
     @Query('categoryId', ParseIntPipe) categoryId: number,
     @Request() req,
   ) {
-    const userId = req.user.sub;
-    const userType = req.user.type;
+    const userId = req.member.sub;
+    const userType = req.member.type;
     return this.belongsToService.remove(bookID, categoryId, userId, userType);
   }
 }

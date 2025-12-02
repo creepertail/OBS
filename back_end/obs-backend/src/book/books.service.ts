@@ -18,7 +18,7 @@ export class BooksService {
     private bookImagesRepository: Repository<BookImage>,
     @InjectRepository(Member)
     private memberRepository: Repository<Member>,
-  ) {}
+  ) { }
 
   /**
    * 建立新書籍（包含圖片）
@@ -31,7 +31,7 @@ export class BooksService {
     if (createBookDto.inventoryQuantity < 0) {
       throw new BadRequestException('InventoryQuantity must be greater than 0');
     }
-    else if(createBookDto.inventoryQuantity === 0){
+    else if (createBookDto.inventoryQuantity === 0) {
       createBookDto.status = 0;
     }
 
@@ -49,6 +49,7 @@ export class BooksService {
    */
   async findAll(): Promise<Book[]> {
     return await this.booksRepository.find({
+      where: { status: 1 },
       relations: ['images'],
       order: {
         createdAt: 'DESC',
@@ -61,7 +62,7 @@ export class BooksService {
    */
   async findByID(id: string): Promise<Book> {
     const book = await this.booksRepository.findOne({
-      where: { bookID: id },
+      where: { bookID: id, status: 1 },
       relations: ['images'],
     });
 
@@ -77,7 +78,7 @@ export class BooksService {
    */
   async findByISBN(isbn: string): Promise<Book> {
     const book = await this.booksRepository.findOne({
-      where: { ISBN: isbn },
+      where: { ISBN: isbn, status: 1 },
       relations: ['images'],
     });
 
@@ -109,7 +110,7 @@ export class BooksService {
       if (updateBookDto.inventoryQuantity < 0) {
         throw new BadRequestException('InventoryQuantity must be greater than 0');
       }
-      else if(updateBookDto.inventoryQuantity === 0){
+      else if (updateBookDto.inventoryQuantity === 0) {
         updateBookDto.status = 0;
       }
     }
@@ -206,7 +207,8 @@ export class BooksService {
   }): Promise<Book[]> {
     const queryBuilder = this.booksRepository
       .createQueryBuilder('book')
-      .leftJoinAndSelect('book.images', 'images');
+      .leftJoinAndSelect('book.images', 'images')
+      .where('book.status = :status', { status: 1 });
 
     // 根據提供的參數動態建立查詢條件
     if (params.isbn) {

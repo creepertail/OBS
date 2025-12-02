@@ -1,10 +1,11 @@
 // src/subscription/subscription.controller.ts
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { SubscriptionService } from './subscription.service';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
-import { JwtAuthGuard } from '../member/guards/jwt-auth.guard';
+import { JWTGuard } from '../member/decorators/jwt-guard.decorator';
 import { CurrentUser } from '../member/decorators/current-user.decorator';
+import { MemberType } from '../member/member-type.enum';
 
 @Controller('subscriptions')
 export class SubscriptionController {
@@ -48,14 +49,14 @@ export class SubscriptionController {
   }
 
   // POST url/subscriptions
-  @UseGuards(JwtAuthGuard)
+  @JWTGuard(MemberType.User)
   @Post()
   create(@Body() createSubscriptionDto: CreateSubscriptionDto, @CurrentUser() user: any) {
     return this.subscriptionService.create(createSubscriptionDto, user);
   }
 
   // PATCH url/subscriptions/:userID/:merchantID
-  @UseGuards(JwtAuthGuard)
+  @JWTGuard(MemberType.User)
   @Patch(':userID/:merchantID')
   update(
     @Param('userID') userID: string,
@@ -67,7 +68,7 @@ export class SubscriptionController {
   }
 
   // DELETE url/subscriptions/:userID/:merchantID
-  @UseGuards(JwtAuthGuard)
+  @JWTGuard(MemberType.User)
   @Delete(':userID/:merchantID')
   remove(@Param('userID') userID: string, @Param('merchantID') merchantID: string, @CurrentUser() user: any) {
     return this.subscriptionService.remove(userID, merchantID, user);
