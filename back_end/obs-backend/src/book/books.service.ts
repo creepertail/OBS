@@ -195,7 +195,6 @@ export class BooksService {
     author?: string;
     publisher?: string;
     merchantName?: string;
-    status?: number;
   }): Promise<Book[]> {
     const queryBuilder = this.booksRepository
       .createQueryBuilder('book')
@@ -269,10 +268,6 @@ export class BooksService {
     // 如果提供商家名字，檢查 merchant.merchantName
     if (params.merchantName) {
       queryBuilder.andWhere('merchant.merchantName LIKE :merchantName', { merchantName: `%${params.merchantName}%` });
-    }
-
-    if (params.status !== undefined) {
-      queryBuilder.andWhere('book.status = :status', { status: params.status });
     }
 
     return await queryBuilder
