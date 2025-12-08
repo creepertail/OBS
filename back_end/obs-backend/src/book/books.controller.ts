@@ -80,8 +80,10 @@ export class BooksController {
     @Query('publisher') publisher?: string,
     @Query('merchantName') merchantName?: string,
     @Query('status') status?: string,
+    @Query('keyword') keyword?: string,
   ) {
     return this.booksService.search({
+      keyword,
       isbn,
       name,
       author,

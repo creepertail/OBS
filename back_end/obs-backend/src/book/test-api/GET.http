@@ -110,7 +110,30 @@ GET {{baseUrl}}/books/search?publisher=天瓏&status=1
 GET {{baseUrl}}/books/search?merchantName=Merchant
 
 # ========================================
-# 6. 測試錯誤處理
+# 6. 全域搜尋 (Global Search)
+# ========================================
+
+### 搜尋：單一關鍵字全域搜尋
+# 說明：這會同時在書名、作者、出版社、ISBN、商品描述、商家名稱中尋找 "程式"
+GET {{baseUrl}}/books/search?keyword=程式
+
+### 搜尋：根據作者關鍵字 (Terry)
+GET {{baseUrl}}/books/search?keyword=Terry
+
+### 搜尋：根據出版社關鍵字 (五南)
+GET {{baseUrl}}/books/search?keyword=五南
+
+### 搜尋：根據描述關鍵字 (物理)
+GET {{baseUrl}}/books/search?keyword=物理
+
+### 搜尋：根據 ISBN 片段
+GET {{baseUrl}}/books/search?keyword=978626
+
+### 搜尋：根據商家名稱 (博客來)
+GET {{baseUrl}}/books/search?keyword=博客來
+
+# ========================================
+# 7. 測試錯誤處理
 # ========================================
 
 ### 測試：查詢不存在的 ID（應該回傳 404）
