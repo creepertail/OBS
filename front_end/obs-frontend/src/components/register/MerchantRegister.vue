@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import axios from "axios";
 
 const email = ref("");
@@ -11,9 +11,9 @@ const merchantName = ref("");
 const merchantAddress = ref("");
 const error = ref("");
 
-const getPassword = () => password.value;
-const getPassword2 = () => password2.value;
-const setError = (errorMessage: string) => error.value = errorMessage;
+const isPasswordConsist = computed(() => {
+  console.log(password.value === password2.value);
+  return password.value === password2.value});
 
 async function handleRegister(): Promise<boolean> {
   try {
@@ -34,10 +34,8 @@ async function handleRegister(): Promise<boolean> {
 }
 
 defineExpose({
-  getPassword,
-  getPassword2,
+  isPasswordConsist,
   handleRegister,
-  setError,
 });
 </script>
 
@@ -65,7 +63,7 @@ defineExpose({
   <div class="form-row">
     <label for="password2">Confirm password</label>
     <input id="password2" type="password" v-model="password2" placeholder="Enter password again" />
-    <div class="error" v-if="error === '密碼不一致'" style="color:red">{{ error }}</div>
+    <div class="error" v-if="!isPasswordConsist" style="color:red">The password is inconsistent.</div>
   </div>
 
   <div class="form-row">
