@@ -11,7 +11,6 @@ const userName = ref("");
 const error = ref("");
 
 const isPasswordConsist = computed(() => {
-  console.log(password.value === password2.value);
   return password.value === password2.value});
 
 async function handleRegister(): Promise<boolean> {
