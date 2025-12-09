@@ -1,5 +1,6 @@
 #  /**
 #    * API 功能：
+#    * GET url/members/me         => 取得自己的資料 (需帶 Access Token)
 #    * GET url/members            => 所有member
 #    * GET url/members/:id        => 用id找member
 #    * GET url/members/:id/type   => 用id找member的type
@@ -8,17 +9,30 @@
 @admin_id = 81dc3b42-d706-4b88-8e79-4f1ed93b56e6
 @user_id = 31fde60e-6b3a-4910-ae22-a484e27764aa
 @merchant_id = 0281a18a-b682-40ae-bff3-bddaf041fa57
+@access_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlZjAzOTBjNS03MDFjLTQ5MjAtODZmZS0xZGNiOWE0MTFmMWMiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2NDQzMjEzNiwiZXhwIjoxNzY0NTE4NTM2fQ.pVXBf8cDfG5U4f-CAqipCADCy3eAnHTDxnjOUsfqrSc
 
 
-# 拿回所有members的資料
+
+
+### 拿回所有members的資料
 GET http://localhost:3000/members
 
-# 拿回某成員的資料
+
+### 拿回自己的資料
+GET http://localhost:3000/members/me
+Authorization: Bearer {{access_token}}
+
+
+### 拿回某成員的資料
 GET http://localhost:3000/members/81dc3b42-d706-4b88-8e79-4f1ed93b56e6
+###
 GET http://localhost:3000/members/31fde60e-6b3a-4910-ae22-a484e27764aa
+###
 GET http://localhost:3000/members/0281a18a-b682-40ae-bff3-bddaf041fa57
 
-# 拿回某成員的type
+### 拿回某成員的type
 GET http://localhost:3000/members/81dc3b42-d706-4b88-8e79-4f1ed93b56e6/type
+###
 GET http://localhost:3000/members/31fde60e-6b3a-4910-ae22-a484e27764aa/type
+###
 GET http://localhost:3000/members/0281a18a-b682-40ae-bff3-bddaf041fa57/type
