@@ -2,8 +2,8 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Brackets } from 'typeorm';
-import { Book } from './entityies/book.entity';
-import { BookImage } from './entityies/book-image.entity';
+import { Book } from './entities/book.entity';
+import { BookImage } from './entities/book-image.entity';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { Member } from '../member/entities/member.entity';

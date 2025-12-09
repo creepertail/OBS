@@ -1,0 +1,331 @@
+#  /**
+#    * Order API 完整測試流程
+#    *
+#    * API 功能總覽：
+#    *
+#    * POST /orders + body              => 建立新訂單（需要 JWT token，User 類型）
+#    *   - body:
+#    *   - shippingAddress, paymentMethod, totalPrice, totalAmount, couponId (optional)
+#    *   - items: [{ bookId, amount }]
+#    *   - 注意：userId 從 JWT token 自動取得，merchantId 從書籍資料自動取得
+#    *   - 所有書籍必須屬於同一個商家
+#    *
+#    * GET /orders                      => 查詢所有訂單（根據使用者類型過濾）
+#    *   - User: 只能看到自己的訂單
+#    *   - Merchant: 只能看到自己商店的訂單
+#    *   - Admin: 可以看到所有訂單
+#    *
+#    * GET /orders/me                   => 查詢自己的訂單（User）
+#    *
+#    * GET /orders/:id                  => 根據 ID 查詢訂單（需要權限驗證）
+#    *
+#    * PATCH /orders/:id + body         => 更新訂單
+#    *   - User: 只能修改 shippingAddress 和 paymentMethod
+#    *   - Merchant: 只能修改 state（訂單狀態）
+#    *   - Admin: 可以修改所有欄位
+#    *
+#    * DELETE /orders/:id               => 刪除訂單（只有 User 和 Admin 可以刪除）
+#    */
+
+# ===========================================
+# 測試流程說明：
+# ===========================================
+# 1. 先到 member/test-api 建立測試帳號並登入取得 token
+# 2. 先到 book/test-api 建立測試書籍並取得 bookId
+# 3. 使用下面的 API 測試訂單功能
+# 4. 依序執行：建立訂單 -> 查詢訂單 -> 更新訂單 -> 刪除訂單
+# ===========================================
+
+@baseUrl = http://localhost:3000
+
+# 請先執行登入 API 取得對應身分的 access_token
+@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLWlkLWhlcmUiLCJhY2NvdW50IjoidXNlci10ZXN0LTEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTcwMDAwMDAwMCwiZXhwIjoxNzAwMDg2NDAwfQ.xxxxx
+@merchantToken = merchant-token-here
+@adminToken = admin-token-here
+
+# 書籍 ID（請先使用 POST /books 建立書籍後取得 bookId）
+@bookId1 = xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+@bookId2 = yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy
+
+# 訂單 ID（執行建立訂單後，將回傳的 orderId 填入這裡）
+@orderId = xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+
+# ===========================================
+# 步驟 1：User 建立訂單
+# ===========================================
+
+### 1-1. User 建立新訂單（單一書籍）
+POST {{baseUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "shippingAddress": "台北市信義區信義路五段7號",
+  "paymentMethod": 1,
+  "totalPrice": 450,
+  "totalAmount": 1,
+  "items": [
+    {
+      "bookId": "{{bookId1}}",
+      "amount": 1
+    }
+  ]
+}
+
+### 1-2. User 建立新訂單（多本書籍）
+POST {{baseUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "shippingAddress": "新北市板橋區文化路一段188號",
+  "paymentMethod": 2,
+  "totalPrice": 1320,
+  "totalAmount": 3,
+  "items": [
+    {
+      "bookId": "{{bookId1}}",
+      "amount": 2
+    },
+    {
+      "bookId": "{{bookId2}}",
+      "amount": 1
+    }
+  ]
+}
+
+# ===========================================
+# 步驟 2：查詢訂單
+# ===========================================
+
+### 2-1. User 查詢所有自己的訂單
+GET {{baseUrl}}/orders
+Authorization: Bearer {{userToken}}
+
+### 2-2. User 查詢自己的訂單（使用 /me）
+GET {{baseUrl}}/orders/me
+Authorization: Bearer {{userToken}}
+
+### 2-3. User 查詢特定訂單
+GET {{baseUrl}}/orders/{{orderId}}
+Authorization: Bearer {{userToken}}
+
+### 2-4. Merchant 查詢自己商店的訂單
+GET {{baseUrl}}/orders
+Authorization: Bearer {{merchantToken}}
+
+### 2-5. Merchant 查詢特定訂單
+GET {{baseUrl}}/orders/{{orderId}}
+Authorization: Bearer {{merchantToken}}
+
+### 2-6. Admin 查詢所有訂單
+GET {{baseUrl}}/orders
+Authorization: Bearer {{adminToken}}
+
+# ===========================================
+# 步驟 3：更新訂單
+# ===========================================
+
+### 3-1. User 更新配送地址
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "shippingAddress": "高雄市前金區中正四路211號"
+}
+
+### 3-2. User 更新付款方式
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "paymentMethod": 3
+}
+
+### 3-3. Merchant 更新訂單狀態為「處理中」
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{merchantToken}}
+
+{
+  "state": 1
+}
+
+### 3-4. Merchant 更新訂單狀態為「已出貨」
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{merchantToken}}
+
+{
+  "state": 2
+}
+
+### 3-5. Merchant 更新訂單狀態為「已完成」
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{merchantToken}}
+
+{
+  "state": 3
+}
+
+### 3-6. Admin 更新訂單（可修改所有欄位）
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "shippingAddress": "桃園市中壢區中北路200號",
+  "paymentMethod": 2,
+  "state": 2,
+  "totalPrice": 1200,
+  "totalAmount": 3
+}
+
+# ===========================================
+# 步驟 4：刪除訂單
+# ===========================================
+
+### 4-1. User 刪除自己的訂單
+DELETE {{baseUrl}}/orders/{{orderId}}
+Authorization: Bearer {{userToken}}
+
+### 4-2. Admin 刪除任何訂單
+DELETE {{baseUrl}}/orders/{{orderId}}
+Authorization: Bearer {{adminToken}}
+
+# ===========================================
+# 完整流程測試（從頭到尾）
+# ===========================================
+
+### 完整流程 1：建立訂單
+POST {{baseUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "shippingAddress": "台北市大安區羅斯福路四段1號",
+  "paymentMethod": 1,
+  "totalPrice": 520,
+  "totalAmount": 1,
+  "items": [
+    {
+      "bookId": "{{bookId1}}",
+      "amount": 1
+    }
+  ]
+}
+
+### 完整流程 2：查詢剛建立的訂單（將上面回傳的 orderId 填入 @orderId）
+GET {{baseUrl}}/orders/{{orderId}}
+Authorization: Bearer {{userToken}}
+
+### 完整流程 3：User 修改配送地址
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "shippingAddress": "台北市中山區南京東路三段219號"
+}
+
+### 完整流程 4：Merchant 更新訂單狀態
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{merchantToken}}
+
+{
+  "state": 1
+}
+
+### 完整流程 5：再次查詢訂單確認更新
+GET {{baseUrl}}/orders/{{orderId}}
+Authorization: Bearer {{userToken}}
+
+### 完整流程 6：刪除訂單
+DELETE {{baseUrl}}/orders/{{orderId}}
+Authorization: Bearer {{userToken}}
+
+### 完整流程 7：確認訂單已刪除（應回傳 404）
+GET {{baseUrl}}/orders/{{orderId}}
+Authorization: Bearer {{userToken}}
+
+# ===========================================
+# 錯誤測試案例
+# ===========================================
+
+### 錯誤測試 1：User 嘗試修改訂單狀態（應失敗）
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "state": 1
+}
+
+### 錯誤測試 2：Merchant 嘗試修改配送地址（應失敗）
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{merchantToken}}
+
+{
+  "shippingAddress": "新的地址"
+}
+
+### 錯誤測試 3：Merchant 嘗試刪除訂單（應失敗）
+DELETE {{baseUrl}}/orders/{{orderId}}
+Authorization: Bearer {{merchantToken}}
+
+### 錯誤測試 4：User 查詢別人的訂單（應失敗）
+GET {{baseUrl}}/orders/other-user-order-id
+Authorization: Bearer {{userToken}}
+
+### 錯誤測試 5：未登入建立訂單（應失敗）
+POST {{baseUrl}}/orders
+Content-Type: application/json
+
+{
+  "shippingAddress": "台北市信義區信義路五段7號",
+  "paymentMethod": 1,
+  "totalPrice": 450,
+  "totalAmount": 1,
+  "items": [
+    {
+      "bookId": "{{bookId1}}",
+      "amount": 1
+    }
+  ]
+}
+
+### 錯誤測試 6：書籍不存在（應失敗）
+POST {{baseUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "shippingAddress": "台北市信義區信義路五段7號",
+  "paymentMethod": 1,
+  "totalPrice": 450,
+  "totalAmount": 1,
+  "items": [
+    {
+      "bookId": "00000000-0000-0000-0000-000000000000",
+      "amount": 1
+    }
+  ]
+}
+
+### 錯誤測試 7：訂單項目為空（應失敗）
+POST {{baseUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "shippingAddress": "台北市信義區信義路五段7號",
+  "paymentMethod": 1,
+  "totalPrice": 450,
+  "totalAmount": 1,
+  "items": []
+}

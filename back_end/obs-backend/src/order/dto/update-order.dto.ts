@@ -30,13 +30,5 @@ export class UpdateOrderDto {
 
   @IsUUID()
   @IsOptional()
-  userId?: string;
-
-  @IsUUID()
-  @IsOptional()
-  merchantId?: string;
-
-  @IsUUID()
-  @IsOptional()
   couponId?: string;
 }
