@@ -9,6 +9,7 @@ import { MemberModule } from './member/member.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { CategoryModule } from './category/category.module';
 import { BelongsToModule } from './belongs-to/belongs-to.module';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { BelongsToModule } from './belongs-to/belongs-to.module';
     SubscriptionModule,
     CategoryModule,
     BelongsToModule,
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [AppService],

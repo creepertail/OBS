@@ -3,7 +3,6 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColum
 import { Member } from '../../member/entities/member.entity';
 // import { Coupon } from '../../coupon/entities/coupon.entity';
 import { Contains } from './contains.entity';
-import { Control } from './control.entity';
 
 @Entity('order')
 export class Order {
@@ -53,7 +52,4 @@ export class Order {
 
   @OneToMany(() => Contains, (item) => item.order, { cascade: true })
   contains: Contains[];
-
-  @OneToMany(() => Control, (control) => control.order)
-  controls: Control[];
 }

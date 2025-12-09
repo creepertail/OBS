@@ -1,0 +1,65 @@
+#  /**
+#    * API 功能：
+#    * DELETE url/orders/:id               => 刪除訂單（只有 User 和 Admin 可以刪除）
+#    *   - User: 只能刪除自己的訂單
+#    *   - Merchant: 不能刪除訂單
+#    *   - Admin: 可以刪除任何訂單
+#    */
+
+# ----------
+# 權限說明：
+# User 可以刪除自己的訂單
+# Merchant 不能刪除訂單（會回覆 "Merchants cannot delete orders"）
+# Admin 可以刪除任何訂單
+# ----------
+
+@baseUrl = http://localhost:3000
+
+# 請先執行登入 API 取得對應身分的 access_token
+@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLWlkLWhlcmUiLCJhY2NvdW50IjoidXNlci10ZXN0LTEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTcwMDAwMDAwMCwiZXhwIjoxNzAwMDg2NDAwfQ.xxxxx
+@merchantToken = merchant-token-here
+@adminToken = admin-token-here
+
+# 訂單 ID（請先使用 POST /orders 建立訂單後取得訂單 ID）
+@orderId = xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+
+# ========================================
+# 刪除訂單測試
+# ========================================
+
+### User 刪除自己的訂單（成功）
+DELETE {{baseUrl}}/orders/{{orderId}}
+Authorization: Bearer {{userToken}}
+
+### Admin 刪除任何訂單（成功）
+DELETE {{baseUrl}}/orders/{{orderId}}
+Authorization: Bearer {{adminToken}}
+
+# ========================================
+# 權限測試
+# ========================================
+
+### 測試權限錯誤 - 未登入（無 JWT token）
+DELETE {{baseUrl}}/orders/{{orderId}}
+
+### 測試權限錯誤 - User 刪除別人的訂單（失敗 - 403 Forbidden）
+# 請將 other-user-order-id 替換成其他使用者的訂單 ID
+DELETE {{baseUrl}}/orders/other-user-order-id
+Authorization: Bearer {{userToken}}
+
+### 測試權限錯誤 - Merchant 嘗試刪除訂單（失敗 - 403 Forbidden）
+# Merchant 不能刪除訂單，即使是自己商店的訂單
+DELETE {{baseUrl}}/orders/{{orderId}}
+Authorization: Bearer {{merchantToken}}
+
+# ========================================
+# 錯誤測試
+# ========================================
+
+### 測試 404 - 訂單不存在
+DELETE {{baseUrl}}/orders/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{userToken}}
+
+### 測試 404 - 無效的訂單 ID 格式
+DELETE {{baseUrl}}/orders/invalid-id
+Authorization: Bearer {{userToken}}
