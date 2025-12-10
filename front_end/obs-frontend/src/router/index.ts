@@ -4,6 +4,7 @@ import HideView from '../views/HideView.vue'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import MerchantView from '../views/MerchantView.vue'
+import SettingView from '../views/SettingView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -41,6 +42,11 @@ const router = createRouter({
       path: '/merchant',
       name: 'merchant',
       component: MerchantView,
+    },
+    {
+      path: '/setting',
+      name: 'setting',
+      component: SettingView,
     },
   ],
 })

@@ -8,7 +8,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BelongsTo } from './entities/belongs-to.entity';
-import { Book } from '../book/entityies/book.entity';
+import { Book } from '../book/entities/book.entity';
 import { Category } from '../category/entities/categories.entity';
 import { CreateBelongsToDto } from './dto/create-belongs-to.dto';
 import { MemberType } from '../member/member-type.enum';
@@ -22,7 +22,7 @@ export class BelongsToService {
     private bookRepository: Repository<Book>,
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
-  ) {}
+  ) { }
 
   /**
    * 將書籍加入分類

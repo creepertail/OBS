@@ -29,10 +29,10 @@ import { ref, computed, onMounted, onUnmounted } from "vue";
 
 // 輪播圖片列表（可換成你的圖片）
 const images = [
-  "https://www.ntut.edu.tw/var/file/7/1007/randimg/mobileadv_4421_3702842_37954.jpg",
-  "https://www.ntut.edu.tw/var/file/7/1007/randimg/mobileadv_4317_2447141_64526.jpg",
-  "https://www.ntut.edu.tw/var/file/7/1007/randimg/mobileadv_3973_5062299_87901.jpg",
-  "https://www.ntut.edu.tw/var/file/7/1007/randimg/mobileadv_3917_9027893_74268.jpg"
+  "https://static.eslite.com/unsafe/gs.eslite.com/index_slot/202511/ac95cd1e-6310-4157-a64f-53daa93e4008.jpg",
+  "https://static.eslite.com/unsafe/gs.eslite.com/index_slot/202511/cc110075-6d98-4bff-9e0a-830efbb48d6c.jpg",
+  // "https://www.ntut.edu.tw/var/file/7/1007/randimg/mobileadv_3973_5062299_87901.jpg",
+  // "https://www.ntut.edu.tw/var/file/7/1007/randimg/mobileadv_3917_9027893_74268.jpg"
 ];
 
 const currentIndex = ref(0);

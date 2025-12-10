@@ -7,9 +7,11 @@ import * as path from 'path';
 import { Member } from '../src/member/entities/member.entity';
 import { MemberType } from '../src/member/member-type.enum';
 import { Category } from '../src/category/entities/categories.entity';
-import { Book } from '../src/book/entityies/book.entity';
-import { BookImage } from '../src/book/entityies/book-image.entity';
+import { Book } from '../src/book/entities/book.entity';
+import { BookImage } from '../src/book/entities/book-image.entity';
 import { BelongsTo } from '../src/belongs-to/entities/belongs-to.entity';
+import { Order } from '../src/order/entities/order.entity';
+import { Contains } from '../src/order/entities/contains.entity';
 
 // 載入環境變數
 config();
@@ -22,7 +24,7 @@ const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME || 'root',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_DATABASE || 'OBS',
-  entities: [Member, Category, Book, BookImage, BelongsTo],
+  entities: [Member, Category, Book, BookImage, BelongsTo, Order, Contains],
   synchronize: false,
   logging: true,
 });
@@ -74,6 +76,8 @@ async function seedData() {
     console.log('\n🗑️  清空現有測試數據...');
     // 暫時禁用外鍵檢查，以便清空資料
     await AppDataSource.query('SET FOREIGN_KEY_CHECKS = 0');
+    await AppDataSource.getRepository(Contains).clear();
+    await AppDataSource.getRepository(Order).clear();
     await AppDataSource.getRepository(BelongsTo).clear();
     await AppDataSource.getRepository(BookImage).clear();
     await AppDataSource.getRepository(Book).clear();
@@ -566,6 +570,143 @@ async function seedData() {
 
     console.log('✅ 創建了 12 本書籍');
 
+    // 4. 創建訂單
+    console.log('\n🛒 創建訂單數據...');
+    const orderRepo = AppDataSource.getRepository(Order);
+    const containsRepo = AppDataSource.getRepository(Contains);
+
+    // User1 的第一筆訂單 - 向 merchant1 購買
+    const order1 = await orderRepo.save({
+      shippingAddress: '台北市大安區羅斯福路四段1號',
+      paymentMethod: 1,
+      totalPrice: 360,
+      totalAmount: 1,
+      state: 1, // 處理中
+      userId: user1.memberID,
+      merchantId: merchant1.memberID,
+    });
+
+    await containsRepo.save({
+      orderId: order1.orderId,
+      bookId: book1.bookID,
+      amount: 1,
+    });
+
+    // User1 的第二筆訂單 - 向 merchant2 購買多本書
+    const order2 = await orderRepo.save({
+      shippingAddress: '台北市中山區南京東路三段219號',
+      paymentMethod: 1,
+      totalPrice: 1629, // 1300 + 149 + 180
+      totalAmount: 3,
+      state: 2, // 已出貨
+      userId: user1.memberID,
+      merchantId: merchant2.memberID,
+    });
+
+    await containsRepo.save([
+      {
+        orderId: order2.orderId,
+        bookId: book3.bookID,
+        amount: 1,
+      },
+      {
+        orderId: order2.orderId,
+        bookId: book4.bookID,
+        amount: 1,
+      },
+      {
+        orderId: order2.orderId,
+        bookId: book7.bookID,
+        amount: 1,
+      },
+    ]);
+
+    // User2 的訂單 - 向 merchant3 購買
+    const order3 = await orderRepo.save({
+      shippingAddress: '新北市板橋區文化路一段188號',
+      paymentMethod: 1,
+      totalPrice: 680,
+      totalAmount: 2,
+      state: 0, // 待處理
+      userId: user2.memberID,
+      merchantId: merchant3.memberID,
+    });
+
+    await containsRepo.save([
+      {
+        orderId: order3.orderId,
+        bookId: book5.bookID,
+        amount: 1,
+      },
+      {
+        orderId: order3.orderId,
+        bookId: book8.bookID,
+        amount: 1,
+      },
+    ]);
+
+    // User3 的訂單 - 向 merchant2 購買
+    const order4 = await orderRepo.save({
+      shippingAddress: '高雄市前金區中正四路211號',
+      paymentMethod: 1,
+      totalPrice: 758,
+      totalAmount: 1,
+      state: 3, // 已完成
+      userId: user3.memberID,
+      merchantId: merchant2.memberID,
+    });
+
+    await containsRepo.save({
+      orderId: order4.orderId,
+      bookId: book6.bookID,
+      amount: 1,
+    });
+
+    // User2 的第二筆訂單 - 向 merchant1 購買
+    const order5 = await orderRepo.save({
+      shippingAddress: '台南市中西區民族路二段76號',
+      paymentMethod: 1,
+      totalPrice: 560,
+      totalAmount: 2,
+      state: 1, // 處理中
+      userId: user2.memberID,
+      merchantId: merchant1.memberID,
+    });
+
+    await containsRepo.save([
+      {
+        orderId: order5.orderId,
+        bookId: book9.bookID,
+        amount: 2,
+      },
+    ]);
+
+    // User3 的第二筆訂單 - 向 merchant1 購買
+    const order6 = await orderRepo.save({
+      shippingAddress: '桃園市中壢區中北路200號',
+      paymentMethod: 1,
+      totalPrice: 880,
+      totalAmount: 2,
+      state: 0, // 待處理
+      userId: user3.memberID,
+      merchantId: merchant1.memberID,
+    });
+
+    await containsRepo.save([
+      {
+        orderId: order6.orderId,
+        bookId: book1.bookID,
+        amount: 1,
+      },
+      {
+        orderId: order6.orderId,
+        bookId: book12.bookID,
+        amount: 1,
+      },
+    ]);
+
+    console.log('✅ 創建了 6 筆訂單');
+
     // 顯示統計資訊
     console.log('\n📊 數據統計：');
     console.log('─────────────────────────────');
@@ -579,6 +720,12 @@ async function seedData() {
     console.log(`   - 下架：${await bookRepo.count({ where: { status: 0 } })}`);
     console.log(`🖼️  圖片總數：${await bookImageRepo.count()}`);
     console.log(`🔗 分類關聯數：${await belongsToRepo.count()}`);
+    console.log(`🛒 訂單總數：${await orderRepo.count()}`);
+    console.log(`   - 待處理：${await orderRepo.count({ where: { state: 0 } })}`);
+    console.log(`   - 處理中：${await orderRepo.count({ where: { state: 1 } })}`);
+    console.log(`   - 已出貨：${await orderRepo.count({ where: { state: 2 } })}`);
+    console.log(`   - 已完成：${await orderRepo.count({ where: { state: 3 } })}`);
+    console.log(`📦 訂單項目數：${await containsRepo.count()}`);
     console.log('─────────────────────────────');
 
     console.log('\n🎉 測試數據生成完成！');

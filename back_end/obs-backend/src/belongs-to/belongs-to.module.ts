@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { BelongsToController } from './belongs-to.controller';
 import { BelongsToService } from './belongs-to.service';
 import { BelongsTo } from './entities/belongs-to.entity';
-import { Book } from '../book/entityies/book.entity';
+import { Book } from '../book/entities/book.entity';
 import { Category } from '../category/entities/categories.entity';
 
 @Module({
@@ -13,4 +13,4 @@ import { Category } from '../category/entities/categories.entity';
   providers: [BelongsToService],
   exports: [BelongsToService],
 })
-export class BelongsToModule {}
+export class BelongsToModule { }

@@ -1,6 +1,6 @@
 // src/book/entityies/belongs-to.entity.ts
 import { Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
-import { Book } from '../../book/entityies/book.entity';
+import { Book } from '../../book/entities/book.entity';
 import { Category } from '../../category/entities/categories.entity';
 
 @Entity('belong_to')

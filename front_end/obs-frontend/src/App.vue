@@ -39,7 +39,7 @@ onBeforeUnmount(() => {
 <template>
   <header v-if="!hideLayout">
     <RouterLink :to="{name: 'home'}" class="homeButton">
-      <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="80" height="80" /> <!-- TODO: change img -->
+      <img alt="OBS logo" class="logo" src="@/assets/logo2.png" width="80" height="80" />
       <h1>Online Bookstore System</h1>
     </RouterLink>
 
@@ -50,7 +50,7 @@ onBeforeUnmount(() => {
       <div class="profile-container" v-if="isLogin" ref="profileButton">
         <button class="account textButton" @click="isOpen=!isOpen">{{ account }}</button>
         <div class="profile-view" v-if="isOpen">
-          <button class="textButton">設置</button>
+          <button class="textButton" @click="router.push({ name: 'setting' })">設置</button>
           <button class="textButton" @click="logout">登出</button>
         </div>
       </div>
@@ -130,8 +130,7 @@ h1 {
   position: absolute;
   width: 100px;
   border: 1px solid gray;
-  border-radius: 8px;
-  box-shadow: 0 0 10px black;
+  box-shadow: 0 0 8px black;
   background-color: white;
   z-index: 1000;
   right: 5px;
