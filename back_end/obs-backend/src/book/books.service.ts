@@ -46,6 +46,7 @@ export class BooksService {
    */
   async findAll(): Promise<Book[]> {
     return await this.booksRepository.find({
+      where: { status: 1 },
       relations: ['images'],
       order: {
         createdAt: 'DESC',

@@ -531,7 +531,7 @@ async function seedData() {
       productDescription: '這是舊版的 JavaScript 教程，已被新版取代。',
       price: 350,
       inventoryQuantity: 0,
-      status: 0, // 已下架
+      status: 1,  //上架但沒庫存
       author: '趙六',
       publisher: '旗標出版',
       merchantId: merchant3.memberID,
@@ -568,7 +568,49 @@ async function seedData() {
       },
     ]);
 
-    console.log('✅ 創建了 12 本書籍');
+    // 第十三本 - 第一本書的舊版（已下架）
+    const book13 = await bookRepo.save({
+      ISBN: '9786263294000',
+      name: '電腦&程式設計知識圖鑑 (舊版)',
+      productDescription: 'AI時代不可不知的知識\n' +
+        'AI是什麼？究竟什麼是程式設計？' +
+        '程式語言有何區別？' +
+        '最輕鬆、易懂的電腦＆程式設計圖鑑！',
+      price: 320,
+      inventoryQuantity: 100,
+      status: 0,  // 有庫存不過是下架狀態
+      author: '石戶奈奈子/ 監修',
+      publisher: '台灣東販股份有限公司',
+      merchantId: merchant1.memberID,
+    });
+
+    await bookImageRepo.save([
+      {
+        imageUrl: copyImageToUploads('BookImage-Demo/1/1.jpg'),
+        displayOrder: 0,
+        isCover: true,
+        book: book13,
+      },
+      {
+        imageUrl: copyImageToUploads('BookImage-Demo/1/2.jpg'),
+        displayOrder: 1,
+        isCover: false,
+        book: book13,
+      },
+      {
+        imageUrl: copyImageToUploads('BookImage-Demo/1/3.jpg'),
+        displayOrder: 2,
+        isCover: false,
+        book: book13,
+      },
+    ]);
+
+    await belongsToRepo.save({
+      bookID: book13.bookID,
+      categoryId: categories[0].categoryID,
+    });
+
+    console.log('✅ 創建了 13 本書籍');
 
     // 4. 創建訂單
     console.log('\n🛒 創建訂單數據...');
