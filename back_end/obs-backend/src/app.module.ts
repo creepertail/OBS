@@ -10,6 +10,7 @@ import { SubscriptionModule } from './subscription/subscription.module';
 import { CategoryModule } from './category/category.module';
 import { BelongsToModule } from './belongs-to/belongs-to.module';
 import { OrderModule } from './order/order.module';
+import { CartModule } from './cart/cart.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { OrderModule } from './order/order.module';
     CategoryModule,
     BelongsToModule,
     OrderModule,
+    CartModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,0 +1,26 @@
+# 購物車 - PATCH 範例
+@baseUrl = http://localhost:3000
+
+# 請替換為有效的 User access_token
+@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMTM2NTEwZi0zMDhlLTQ3YWYtYjc3ZS1jZTI0YTIxMDlhZDQiLCJhY2NvdW50IjoidXNlci10ZXN0LTEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2NTQyNzkzMywiZXhwIjoxNzY1NTE0MzMzfQ.JCW9jQwWkbImhSk9yAfkil8UcE24DzVHaQSfaHy1BHw
+
+# 請替換為購物車中已有的書籍 ID
+@bookId1 = 1f2e4a59-1a6c-41ac-826d-49e653b8ee0a
+
+### 修改購物車商品數量
+PATCH {{baseUrl}}/cart/{{bookId1}}
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "amount": 2
+}
+
+### 修改為超過庫存（預期回 400）
+PATCH {{baseUrl}}/cart/{{bookId1}}
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "amount": 999
+}

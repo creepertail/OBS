@@ -1,0 +1,49 @@
+# 購物車 - POST 範例
+@baseUrl = http://localhost:3000
+
+# 請替換為有效的 User access_token
+@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMTM2NTEwZi0zMDhlLTQ3YWYtYjc3ZS1jZTI0YTIxMDlhZDQiLCJhY2NvdW50IjoidXNlci10ZXN0LTEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2NTQyNzkzMywiZXhwIjoxNzY1NTE0MzMzfQ.JCW9jQwWkbImhSk9yAfkil8UcE24DzVHaQSfaHy1BHw
+
+# 請替換為實際書籍 ID（可先用 GET /books 查詢）
+@bookId1 = 1f2e4a59-1a6c-41ac-826d-49e653b8ee0a
+@bookId2 = 390c5ec8-3c75-4daf-904a-3213e10c9754
+
+### 新增一筆商品到購物車
+POST {{baseUrl}}/cart
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "bookID": "{{bookId1}}",
+  "amount": 1
+}
+
+### 再次新增同一本書（應累加數量）
+POST {{baseUrl}}/cart
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "bookID": "{{bookId1}}",
+  "amount": 2
+}
+
+### 新增另一個商品
+POST {{baseUrl}}/cart
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "bookID": "{{bookId2}}",
+  "amount": 1
+}
+
+### 嘗試超過庫存（預期回 400）
+POST {{baseUrl}}/cart
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "bookID": "{{bookId1}}",
+  "amount": 999
+}
