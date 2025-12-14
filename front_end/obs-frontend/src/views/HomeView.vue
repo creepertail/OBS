@@ -12,6 +12,7 @@ interface BookCardData {
   author: string
   publisher: string
   price: number
+  inventoryQuantity: number
 }
 
 const books = ref<BookCardData[]>([])
@@ -25,8 +26,10 @@ onMounted(async () => {
     title: book.name,
     author: book.author,
     publisher: book.publisher,
-    price: book.price
+    price: book.price,
+    inventoryQuantity: book.inventoryQuantity
   }))
+  console.log(books.value);
 });
 </script>
 

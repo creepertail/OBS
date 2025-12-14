@@ -4,6 +4,7 @@ import HideView from '../views/HideView.vue'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import MerchantView from '../views/MerchantView.vue'
+import BookView from '../views/BookView.vue'
 import SettingView from '../views/SettingView.vue'
 
 const router = createRouter({
@@ -44,10 +45,16 @@ const router = createRouter({
       component: MerchantView,
     },
     {
+      path: '/book',
+      name: 'book',
+      component: BookView,
+    },
+    {
       path: '/setting',
       name: 'setting',
       component: SettingView,
     },
+    
   ],
 })
 

@@ -21,9 +21,6 @@ const props = defineProps({
 
 <style scoped>
 .book-table {
-  /* width: 80%; */
-  /* margin: 20px auto; */
-
   display: grid;
 
   /* 一列 5 個，會自動換行 */
