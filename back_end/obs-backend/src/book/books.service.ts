@@ -59,6 +59,7 @@ export class BooksService {
    */
   async findByID(id: string): Promise<Book> {
     const book = await this.booksRepository.findOne({
+      where: {bookID: id},     
       relations: ['images'],
     });
 
@@ -74,6 +75,7 @@ export class BooksService {
    */
   async findByISBN(isbn: string): Promise<Book> {
     const book = await this.booksRepository.findOne({
+      where: {ISBN: isbn}, 
       relations: ['images'],
     });
 
