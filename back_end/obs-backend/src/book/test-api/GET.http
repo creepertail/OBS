@@ -35,7 +35,7 @@ GET {{baseUrl}}/books
 
 ### 根據書籍 ID 查詢（需替換成實際的 book ID）
 # 說明：將 {book-id} 替換成實際的書籍 UUID
-@bookId = b316330a-a386-4d97-8e3d-8092bc2bb4b3
+@bookId = ffc87f7d-10ee-4861-a6e7-4a8753f16b9d
 GET {{baseUrl}}/books/{{bookId}}
 
 ### 範例：使用特定 ID 查詢

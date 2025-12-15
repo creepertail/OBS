@@ -45,11 +45,11 @@ const router = createRouter({
       name: 'merchant',
       component: MerchantView,
     },
-    {
-      path: '/book',
-      name: 'book',
-      component: BookView,
-    },
+    // {
+    //   path: '/book',
+    //   name: 'book',
+    //   component: BookView,
+    // },
     {
       path: '/setting',
       name: 'setting',
@@ -59,6 +59,11 @@ const router = createRouter({
       path: '/search',
       name: 'search',
       component: SearchView,
+    },
+    {
+      path: "/books/:bookID",
+      name: "book-detail",
+      component: () => import("@/views/BookView.vue")
     }
   ],
 })

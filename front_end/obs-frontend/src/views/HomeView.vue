@@ -7,6 +7,7 @@ import { ref, onMounted } from "vue"
 import axios from 'axios'
 
 interface BookCardData {
+  bookID: string
   image: string
   title: string
   author: string
@@ -21,6 +22,7 @@ onMounted(async () => {
   const res = await axios.get<Book[]>("http://localhost:3000/books")
   console.log(res.data)
   books.value = res.data.map((book: Book) => ({
+    bookID: book.bookID,
     image: book.images?.find(img => img.isCover)?.imageUrl 
        ?? "http://localhost:3000/uploads/defaultImages/default_book_image.png",
     title: book.name,

@@ -2,33 +2,21 @@
 import { ref, onMounted } from "vue"
 import { useRoute } from "vue-router"
 import axios from "axios"
-
-interface BookDetail {
-  bookID: string
-  ISBN: string
-  name: string
-  images: {
-    imageId: string
-    imageUrl: string
-    displayOrder: number
-    isCover: boolean
-  }[]
-  price: number
-  author: string
-  publisher: string
-  productDescription: string
-  inventoryQuantity: number
-}
+import type { Book } from "../type/book"
 
 const route = useRoute()
-const book = ref<BookDetail | null>(null)
+const book = ref<Book | null>(null)
 const loading = ref(true)
 const errorMsg = ref("")
 
 onMounted(async () => {
   try {
-    const id = route.params.id
-    const res = await axios.get<BookDetail>(`http://localhost:3000/books/${id}`)
+    const bookID = route.params.bookID as string
+    console.log("book view bookID =", bookID)
+
+    const res = await axios.get<Book>(
+      `http://localhost:3000/books/${bookID}`
+    )
     book.value = res.data
   } catch (e) {
     errorMsg.value = "無法載入書籍資料"
@@ -47,73 +35,273 @@ function buyNow() {
 </script>
 
 <template>
-  <div class="max-w-5xl mx-auto p-6" v-if="!loading && book">
-    <!-- 上半部：圖片 + 資訊 -->
-    <div class="flex flex-col lg:flex-row gap-8">
+  <main class="book-page">
 
-      <!-- 書籍圖片 -->
-      <div class="w-full lg:w-1/3">
-        <img
-          :src="book.images.find(i => i.isCover)?.imageUrl || '/default-book.png'"
-          class="w-full h-[400px] object-contain bg-gray-100 rounded shadow"
-          alt="book cover"
-        />
-      </div>
+    <!-- 載入中 -->
+    <div v-if="loading" class="page-state page-state--loading">
+      正在載入書籍資料…
+    </div>
 
-      <!-- 書籍資訊 -->
-      <div class="flex-1 space-y-4">
-        <h1 class="text-3xl font-bold">{{ book.name }}</h1>
-        
-        <p class="text-gray-700 text-lg"><b>作者：</b> {{ book.author }}</p>
-        <p class="text-gray-700 text-lg"><b>出版社：</b> {{ book.publisher }}</p>
-        <p class="text-gray-700"><b>ISBN：</b> {{ book.ISBN }}</p>
+    <!-- 錯誤 -->
+    <div v-else-if="errorMsg" class="page-state page-state--error">
+      {{ errorMsg }}
+    </div>
 
-        <p class="text-2xl text-red-600 font-bold">
-          NT$ {{ book.price }}
-        </p>
+    <!-- 書籍內容 -->
+    <section v-else-if="book" class="book-detail">
 
-        <p class="text-gray-600">
-          庫存：<b>{{ book.inventoryQuantity }}</b>
-        </p>
+      <!-- 上半部 -->
+      <div class="book-detail__top">
 
-        <!-- 按鈕 -->
-        <div class="flex gap-4 mt-6">
-          <button
-            @click="addToCart"
-            class="px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg shadow"
-          >
-            加入購物車
-          </button>
+        <!-- 書封 -->
+        <div class="book-cover">
+          <img
+            :src="book.images.find(i => i.isCover)?.imageUrl || '/default-book.png'"
+            alt="book cover"
+            class="book-cover__image"
+          />
+        </div>
 
-          <button
-            @click="buyNow"
-            class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow"
-          >
-            立即購買
-          </button>
+        <!-- 書籍資訊 -->
+        <div class="book-info">
+          <h1 class="book-info__title">{{ book.name }}</h1>
+
+          <div class="book-info__meta">
+            <p><span>作者</span>{{ book.author }}</p>
+            <p><span>出版社</span>{{ book.publisher }}</p>
+            <p><span>ISBN</span>{{ book.ISBN }}</p>
+          </div>
+
+          <div class="book-info__pricing">
+            <div class="book-info__price">NT$ {{ book.price }}</div>
+            <div
+              class="book-info__stock"
+              :class="book.inventoryQuantity > 0
+                ? 'book-info__stock--available'
+                : 'book-info__stock--soldout'"
+            >
+              {{ book.inventoryQuantity > 0
+                ? `庫存 ${book.inventoryQuantity}`
+                : '已售完' }}
+            </div>
+          </div>
+
+          <div class="book-info__actions">
+            <button
+              class="action-button action-button--cart"
+              :disabled="book.inventoryQuantity === 0"
+              @click="addToCart"
+            >
+              加入購物車
+            </button>
+
+            <button
+              class="action-button action-button--buy"
+              :disabled="book.inventoryQuantity === 0"
+              @click="buyNow"
+            >
+              立即購買
+            </button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- 下半部：商品描述 -->
-    <div class="mt-12">
-      <h2 class="text-2xl font-bold mb-4">內容介紹</h2>
-      <p class="text-gray-800 leading-relaxed whitespace-pre-line">
-        {{ book.productDescription }}
-      </p>
-    </div>
-  </div>
+      <!-- 分隔線 -->
+      <hr class="book-detail__divider" />
 
-  <!-- Loading 狀態 -->
-  <div v-else-if="loading" class="text-center py-10 text-gray-500 text-lg">
-    正在載入書籍資料...
-  </div>
+      <!-- 商品描述 -->
+      <div class="book-description">
+        <h2 class="book-description__title">內容介紹</h2>
+        <p class="book-description__content">
+          {{ book.productDescription }}
+        </p>
+      </div>
 
-  <!-- Error 狀態 -->
-  <div v-else class="text-center py-10 text-red-500 text-lg">
-    {{ errorMsg }}
-  </div>
+    </section>
+  </main>
 </template>
 
+
 <style scoped>
+/* ===== Page ===== */
+.book-page {
+  min-height: 100vh;
+  background-color: var(--color-bg-page);
+  padding: 100px 16px 48px;
+}
+
+/* ===== 狀態頁 ===== */
+.page-state {
+  text-align: center;
+  padding: 80px 0;
+  font-size: 18px;
+}
+
+.page-state--loading {
+  color: var(--color-text-secondary);
+}
+
+.page-state--error {
+  color: #dc2626; /* 錯誤色保留語意紅 */
+}
+
+/* ===== 主內容 ===== */
+.book-detail {
+  max-width: 1100px;
+  margin: 0 auto;
+  background: var(--color-bg-card);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.08);
+  color: var(--color-text-primary);
+}
+
+/* ===== 上半部 ===== */
+.book-detail__top {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 48px;
+}
+
+@media (max-width: 1024px) {
+  .book-detail__top {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== 書封 ===== */
+.book-cover {
+  background: var(--color-bg-muted);
+  border-radius: 20px;
+  padding: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.book-cover__image {
+  max-height: 420px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.15));
+}
+
+/* ===== 書籍資訊 ===== */
+.book-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.book-info__title {
+  font-size: 34px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  margin-bottom: 24px;
+}
+
+.book-info__meta p {
+  font-size: 16px;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+}
+
+.book-info__meta span {
+  display: inline-block;
+  width: 70px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+/* ===== 價格與庫存 ===== */
+.book-info__pricing {
+  margin-top: 32px;
+}
+
+.book-info__price {
+  font-size: 38px;
+  font-weight: 800;
+  color: #dc2626; /* 價格紅色：刻意不進主題變數 */
+}
+
+.book-info__stock {
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.book-info__stock--available {
+  color: #16a34a;
+}
+
+.book-info__stock--soldout {
+  color: #dc2626;
+}
+
+/* ===== 按鈕 ===== */
+.book-info__actions {
+  display: flex;
+  gap: 16px;
+  margin-top: auto;
+}
+
+.action-button {
+  flex: 1;
+  padding: 16px 0;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.15s ease, background-color 0.2s ease;
+}
+
+.action-button:disabled {
+  background: var(--color-bg-muted);
+  color: var(--color-text-secondary);
+  cursor: not-allowed;
+}
+
+/* 加入購物車 */
+.action-button--cart {
+  background: #f59e0b;
+  color: #ffffff;
+}
+
+.action-button--cart:hover:not(:disabled) {
+  background: #d97706;
+  transform: translateY(-1px);
+}
+
+/* 立即購買 */
+.action-button--buy {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.action-button--buy:hover:not(:disabled) {
+  background: #b91c1c;
+  transform: translateY(-1px);
+}
+
+/* ===== 分隔線 ===== */
+.book-detail__divider {
+  margin: 56px 0;
+  border: none;
+  border-top: 1px solid var(--color-border);
+}
+
+/* ===== 商品描述 ===== */
+.book-description__title {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--color-text-primary);
+}
+
+.book-description__content {
+  font-size: 16px;
+  line-height: 1.9;
+  color: var(--color-text-secondary);
+  white-space: pre-line;
+}
+
 </style>
