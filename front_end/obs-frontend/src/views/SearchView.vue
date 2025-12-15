@@ -15,7 +15,8 @@ async function search() {
     title: book.name,
     author: book.author,
     publisher: book.publisher,
-    price: book.price
+    price: book.price,
+    inventoryQuantity: book.inventoryQuantity
   }));
 }
 
