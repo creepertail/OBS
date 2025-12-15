@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { RouterLink, RouterView, useRoute, useRouter  } from 'vue-router'
 import { computed } from 'vue'
-import { MagnifyingGlassIcon } from '@heroicons/vue/24/solid'
 import { ref, onMounted, onBeforeUnmount } from 'vue';
+import SearchBox from './components/SearchBox.vue';
 
 const router = useRouter();
 const route = useRoute()
@@ -44,7 +44,7 @@ onBeforeUnmount(() => {
     </RouterLink>
 
     <div class="routerButtons">
-      <MagnifyingGlassIcon style="width:32px; height:32px; color:aliceblue;" />
+      <SearchBox></SearchBox>
       <RouterLink :to="{name: 'login'}" v-if="!isLogin">Login</RouterLink>
       <RouterLink :to="{name: 'register'}" v-if="!isLogin">Register</RouterLink>
       <div class="profile-container" v-if="isLogin" ref="profileButton">
