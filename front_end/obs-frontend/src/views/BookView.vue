@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue"
-import { useRoute } from "vue-router"
+import { useRoute, useRouter } from "vue-router"
 import axios from "axios"
 import type { Book } from "../type/book"
 import type { Member } from "../type/member"
 
 const route = useRoute()
+const router = useRouter()
 const book = ref<Book | null>(null)
 const merchant = ref<Member>()
 const loading = ref(true)
@@ -103,12 +104,19 @@ async function addBookToCart(goToCardPage: boolean) {
       }
     )
 
-    alert("已加入購物車！")
+    // alert("已加入購物車！")
   } catch (error) {
     console.error(error)
     alert("加入購物車失敗")
   }
-  if (goToCardPage) alert("前往購物車頁面")
+  finally{
+    if (goToCardPage === true) {
+      router.push({ name: 'cart' })
+    }
+    else {
+      alert("已加入購物車！")
+    }
+  }
 }
 </script>
 

@@ -26,6 +26,8 @@
 /* =========================================
    🌞 Semantic tokens - Light theme
    ========================================= */
+   :root {
+}
 :root {
   --color-bg-page: var(--vt-c-white);
   --color-bg-card: var(--vt-c-white-soft);
@@ -34,10 +36,15 @@
   --color-border: var(--vt-c-divider-light-2);
   --color-border-hover: var(--vt-c-divider-light-1);
 
+  --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
+
   --color-text-primary: var(--vt-c-text-light-1);
   --color-text-secondary: var(--vt-c-text-light-2);
 
   --color-link: #42b883;
+
+  --color-accent: #2563eb;
 
   --section-gap: 160px;
 }
@@ -54,10 +61,21 @@
     --color-border: var(--vt-c-divider-dark-2);
     --color-border-hover: var(--vt-c-divider-dark-1);
 
+    --color-danger: #ef4444;
+    --color-danger-hover: #dc2626;
+
     --color-text-primary: var(--vt-c-text-dark-1);
     --color-text-secondary: var(--vt-c-text-dark-2);
 
     --color-link: #5de4c7;
+
+    --color-accent: #60a5fa;
+  }
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  :root {
   }
 }
 

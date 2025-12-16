@@ -54,7 +54,7 @@ const router = createRouter({
     {
       path: "/cart",
       name: "cart",
-      component: CartView.vue
+      component: CartView
     },
     {
       path: '/setting',
