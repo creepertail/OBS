@@ -9,21 +9,59 @@ const book = ref<Book | null>(null)
 const loading = ref(true)
 const errorMsg = ref("")
 
+// onMounted(async () => {
+//   try {
+//     const bookID = route.params.bookID as string
+//     const res = await axios.get<Book>(
+//       `http://localhost:3000/books/${bookID}`
+//     )
+//     book.value = res.data
+//     console.log("bookimg", book.value.images);
+//   } catch (e) {
+//     errorMsg.value = "無法載入書籍資料"
+//   } finally {
+//     loading.value = false
+//   }
+// })
+
 onMounted(async () => {
   try {
     const bookID = route.params.bookID as string
-    console.log("book view bookID =", bookID)
-
     const res = await axios.get<Book>(
       `http://localhost:3000/books/${bookID}`
     )
-    book.value = res.data
+
+    const data = res.data
+
+    // 確保 images 一定是陣列
+    if (!Array.isArray(data.images)) {
+      data.images = []
+    }
+
+    // 檢查是否已經有封面
+    const hasCover = data.images.some(img => img.isCover)
+
+    // 如果沒有封面 → 補預設圖
+    if (!hasCover) {
+      data.images.unshift({
+        imageId: "imageId",
+        imageUrl: "http://localhost:3000/uploads/defaultImages/default_book_image.png",
+        displayOrder: 0,
+        isCover: true
+      })
+    }
+
+    book.value = data
+
+    console.log("處理後 images =", book.value.images)
   } catch (e) {
     errorMsg.value = "無法載入書籍資料"
   } finally {
     loading.value = false
   }
 })
+
+
 
 function addToCart() {
   alert("已加入購物車！")

@@ -19,10 +19,10 @@ a {
 
 @media (hover: hover) {
   a:hover {
-    background-color: color-mix(
+    /* background-color: color-mix(
       in srgb,
       var(--color-link) 20%,
       transparent
-    );
+    ); */
   }
 }
