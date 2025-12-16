@@ -1,4 +1,4 @@
-export interface Merber {
+export interface Member {
   memberID: string
   email: string
   account: string
