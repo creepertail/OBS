@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<!-- <script setup lang="ts">
 import { ref, onMounted, computed } from "vue"
 import { useRoute } from "vue-router"
 import axios from "axios"
@@ -9,6 +9,7 @@ const book = ref<Book | null>(null)
 const loading = ref(true)
 const errorMsg = ref("")
 const quantity = ref(1)
+const currentImageIndex = ref(0)
 
 onMounted(async () => {
   try {
@@ -93,7 +94,107 @@ async function addBookToCart(goToCardPage: boolean) {
     alert("前往購物車頁面")
   }
 }
+</script> -->
 
+<script setup lang="ts">
+import { ref, onMounted } from "vue"
+import { useRoute } from "vue-router"
+import axios from "axios"
+import type { Book } from "../type/book"
+
+const route = useRoute()
+const book = ref<Book | null>(null)
+const loading = ref(true)
+const errorMsg = ref("")
+const quantity = ref(1)
+const currentImageIndex = ref(0) // 當前顯示的圖片索引
+
+onMounted(async () => {
+  try {
+    const bookID = route.params.bookID as string
+    const res = await axios.get<Book>(`http://localhost:3000/books/${bookID}`)
+    const data = res.data
+
+    // 確保 images 一定是陣列
+    if (!Array.isArray(data.images)) data.images = []
+
+    // 排序 images 依 displayOrder 升冪
+    data.images.sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
+
+    // 檢查是否有封面
+    const hasCover = data.images.some(img => img.isCover)
+    if (!hasCover) {
+      data.images.unshift({
+        imageId: "imageId",
+        imageUrl: "http://localhost:3000/uploads/defaultImages/default_book_image.png",
+        displayOrder: 0,
+        isCover: true
+      })
+    }
+
+    book.value = data
+    console.log("image", book.value.images)
+    quantity.value = Math.min(1, data.inventoryQuantity || 1)
+  } catch (e) {
+    errorMsg.value = "無法載入書籍資料"
+  } finally {
+    loading.value = false
+  }
+})
+
+
+// 切換圖片
+function prevImage() {
+  if (!book.value) return
+  currentImageIndex.value =
+    (currentImageIndex.value - 1 + book.value.images.length) % book.value.images.length
+}
+
+function nextImage() {
+  if (!book.value) return
+  currentImageIndex.value =
+    (currentImageIndex.value + 1) % book.value.images.length
+}
+
+function addToCart() {
+  if (!book.value) return
+  addBookToCart(false)
+}
+
+function buyNow() {
+  if (!book.value) return
+  addBookToCart(true)
+}
+
+async function addBookToCart(goToCardPage: boolean) {
+  try {
+    const token = localStorage.getItem("accessToken")
+    if (!token) {
+      alert("請先登入")
+      return
+    }
+
+    await axios.post(
+      "http://localhost:3000/cart",
+      {
+        bookID: book.value?.bookID,
+        amount: quantity.value
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      }
+    )
+
+    alert("已加入購物車！")
+  } catch (error) {
+    console.error(error)
+    alert("加入購物車失敗")
+  }
+  if (goToCardPage) alert("前往購物車頁面")
+}
 </script>
 
 <template>
@@ -117,12 +218,30 @@ async function addBookToCart(goToCardPage: boolean) {
 
         <!-- 書封 -->
         <div class="book-cover">
+          <button
+            class="carousel-btn carousel-btn--prev"
+            @click="prevImage"
+            :disabled="!book || book.images.length <= 1"
+          >
+            ‹
+          </button>
+
           <img
-            :src="book.images.find(i => i.isCover)?.imageUrl || '/default-book.png'"
+            v-if="book"
+            :src="book.images[currentImageIndex]?.imageUrl || '/default-book.png'"
             alt="book cover"
             class="book-cover__image"
           />
+
+          <button
+            class="carousel-btn carousel-btn--next"
+            @click="nextImage"
+            :disabled="!book || book.images.length <= 1"
+          >
+            ›
+          </button>
         </div>
+
 
         <!-- 書籍資訊 -->
         <div class="book-info">
@@ -264,6 +383,58 @@ async function addBookToCart(goToCardPage: boolean) {
 
 /* ===== 書封 ===== */
 .book-cover {
+  position: relative;
+  background: var(--color-bg-muted);
+  border-radius: 20px;
+  padding: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.book-cover__image {
+  max-width: 100%;      /* 寬度不超過容器寬度 */
+  max-height: 420px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.15));
+}
+
+/* carousel 按鈕 */
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.3);
+  border: none;
+  color: white;
+  font-size: 28px;
+  font-weight: bold;
+  width: 40px;
+  height: 60px;
+  cursor: pointer;
+  border-radius: 6px;
+  z-index: 10;
+}
+
+.carousel-btn:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.carousel-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.carousel-btn--prev {
+  left: 8px;
+}
+
+.carousel-btn--next {
+  right: 8px;
+}
+/* 
+.book-cover {
   background: var(--color-bg-muted);
   border-radius: 20px;
   padding: 32px;
@@ -277,7 +448,7 @@ async function addBookToCart(goToCardPage: boolean) {
   width: auto;
   object-fit: contain;
   filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.15));
-}
+} */
 
 /* ===== 書籍資訊 ===== */
 .book-info {
