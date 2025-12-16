@@ -36,28 +36,10 @@ const props = defineProps({
 
 const isSoldOut = (props.inventoryQuantity == 0)? true: false; 
 
-console.log("bookID =", props.bookID);
+// console.log("bookID =", props.bookID);
 </script>
 
 <style scoped>
-/* .book-card {
-  width: 200px;
-  height: 100%;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  overflow: hidden;
-  padding: 12px;
-  background: gray;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  transition: 0.2s ease;
-}
-
-.book-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-} */
-
 .book-card {
   
   width: 200px;

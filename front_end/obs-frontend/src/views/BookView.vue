@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue"
+import { ref, onMounted, computed } from "vue"
 import { useRoute } from "vue-router"
 import axios from "axios"
 import type { Book } from "../type/book"
@@ -8,21 +8,7 @@ const route = useRoute()
 const book = ref<Book | null>(null)
 const loading = ref(true)
 const errorMsg = ref("")
-
-// onMounted(async () => {
-//   try {
-//     const bookID = route.params.bookID as string
-//     const res = await axios.get<Book>(
-//       `http://localhost:3000/books/${bookID}`
-//     )
-//     book.value = res.data
-//     console.log("bookimg", book.value.images);
-//   } catch (e) {
-//     errorMsg.value = "無法載入書籍資料"
-//   } finally {
-//     loading.value = false
-//   }
-// })
+const quantity = ref(1)
 
 onMounted(async () => {
   try {
@@ -52,6 +38,7 @@ onMounted(async () => {
     }
 
     book.value = data
+    quantity.value = Math.min(1, data.inventoryQuantity || 1)
 
     console.log("處理後 images =", book.value.images)
   } catch (e) {
@@ -61,15 +48,52 @@ onMounted(async () => {
   }
 })
 
-
-
 function addToCart() {
-  alert("已加入購物車！")
+  if (!book.value) return
+
+  addBookToCart(false);
 }
 
 function buyNow() {
-  alert("前往結帳頁面！")
+  if (!book.value) return
+
+  addBookToCart(true);
+
+  
 }
+
+async function addBookToCart(goToCardPage: boolean) {
+  try {
+    const token = localStorage.getItem("accessToken")
+    if (!token) {
+      alert("請先登入")
+      return
+    }
+
+    await axios.post(
+      "http://localhost:3000/cart",
+      {
+        bookID: book.value?.bookID,
+        amount: quantity.value
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      }
+    )
+
+    alert("已加入購物車！")
+  } catch (error) {
+    console.error(error)
+    alert("加入購物車失敗")
+  }
+  if (goToCardPage){
+    alert("前往購物車頁面")
+  }
+}
+
 </script>
 
 <template>
@@ -121,6 +145,37 @@ function buyNow() {
               {{ book.inventoryQuantity > 0
                 ? `庫存 ${book.inventoryQuantity}`
                 : '已售完' }}
+            </div>
+          </div>
+
+          <!-- 數量選擇 -->
+          <div class="book-quantity">
+            <span class="book-quantity__label">數量</span>
+
+            <div class="quantity-control">
+              <button
+                class="quantity-control__btn"
+                @click="quantity--"
+                :disabled="quantity <= 1"
+              >
+                −
+              </button>
+
+              <input
+                class="quantity-control__input"
+                type="number"
+                v-model.number="quantity"
+                :min="1"
+                :max="book.inventoryQuantity"
+              />
+
+              <button
+                class="quantity-control__btn"
+                @click="quantity++"
+                :disabled="quantity >= book.inventoryQuantity"
+              >
+                +
+              </button>
             </div>
           </div>
 
@@ -273,6 +328,71 @@ function buyNow() {
 .book-info__stock--soldout {
   color: #dc2626;
 }
+
+/* ===== 數量選擇 ===== */
+.book-quantity {
+  margin-top: 24px;
+  padding-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.book-quantity__label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.quantity-control {
+  display: flex;
+  align-items: center;
+  background: var(--color-bg-muted);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+
+.quantity-control__btn {
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--color-text-primary);
+  transition: background-color 0.15s ease;
+}
+
+.quantity-control__btn:hover:not(:disabled) {
+  background: var(--color-background-soft);
+}
+
+.quantity-control__btn:disabled {
+  color: var(--color-text-secondary);
+  cursor: not-allowed;
+}
+
+/* 移除 Chrome / Edge / Safari 的數字輸入上下箭頭 */
+.quantity-control__input::-webkit-inner-spin-button,
+.quantity-control__input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.quantity-control__input {
+  width: 56px;
+  height: 40px;
+  text-align: center;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  background: transparent;
+  color: var(--color-text-primary);
+  /* -moz-appearance: textfield; 移除 Firefox 的數字輸入箭頭 */
+}
+
 
 /* ===== 按鈕 ===== */
 .book-info__actions {
