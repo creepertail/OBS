@@ -20,7 +20,6 @@ const props = defineProps({
 </script>
 
 <style scoped>
-
 .book-table {
   display: grid;
 
@@ -30,5 +29,4 @@ const props = defineProps({
   gap: 20px;
   padding: 10px 0;
 }
-
 </style>

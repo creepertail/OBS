@@ -1,6 +1,6 @@
 <template>
   <RouterLink
-    :to="`/books/${bookID}`"
+    :to="`/book/${bookID}`"
     class="book-link"
   >
     <div class="book-card">

@@ -1,109 +1,13 @@
-<!-- <script setup lang="ts">
-import { ref, onMounted, computed } from "vue"
-import { useRoute } from "vue-router"
-import axios from "axios"
-import type { Book } from "../type/book"
-
-const route = useRoute()
-const book = ref<Book | null>(null)
-const loading = ref(true)
-const errorMsg = ref("")
-const quantity = ref(1)
-const currentImageIndex = ref(0)
-
-onMounted(async () => {
-  try {
-    const bookID = route.params.bookID as string
-    const res = await axios.get<Book>(
-      `http://localhost:3000/books/${bookID}`
-    )
-
-    const data = res.data
-
-    // 確保 images 一定是陣列
-    if (!Array.isArray(data.images)) {
-      data.images = []
-    }
-
-    // 檢查是否已經有封面
-    const hasCover = data.images.some(img => img.isCover)
-
-    // 如果沒有封面 → 補預設圖
-    if (!hasCover) {
-      data.images.unshift({
-        imageId: "imageId",
-        imageUrl: "http://localhost:3000/uploads/defaultImages/default_book_image.png",
-        displayOrder: 0,
-        isCover: true
-      })
-    }
-
-    book.value = data
-    quantity.value = Math.min(1, data.inventoryQuantity || 1)
-
-    console.log("處理後 images =", book.value.images)
-  } catch (e) {
-    errorMsg.value = "無法載入書籍資料"
-  } finally {
-    loading.value = false
-  }
-})
-
-function addToCart() {
-  if (!book.value) return
-
-  addBookToCart(false);
-}
-
-function buyNow() {
-  if (!book.value) return
-
-  addBookToCart(true);
-
-  
-}
-
-async function addBookToCart(goToCardPage: boolean) {
-  try {
-    const token = localStorage.getItem("accessToken")
-    if (!token) {
-      alert("請先登入")
-      return
-    }
-
-    await axios.post(
-      "http://localhost:3000/cart",
-      {
-        bookID: book.value?.bookID,
-        amount: quantity.value
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
-      }
-    )
-
-    alert("已加入購物車！")
-  } catch (error) {
-    console.error(error)
-    alert("加入購物車失敗")
-  }
-  if (goToCardPage){
-    alert("前往購物車頁面")
-  }
-}
-</script> -->
-
 <script setup lang="ts">
 import { ref, onMounted } from "vue"
 import { useRoute } from "vue-router"
 import axios from "axios"
 import type { Book } from "../type/book"
+import type { Member } from "../type/member"
 
 const route = useRoute()
 const book = ref<Book | null>(null)
+const merchant = ref<Member>()
 const loading = ref(true)
 const errorMsg = ref("")
 const quantity = ref(1)
@@ -112,19 +16,19 @@ const currentImageIndex = ref(0) // 當前顯示的圖片索引
 onMounted(async () => {
   try {
     const bookID = route.params.bookID as string
-    const res = await axios.get<Book>(`http://localhost:3000/books/${bookID}`)
-    const data = res.data
+    const resBook = await axios.get<Book>(`http://localhost:3000/books/${bookID}`)
+    const dataBook = resBook.data
 
     // 確保 images 一定是陣列
-    if (!Array.isArray(data.images)) data.images = []
+    if (!Array.isArray(dataBook.images)) dataBook.images = []
 
     // 排序 images 依 displayOrder 升冪
-    data.images.sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
+    dataBook.images.sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
 
     // 檢查是否有封面
-    const hasCover = data.images.some(img => img.isCover)
+    const hasCover = dataBook.images.some(img => img.isCover)
     if (!hasCover) {
-      data.images.unshift({
+      dataBook.images.unshift({
         imageId: "imageId",
         imageUrl: "http://localhost:3000/uploads/defaultImages/default_book_image.png",
         displayOrder: 0,
@@ -132,11 +36,22 @@ onMounted(async () => {
       })
     }
 
-    book.value = data
-    console.log("image", book.value.images)
-    quantity.value = Math.min(1, data.inventoryQuantity || 1)
+    book.value = dataBook
+    // console.log("book", book.value)
+    quantity.value = Math.min(1, dataBook.inventoryQuantity || 1)
   } catch (e) {
     errorMsg.value = "無法載入書籍資料"
+  } finally {
+    loading.value = false
+  }
+  try {
+    const resMerchant = await axios.get<Member>(`http://localhost:3000/members/${book.value?.merchantId}`)
+    const dataMerchant = resMerchant.data
+
+    merchant.value = dataMerchant
+    console.log("merchant", merchant.value)
+  } catch (e) {
+    errorMsg.value = "無法載入商家資料"
   } finally {
     loading.value = false
   }
@@ -321,6 +236,35 @@ async function addBookToCart(goToCardPage: boolean) {
       <!-- 分隔線 -->
       <hr class="book-detail__divider" />
 
+      <!-- 商家資訊 -->
+      <section v-if="merchant" class="merchant-info">
+        <h2 class="merchant-info__title">商家資訊</h2>
+      
+        <div class="merchant-info__card">
+          <i class="pi pi-spin pi-user" style="font-size: 2rem"></i>
+          <div class="merchant-info__main">
+            <div class="merchant-info__name">
+              {{ merchant.merchantName }}
+            </div>
+      
+            <div class="merchant-info__meta">
+              <p v-if="merchant.email">
+                <span>聯絡信箱</span>{{ merchant.email }}
+              </p>
+              <p v-if="merchant.phoneNumber">
+                <span>聯絡電話</span>{{ merchant.phoneNumber }}
+              </p>
+            </div>
+          </div>
+      
+          <div class="merchant-info__action">
+            <button class="merchant-info__btn">
+              前往商家頁面
+            </button>
+          </div>
+        </div>
+      </section>
+
       <!-- 商品描述 -->
       <div class="book-description">
         <h2 class="book-description__title">內容介紹</h2>
@@ -433,22 +377,6 @@ async function addBookToCart(goToCardPage: boolean) {
 .carousel-btn--next {
   right: 8px;
 }
-/* 
-.book-cover {
-  background: var(--color-bg-muted);
-  border-radius: 20px;
-  padding: 32px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.book-cover__image {
-  max-height: 420px;
-  width: auto;
-  object-fit: contain;
-  filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.15));
-} */
 
 /* ===== 書籍資訊 ===== */
 .book-info {
@@ -616,6 +544,96 @@ async function addBookToCart(goToCardPage: boolean) {
   margin: 56px 0;
   border: none;
   border-top: 1px solid var(--color-border);
+}
+
+/* ===== 商家資訊 ===== */
+.merchant-info {
+  margin-bottom: 56px;
+}
+
+.merchant-info__title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--color-text-primary);
+}
+
+.merchant-info__card {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+
+  background: var(--color-bg-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.merchant-info__main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.merchant-info__name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.merchant-info__meta p {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.merchant-info__meta span {
+  display: inline-block;
+  width: 90px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+/* 右側按鈕 */
+.merchant-info__action {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.merchant-info__btn {
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  background: var(--color-bg-card);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.merchant-info__btn:hover {
+  background: var(--color-background-soft);
+  transform: translateY(-1px);
+}
+
+/* RWD */
+@media (max-width: 768px) {
+  .merchant-info__card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .merchant-info__action {
+    width: 100%;
+  }
+
+  .merchant-info__btn {
+    width: 100%;
+    text-align: center;
+  }
 }
 
 /* ===== 商品描述 ===== */

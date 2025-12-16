@@ -5,6 +5,7 @@ import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import MerchantView from '../views/MerchantView.vue'
 import BookView from '../views/BookView.vue'
+import CartView from '../views/CartView.vue'
 import SettingView from '../views/SettingView.vue'
 import SearchView from '../views/SearchView.vue'
 
@@ -45,11 +46,16 @@ const router = createRouter({
       name: 'merchant',
       component: MerchantView,
     },
-    // {
-    //   path: '/book',
-    //   name: 'book',
-    //   component: BookView,
-    // },
+    {
+      path: "/book/:bookID",
+      name: "book",
+      component: () => import("@/views/BookView.vue")
+    },
+    {
+      path: "/cart",
+      name: "cart",
+      component: CartView.vue
+    },
     {
       path: '/setting',
       name: 'setting',
@@ -59,11 +65,6 @@ const router = createRouter({
       path: '/search',
       name: 'search',
       component: SearchView,
-    },
-    {
-      path: "/books/:bookID",
-      name: "book-detail",
-      component: () => import("@/views/BookView.vue")
     }
   ],
 })
