@@ -58,17 +58,17 @@ export class CartService {
     return this.cartRepository.save(item);
   }
 
-  // 取得使用者的購物車清單（只回傳 book 資訊與數量）
-  async findMyCart(userId: string): Promise<Array<{ bookID: string; amount: number; book: Book }>> {
+  // 取得使用者的購物車清單（展開 book 資訊，避免巢狀結構）
+  async findMyCart(userId: string): Promise<Array<{ bookID: string; amount: number } & Book>> {
     const items = await this.cartRepository.find({
       where: { userID: userId },
       relations: ['book'],
     });
 
     return items.map(({ bookID, amount, book }) => ({
-      bookID,
+      // bookID,
       amount,
-      book,
+      ...book,
     }));
   }
 
