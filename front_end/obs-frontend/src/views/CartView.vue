@@ -31,11 +31,11 @@ onMounted(async () => {
         }
       }
     )
-
+    console.log(res),
     cartItems.value = res.data.map(item => ({
       ...item,
       imageUrl:
-        item.imageUrl ||
+        item.images[0].imageUrl ||
         'http://localhost:3000/uploads/defaultImages/default_book_image.png'
     }))
   } catch (e) {
