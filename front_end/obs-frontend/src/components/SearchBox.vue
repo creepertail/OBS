@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/solid'
 import { useRouter } from 'vue-router';
+
 const router = useRouter();
 const keyword = ref("");
 

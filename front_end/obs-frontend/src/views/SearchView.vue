@@ -9,21 +9,39 @@ const route = useRoute();
 const results = ref([]);
 
 async function search() {
-  const res = await axios.get(`http://localhost:3000/books/search?keyword=${route.query.q as string}`);
-  results.value = res.data.map((book: Book) => ({
-    bookID: book.bookID,
-    image: book.images?.find(img => img.isCover)?.imageUrl 
-       ?? "http://localhost:3000/uploads/defaultImages/default_book_image.png",
-    title: book.name,
-    author: book.author,
-    publisher: book.publisher,
-    price: book.price,
-    inventoryQuantity: book.inventoryQuantity
-  }));
+  if (route.query.cat != undefined) {
+    if (route.query.q === undefined) {
+      const res = await axios.get(`http://localhost:3000/belongs-to/category/${route.query.cat as string}`);
+      console.log(res.data);
+      results.value = res.data.map((book: Book) => ({
+        bookID: book.bookID,
+        image: book.images?.find(img => img.isCover)?.imageUrl 
+          ?? "http://localhost:3000/uploads/defaultImages/default_book_image.png",
+        title: book.name,
+        author: book.author,
+        publisher: book.publisher,
+        price: book.price,
+        inventoryQuantity: book.inventoryQuantity
+      }));
+    }
+  }
+  else {
+    const res = await axios.get(`http://localhost:3000/books/search?keyword=${route.query.q as string}`);
+    results.value = res.data.map((book: Book) => ({
+      bookID: book.bookID,
+      image: book.images?.find(img => img.isCover)?.imageUrl 
+        ?? "http://localhost:3000/uploads/defaultImages/default_book_image.png",
+      title: book.name,
+      author: book.author,
+      publisher: book.publisher,
+      price: book.price,
+      inventoryQuantity: book.inventoryQuantity
+    }));
+  }
 }
 
 watch(
-  () => route.query.q,
+  () => [route.query.q, route.query.cat],
   () => {
     search();
   }
