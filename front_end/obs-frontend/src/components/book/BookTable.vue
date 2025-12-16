@@ -23,12 +23,10 @@ const props = defineProps({
 .book-table {
   display: grid;
 
-  /* 一列 5 個，會自動換行 */
-  grid-template-columns: repeat(5, 1fr);
+  /* 自適應列數：每個 item 最小 200px，最大 1fr */
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 
   gap: 20px;
-
-  /* 可視需要調整 padding */
   padding: 10px 0;
 }
 </style>
