@@ -1,7 +1,7 @@
 // src/cart/entities/adds-to-cart.entity.ts
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { Member } from '../../member/entities/member.entity';
-// import { Book } from '../../book/entityies/book.entity';
+import { Book } from '../../book/entities/book.entity';
 
 @Entity('add_to_cart')
 export class AddsToCart {
@@ -18,7 +18,7 @@ export class AddsToCart {
   @JoinColumn({ name: 'UserID', referencedColumnName: 'memberID' })
   user: Member;
 
-  // @ManyToOne(() => Book, { onDelete: 'CASCADE' })
-  // @JoinColumn({ name: 'BookID', referencedColumnName: 'bookID' })
-  // book: Book;
+  @ManyToOne(() => Book, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'BookID', referencedColumnName: 'bookID' })
+  book: Book;
 }
