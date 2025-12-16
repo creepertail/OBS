@@ -48,14 +48,7 @@ onMounted(async () => {
       }
     )
     console.log(res)
-    // cartItems.value = res.data.map(item => ({
-    //   ...item,
-    //   imageUrl:
-    //     item.images[0].imageUrl ||
-    //     'http://localhost:3000/uploads/defaultImages/default_book_image.png'
-    // }))
     cartItems.value = res.data.map((cartItems: RawCartItem) => ({
-    
     bookID: cartItems.bookID,
     name: cartItems.name,
     amount: cartItems.amount,
@@ -65,15 +58,6 @@ onMounted(async () => {
        ?? "http://localhost:3000/uploads/defaultImages/default_book_image.png",
     author: cartItems.author,
     publisher: cartItems.publisher,
-
-    // bookID: cartItems.bookID,
-    // image: cartItems.images?.find(img => img.isCover)?.imageUrl 
-    //    ?? "http://localhost:3000/uploads/defaultImages/default_book_image.png",
-    // title: cartItems.name,
-    // author: cartItems.author,
-    // publisher: cartItems.publisher,
-    // price: cartItems.price,
-    // inventoryQuantity: cartItems.inventoryQuantity
   }))
   } catch (e) {
     console.error('取得購物車資料失敗', e)

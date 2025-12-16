@@ -3,20 +3,11 @@ import Carousel from '../components/Carousel.vue'
 import LeftMenu from '../components/LeftMenu.vue'
 import BookTable from '../components/book/BookTable.vue'
 import Book from '../type/book.ts'
+import BookCard from '../type/bookCard.ts'
 import { ref, onMounted } from "vue"
 import axios from 'axios'
 
-interface BookCardData {
-  bookID: string
-  image: string
-  title: string
-  author: string
-  publisher: string
-  price: number
-  inventoryQuantity: number
-}
-
-const books = ref<BookCardData[]>([])
+const books = ref<BookCard[]>([])
 
 onMounted(async () => {
   const res = await axios.get<Book[]>("http://localhost:3000/books")

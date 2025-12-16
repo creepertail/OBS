@@ -1,10 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-import HideView from '../views/HideView.vue'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import MerchantView from '../views/MerchantView.vue'
-import BookView from '../views/BookView.vue'
 import CartView from '../views/CartView.vue'
 import SettingView from '../views/SettingView.vue'
 import SearchView from '../views/SearchView.vue'
@@ -17,20 +15,6 @@ const router = createRouter({
       name: 'home',
       component: HomeView,
     },
-    // {
-    //   path: '/about',
-    //   name: 'about',
-    //   // route level code-splitting
-    //   // this generates a separate chunk (About.[hash].js) for this route
-    //   // which is lazy-loaded when the route is visited.
-    //   component: () => import('../views/AboutView.vue'),
-    // },
-    // {
-    //   path: '/hide',
-    //   name: 'hide',
-    //   component: HideView,
-    //   meta: { hideLayout: true },
-    // },
     {
       path: '/login',
       name: 'login',
@@ -50,6 +34,11 @@ const router = createRouter({
       path: "/book/:bookID",
       name: "book",
       component: () => import("@/views/BookView.vue")
+    },
+    {
+      path: "/search/merchant/:memberID",
+      name: "searchMerchant",
+      component: () => import("@/views/SearchMerchantView.vue")
     },
     {
       path: "/cart",
