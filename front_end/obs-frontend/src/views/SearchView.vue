@@ -11,7 +11,9 @@ const results = ref([]);
 async function search() {
   const res = await axios.get(`http://localhost:3000/books/search?keyword=${route.query.q as string}`);
   results.value = res.data.map((book: Book) => ({
-    image: book.images?.find(img => img.isCover)?.imageUrl ?? "http://localhost:3000/uploads/defaultImages/default_book_image.png",
+    bookID: book.bookID,
+    image: book.images?.find(img => img.isCover)?.imageUrl 
+       ?? "http://localhost:3000/uploads/defaultImages/default_book_image.png",
     title: book.name,
     author: book.author,
     publisher: book.publisher,
