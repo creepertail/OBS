@@ -58,17 +58,18 @@ export class CartService {
     return this.cartRepository.save(item);
   }
 
-  // 取得使用者的購物車清單（展開 book 資訊，避免巢狀結構）
+  // 取得使用者的購物車清單(展開 book 資訊及 images,避免巢狀結構)
   async findMyCart(userId: string): Promise<Array<{ bookID: string; amount: number } & Book>> {
     const items = await this.cartRepository.find({
       where: { userID: userId },
-      relations: ['book'],
+      relations: ['book', 'book.images'],
     });
 
     return items.map(({ bookID, amount, book }) => ({
       // bookID,
       amount,
       ...book,
+      images: book.images?.filter(img => img.isCover === true) || [],
     }));
   }
 
