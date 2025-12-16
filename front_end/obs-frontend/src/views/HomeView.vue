@@ -20,7 +20,7 @@ const books = ref<BookCardData[]>([])
 
 onMounted(async () => {
   const res = await axios.get<Book[]>("http://localhost:3000/books")
-  console.log(res.data)
+  // console.log(res.data)
   books.value = res.data.map((book: Book) => ({
     bookID: book.bookID,
     image: book.images?.find(img => img.isCover)?.imageUrl 

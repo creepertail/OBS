@@ -2,6 +2,22 @@
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 
+interface RawCartItem {
+  bookID: string
+  name: string
+  amount: number
+  inventoryQuantity: number
+  price: number
+  images: { 
+    imageId: string
+    imageUrl: string
+    displayOrder: number
+    isCover: boolean
+  }[]
+  author: string
+  publisher: string
+}
+
 interface CartItem {
   bookID: string
   name: string
@@ -23,7 +39,7 @@ onMounted(async () => {
       return
     }
 
-    const res = await axios.get<CartItem[]>(
+    const res = await axios.get<RawCartItem[]>(
       'http://localhost:3000/cart',
       {
         headers: {
@@ -31,13 +47,34 @@ onMounted(async () => {
         }
       }
     )
-    console.log(res),
-    cartItems.value = res.data.map(item => ({
-      ...item,
-      imageUrl:
-        item.images[0].imageUrl ||
-        'http://localhost:3000/uploads/defaultImages/default_book_image.png'
-    }))
+    console.log(res)
+    // cartItems.value = res.data.map(item => ({
+    //   ...item,
+    //   imageUrl:
+    //     item.images[0].imageUrl ||
+    //     'http://localhost:3000/uploads/defaultImages/default_book_image.png'
+    // }))
+    cartItems.value = res.data.map((cartItems: RawCartItem) => ({
+    
+    bookID: cartItems.bookID,
+    name: cartItems.name,
+    amount: cartItems.amount,
+    inventoryQuantity: cartItems.inventoryQuantity,
+    price: cartItems.price,
+    imageUrl: cartItems.images?.find(img => img.isCover)?.imageUrl 
+       ?? "http://localhost:3000/uploads/defaultImages/default_book_image.png",
+    author: cartItems.author,
+    publisher: cartItems.publisher,
+
+    // bookID: cartItems.bookID,
+    // image: cartItems.images?.find(img => img.isCover)?.imageUrl 
+    //    ?? "http://localhost:3000/uploads/defaultImages/default_book_image.png",
+    // title: cartItems.name,
+    // author: cartItems.author,
+    // publisher: cartItems.publisher,
+    // price: cartItems.price,
+    // inventoryQuantity: cartItems.inventoryQuantity
+  }))
   } catch (e) {
     console.error('取得購物車資料失敗', e)
   }
@@ -278,9 +315,9 @@ async function deleteAllCartItem(){
 }
 
 .cart-item__image {
-  max-width: 100%;  
-  height: 128px;
-  object-fit: cover;
+  max-width: 128px;
+  height: 100%;
+  object-fit: contain;
   border-radius: 8px;
   border: 1px solid var(--color-border);
   background: var(--color-bg-muted);
