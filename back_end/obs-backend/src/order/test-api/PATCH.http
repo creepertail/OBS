@@ -1,0 +1,301 @@
+#  /**
+#    * API 功能：
+#    * PATCH url/orders/:id + body         => 更新訂單
+#    *   - User: 只能修改 shippingAddress 和 paymentMethod
+#    *   - Merchant: 只能修改 state（訂單狀態）
+#    *   - Admin: 可以修改所有欄位
+#    */
+
+# ----------
+# 權限說明：
+# User 可以修改：shippingAddress、paymentMethod
+# Merchant 可以修改：state（訂單狀態）
+# Admin 可以修改：所有欄位
+#
+# 如果嘗試修改不允許的欄位會回覆：
+# User: "Users can only update shipping address and payment method"
+# Merchant: "Merchants can only update order state"
+# ----------
+
+@baseUrl = http://localhost:3000
+
+# 請先執行登入 API 取得對應身分的 access_token
+@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLWlkLWhlcmUiLCJhY2NvdW50IjoidXNlci10ZXN0LTEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTcwMDAwMDAwMCwiZXhwIjoxNzAwMDg2NDAwfQ.xxxxx
+@merchantToken = merchant-token-here
+@adminToken = admin-token-here
+
+# 訂單 ID（請先使用 POST /orders 建立訂單後取得訂單 ID）
+@orderId = xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+
+# ========================================
+# User 更新訂單測試
+# ========================================
+
+### User 更新配送地址（成功）
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "shippingAddress": "高雄市前金區中正四路211號"
+}
+
+### User 更新付款方式（成功）
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "paymentMethod": 2
+}
+
+### User 同時更新配送地址和付款方式（成功）
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "shippingAddress": "台南市中西區民族路二段76號",
+  "paymentMethod": 3
+}
+
+### User 嘗試更新訂單狀態（失敗 - 權限不足）
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "state": 1
+}
+
+### User 嘗試更新總價（失敗 - 權限不足）
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "totalPrice": 99999
+}
+
+### User 嘗試更新總數量（失敗 - 權限不足）
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "totalAmount": 999
+}
+
+# ========================================
+# Merchant 更新訂單測試
+# ========================================
+
+### Merchant 更新訂單狀態為「處理中」（成功）
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{merchantToken}}
+
+{
+  "state": 1
+}
+
+### Merchant 更新訂單狀態為「已出貨」（成功）
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{merchantToken}}
+
+{
+  "state": 2
+}
+
+### Merchant 更新訂單狀態為「已完成」（成功）
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{merchantToken}}
+
+{
+  "state": 3
+}
+
+### Merchant 嘗試更新配送地址（失敗 - 權限不足）
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{merchantToken}}
+
+{
+  "shippingAddress": "新的地址"
+}
+
+### Merchant 嘗試更新付款方式（失敗 - 權限不足）
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{merchantToken}}
+
+{
+  "paymentMethod": 2
+}
+
+### Merchant 嘗試更新總價（失敗 - 權限不足）
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{merchantToken}}
+
+{
+  "totalPrice": 99999
+}
+
+# ========================================
+# Admin 更新訂單測試
+# ========================================
+
+### Admin 更新配送地址（成功）
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "shippingAddress": "桃園市中壢區中北路200號"
+}
+
+### Admin 更新付款方式（成功）
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "paymentMethod": 2
+}
+
+### Admin 更新訂單狀態（成功）
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "state": 3
+}
+
+### Admin 更新總價（成功）
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "totalPrice": 500
+}
+
+### Admin 更新總數量（成功）
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "totalAmount": 2
+}
+
+### Admin 同時更新多個欄位（成功）
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "shippingAddress": "新竹市東區光復路二段101號",
+  "paymentMethod": 3,
+  "state": 2,
+  "totalPrice": 1200,
+  "totalAmount": 3
+}
+
+# ========================================
+# 權限測試
+# ========================================
+
+### 測試權限錯誤 - 未登入（無 JWT token）
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+
+{
+  "shippingAddress": "新的地址"
+}
+
+### 測試權限錯誤 - User 更新別人的訂單
+# 請將 other-user-order-id 替換成其他使用者的訂單 ID
+PATCH {{baseUrl}}/orders/other-user-order-id
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "shippingAddress": "新的地址"
+}
+
+### 測試權限錯誤 - Merchant 更新其他商家的訂單
+# 請將 other-merchant-order-id 替換成其他商家的訂單 ID
+PATCH {{baseUrl}}/orders/other-merchant-order-id
+Content-Type: application/json
+Authorization: Bearer {{merchantToken}}
+
+{
+  "state": 1
+}
+
+# ========================================
+# 驗證錯誤測試
+# ========================================
+
+### 測試驗證失敗 - 配送地址超過 100 字元
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "shippingAddress": "這是一個超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級長的地址"
+}
+
+### 測試驗證失敗 - 付款方式為負數
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "paymentMethod": -1
+}
+
+### 測試驗證失敗 - 訂單狀態為負數
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{merchantToken}}
+
+{
+  "state": -1
+}
+
+### 測試驗證失敗 - 總價為負數
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "totalPrice": -100
+}
+
+### 測試驗證失敗 - 總數量為 0
+PATCH {{baseUrl}}/orders/{{orderId}}
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "totalAmount": 0
+}
+
+# ========================================
+# 錯誤測試
+# ========================================
+
+### 測試 404 - 訂單不存在
+PATCH {{baseUrl}}/orders/00000000-0000-0000-0000-000000000000
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "shippingAddress": "新的地址"
+}

@@ -4,12 +4,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { Member } from './entities/member.entity';
 import { Subscribes } from '../subscription/entities/subscribes.entity';
+import { Book } from '../book/entities/book.entity';
 import { MemberService } from './member.service';
 import { MemberController } from './member.controller';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Member, Subscribes]),
+    TypeOrmModule.forFeature([Member, Subscribes, Book]),
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET || 'your-secret-key-change-this-in-production',

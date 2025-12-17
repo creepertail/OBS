@@ -10,6 +10,7 @@ import { LoginMemberDto } from './dto/login-member.dto';
 import { Member } from './entities/member.entity';
 import { Subscribes } from '../subscription/entities/subscribes.entity';
 import { MemberType } from './member-type.enum';
+import { Book } from '../book/entities/book.entity';
 
 @Injectable()
 export class MemberService {
@@ -18,6 +19,8 @@ export class MemberService {
     private readonly memberRepository: Repository<Member>,
     @InjectRepository(Subscribes)
     private readonly subscribesRepository: Repository<Subscribes>,
+    @InjectRepository(Book)
+    private readonly bookRepository: Repository<Book>,
     private readonly jwtService: JwtService,
   ) { }
 
@@ -43,6 +46,28 @@ export class MemberService {
     }
 
     return member;
+  }
+
+  async findBookByMerchantID(id: string): Promise<Member & { books: Book[] }> {
+    const member = await this.memberRepository.findOne({ where: { memberID: id } });
+    if (!member) {
+      throw new NotFoundException(`Member with ID ${id} not found`);
+    }
+    if (member.type === MemberType.Merchant) {
+      const subscriberCount = await this.subscribesRepository.count({
+        where: { merchantID: id },
+      });
+      if (member.merchantSubscriberCount !== subscriberCount) {
+        member.merchantSubscriberCount = subscriberCount;
+        await this.memberRepository.save(member);
+      }
+    }
+    const books = await this.bookRepository.find({
+      where: { merchantId: id },
+      relations: ['images']
+    });
+
+    return { ...member, books };
   }
 
   async findMemberType(id: string): Promise<MemberType> {

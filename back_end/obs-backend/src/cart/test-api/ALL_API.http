@@ -1,0 +1,60 @@
+# 購物車 - ALL API 快速測試
+@baseUrl = http://localhost:3000
+
+# 請替換為有效的 User access_token
+@userToken = user-access-token-here
+
+# 請替換為實際書籍 ID
+@bookId1 = 11111111-2222-3333-4444-555555555555
+@bookId2 = 66666666-7777-8888-9999-000000000000
+
+### 新增書籍 1
+POST {{baseUrl}}/cart
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "bookID": "{{bookId1}}",
+  "amount": 1
+}
+
+### 再次新增書籍 1（累加）
+POST {{baseUrl}}/cart
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "bookID": "{{bookId1}}",
+  "amount": 2
+}
+
+### 新增書籍 2
+POST {{baseUrl}}/cart
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "bookID": "{{bookId2}}",
+  "amount": 1
+}
+
+### 查看購物車
+GET {{baseUrl}}/cart
+Authorization: Bearer {{userToken}}
+
+### 修改書籍 1 的數量
+PATCH {{baseUrl}}/cart/{{bookId1}}
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "amount": 3
+}
+
+### 移除書籍 2
+DELETE {{baseUrl}}/cart/{{bookId2}}
+Authorization: Bearer {{userToken}}
+
+### 清空購物車
+DELETE {{baseUrl}}/cart
+Authorization: Bearer {{userToken}}

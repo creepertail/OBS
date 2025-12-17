@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { RouterLink, RouterView, useRoute, useRouter  } from 'vue-router'
 import { computed } from 'vue'
-import { MagnifyingGlassIcon } from '@heroicons/vue/24/solid'
 import { ref, onMounted, onBeforeUnmount } from 'vue';
+import SearchBox from './components/SearchBox.vue';
 
 const router = useRouter();
 const route = useRoute()
@@ -39,18 +39,21 @@ onBeforeUnmount(() => {
 <template>
   <header v-if="!hideLayout">
     <RouterLink :to="{name: 'home'}" class="homeButton">
-      <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="80" height="80" /> <!-- TODO: change img -->
+      <img alt="OBS logo" class="logo" src="@/assets/logo2.png" width="80" height="80" />
       <h1>Online Bookstore System</h1>
     </RouterLink>
 
     <div class="routerButtons">
-      <MagnifyingGlassIcon style="width:32px; height:32px; color:aliceblue;" />
+      <SearchBox></SearchBox>
       <RouterLink :to="{name: 'login'}" v-if="!isLogin">Login</RouterLink>
       <RouterLink :to="{name: 'register'}" v-if="!isLogin">Register</RouterLink>
+      <RouterLink :to="{name: 'cart'}" v-if="isLogin">
+        <i class="pi pi-spin pi-shopping-cart" style="font-size: 2rem"></i>
+      </RouterLink>
       <div class="profile-container" v-if="isLogin" ref="profileButton">
         <button class="account textButton" @click="isOpen=!isOpen">{{ account }}</button>
         <div class="profile-view" v-if="isOpen">
-          <button class="textButton">設置</button>
+          <button class="textButton" @click="router.push({ name: 'setting' })">設置</button>
           <button class="textButton" @click="logout">登出</button>
         </div>
       </div>
@@ -130,8 +133,7 @@ h1 {
   position: absolute;
   width: 100px;
   border: 1px solid gray;
-  border-radius: 8px;
-  box-shadow: 0 0 10px black;
+  box-shadow: 0 0 8px black;
   background-color: white;
   z-index: 1000;
   right: 5px;

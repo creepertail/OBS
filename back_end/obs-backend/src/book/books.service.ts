@@ -1,9 +1,9 @@
 // src/book/books.service.ts
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Book } from './entityies/book.entity';
-import { BookImage } from './entityies/book-image.entity';
+import { Repository, Brackets } from 'typeorm';
+import { Book } from './entities/book.entity';
+import { BookImage } from './entities/book-image.entity';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { Member } from '../member/entities/member.entity';
@@ -30,9 +30,6 @@ export class BooksService {
     }
     if (createBookDto.inventoryQuantity < 0) {
       throw new BadRequestException('InventoryQuantity must be greater than 0');
-    }
-    else if (createBookDto.inventoryQuantity === 0) {
-      createBookDto.status = 0;
     }
 
     // 建立書籍（cascade: true 會自動儲存 images）
@@ -62,7 +59,7 @@ export class BooksService {
    */
   async findByID(id: string): Promise<Book> {
     const book = await this.booksRepository.findOne({
-      where: { bookID: id, status: 1 },
+      where: {bookID: id},     
       relations: ['images'],
     });
 
@@ -78,7 +75,7 @@ export class BooksService {
    */
   async findByISBN(isbn: string): Promise<Book> {
     const book = await this.booksRepository.findOne({
-      where: { ISBN: isbn, status: 1 },
+      where: {ISBN: isbn}, 
       relations: ['images'],
     });
 
@@ -108,10 +105,7 @@ export class BooksService {
     // 驗證庫存
     if (updateBookDto.inventoryQuantity !== undefined) {
       if (updateBookDto.inventoryQuantity < 0) {
-        throw new BadRequestException('InventoryQuantity must be greater than 0');
-      }
-      else if (updateBookDto.inventoryQuantity === 0) {
-        updateBookDto.status = 0;
+        throw new BadRequestException('InventoryQuantity must be greater or equal to 0');
       }
     }
 
@@ -198,19 +192,66 @@ export class BooksService {
    * 根據多個條件搜尋書籍（模糊搜尋）
    */
   async search(params: {
+    keyword?: string;
     isbn?: string;
     name?: string;
     author?: string;
     publisher?: string;
     merchantName?: string;
-    status?: number;
   }): Promise<Book[]> {
     const queryBuilder = this.booksRepository
       .createQueryBuilder('book')
       .leftJoinAndSelect('book.images', 'images')
+      .leftJoin('book.merchant', 'merchant')
+      .addSelect([
+        'merchant.memberID',
+        'merchant.email',
+        'merchant.account',
+        'merchant.phoneNumber',
+        'merchant.merchantName',
+        'merchant.merchantAddress',
+      ])
+      .select([
+        'book.bookID',
+        'book.ISBN',
+        'book.name',
+        'book.status',
+        'book.productDescription',
+        'book.inventoryQuantity',
+        'book.price',
+        'book.author',
+        'book.publisher',
+        'book.merchantId',
+        // 'book.createdAt', // Excluded
+        // 'book.updatedAt', // Excluded
+        'images.imageID',
+        'images.imageUrl',
+        'images.displayOrder',
+        'images.isCover',
+        'merchant.memberID',
+        'merchant.email',
+        'merchant.account',
+        'merchant.phoneNumber',
+        'merchant.merchantName',
+        'merchant.merchantAddress',
+      ])
       .where('book.status = :status', { status: 1 });
 
     // 根據提供的參數動態建立查詢條件
+    if (params.keyword) {
+      const keyword = `%${params.keyword}%`;
+      queryBuilder.andWhere(
+        new Brackets((qb) => {
+          qb.where('book.ISBN LIKE :keyword', { keyword })
+            .orWhere('book.name LIKE :keyword', { keyword })
+            .orWhere('book.author LIKE :keyword', { keyword })
+            .orWhere('book.publisher LIKE :keyword', { keyword })
+            .orWhere('book.productDescription LIKE :keyword', { keyword })
+            .orWhere('merchant.merchantName LIKE :keyword', { keyword });
+        }),
+      );
+    }
+
     if (params.isbn) {
       queryBuilder.andWhere('book.ISBN LIKE :isbn', { isbn: `%${params.isbn}%` });
     }
@@ -227,29 +268,9 @@ export class BooksService {
       queryBuilder.andWhere('book.publisher LIKE :publisher', { publisher: `%${params.publisher}%` });
     }
 
-    // 如果提供商家名字，先查詢 Member 表找出對應的商家 ID
+    // 如果提供商家名字，檢查 merchant.merchantName
     if (params.merchantName) {
-      // 查詢 type 是 merchant 且名字接近的商家
-      const merchants = await this.memberRepository
-        .createQueryBuilder('member')
-        .where('member.type = :type', { type: MemberType.Merchant })
-        .andWhere('member.merchantName LIKE :merchantName', { merchantName: `%${params.merchantName}%` })
-        .getMany();
-
-      if (merchants.length === 0) {
-        // 如果找不到符合的商家，回傳空陣列
-        return [];
-      }
-
-      // 取得所有符合的商家 ID
-      const merchantIds = merchants.map(merchant => merchant.memberID);
-
-      // 用這些 ID 查詢書籍
-      queryBuilder.andWhere('book.merchantId IN (:...merchantIds)', { merchantIds });
-    }
-
-    if (params.status !== undefined) {
-      queryBuilder.andWhere('book.status = :status', { status: params.status });
+      queryBuilder.andWhere('merchant.merchantName LIKE :merchantName', { merchantName: `%${params.merchantName}%` });
     }
 
     return await queryBuilder

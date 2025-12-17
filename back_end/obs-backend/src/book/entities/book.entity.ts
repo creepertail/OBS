@@ -3,7 +3,7 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 import { BelongsTo } from '../../belongs-to/entities/belongs-to.entity';
 import { BookImage } from './book-image.entity';
 // import { Favorite } from '../../favorite/entities/favorite.entity';
-// import { AddsToCart } from '../../cart/entities/adds-to-cart.entity';
+import { AddsToCart } from '../../cart/entities/adds-to-cart.entity';
 // import { Review } from '../../review/entities/review.entity';
 // import { Contains } from '../../order/entities/contains.entity';
 import { Member } from '../../member/entities/member.entity';
@@ -29,8 +29,8 @@ export class Book {
   // @OneToMany(() => Favorite, (favorite) => favorite.book)
   // favorites: Favorite[];
 
-  // @OneToMany(() => AddsToCart, (item) => item.book)
-  // addsToCart: AddsToCart[];
+  @OneToMany(() => AddsToCart, (item) => item.book)
+  addsToCart: AddsToCart[];
 
   // @OneToMany(() => Review, (review) => review.book)
   // reviews: Review[];

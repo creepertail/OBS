@@ -1,0 +1,319 @@
+#  /**
+#    * API 功能：
+#    *
+#    * POST url/orders + body              => 建立新訂單（需要 JWT token，User 類型）
+#    *   - body:
+#    *   - shippingAddress, paymentMethod, totalPrice, totalAmount, couponId (optional)
+#    *   - items: [{ bookId, amount }]
+#    *   - 注意：userId 從 JWT token 自動取得，merchantId 從書籍資料自動取得
+#    *   - 所有書籍必須屬於同一個商家
+#    */
+
+# ----------
+#  使用流程：
+#  0. 先登入取得 JWT token（使用 POST /members/login），將 access_token 貼到下面的 @userToken 變數
+#  1. 確保有可用的書籍（使用 GET /books 查詢書籍 ID）
+#  2. 使用 POST /orders 建立訂單，填入書籍 ID 和數量
+#  3. userId 會自動從 JWT token 的 sub 欄位取得
+#  4. merchantId 會自動從書籍資料取得
+#  5. 所有書籍必須屬於同一個商家，否則會報錯
+# ----------
+@baseUrl = http://localhost:3000
+
+# 請先執行登入 API 取得 User 的 access_token，然後將 token 貼到下面
+@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NWQyMzY3ZC05ZDc4LTRhMTktOTZkMC1mOTc0OTA0ODAxNmIiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2NTI4MzcwOCwiZXhwIjoxNzY1MzcwMTA4fQ.UUSUi7skkc26hVNX_zQ_zaByNZ5m-ov2OfL_3MH9oHE
+
+# 書籍 ID（請先使用 GET /books 取得實際的書籍 ID）
+@bookId1 = 17650374-3db5-4a54-b465-989db68fca41
+@bookId2 = 09f0eb59-e9ec-4a93-966a-12184c7d55db
+
+# ========================================
+# 建立訂單測試
+# ========================================
+
+### 測試建立新訂單（單一書籍）
+POST {{baseUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "shippingAddress": "台北市信義區信義路五段7號",
+  "paymentMethod": 1,
+  "totalPrice": 450,
+  "totalAmount": 1,
+  "items": [
+    {
+      "bookId": "{{bookId1}}",
+      "amount": 1
+    }
+  ]
+}
+
+### 測試建立新訂單（多本書籍）
+POST {{baseUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "shippingAddress": "新北市板橋區文化路一段188號",
+  "paymentMethod": 2,
+  "totalPrice": 1320,
+  "totalAmount": 3,
+  "items": [
+    {
+      "bookId": "{{bookId1}}",
+      "amount": 2
+    },
+    {
+      "bookId": "{{bookId2}}",
+      "amount": 1
+    }
+  ]
+}
+
+### 測試建立新訂單（附帶優惠券）
+POST {{baseUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "shippingAddress": "台中市西屯區台灣大道三段99號",
+  "paymentMethod": 1,
+  "totalPrice": 900,
+  "totalAmount": 2,
+  "couponId": "coupon-id-here",
+  "items": [
+    {
+      "bookId": "{{bookId1}}",
+      "amount": 2
+    }
+  ]
+}
+
+# ========================================
+# 驗證錯誤測試
+# ========================================
+
+### 測試驗證失敗 - 缺少配送地址
+POST {{baseUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "paymentMethod": 1,
+  "totalPrice": 450,
+  "totalAmount": 1,
+  "items": [
+    {
+      "bookId": "{{bookId1}}",
+      "amount": 1
+    }
+  ]
+}
+
+### 測試驗證失敗 - 配送地址為空字串
+POST {{baseUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "shippingAddress": "",
+  "paymentMethod": 1,
+  "totalPrice": 450,
+  "totalAmount": 1,
+  "items": [
+    {
+      "bookId": "{{bookId1}}",
+      "amount": 1
+    }
+  ]
+}
+
+### 測試驗證失敗 - 配送地址超過 100 字元
+POST {{baseUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "shippingAddress": "這是一個超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級長的地址",
+  "paymentMethod": 1,
+  "totalPrice": 450,
+  "totalAmount": 1,
+  "items": [
+    {
+      "bookId": "{{bookId1}}",
+      "amount": 1
+    }
+  ]
+}
+
+### 測試驗證失敗 - 付款方式為負數
+POST {{baseUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "shippingAddress": "台北市信義區信義路五段7號",
+  "paymentMethod": -1,
+  "totalPrice": 450,
+  "totalAmount": 1,
+  "items": [
+    {
+      "bookId": "{{bookId1}}",
+      "amount": 1
+    }
+  ]
+}
+
+### 測試驗證失敗 - 總價為負數
+POST {{baseUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "shippingAddress": "台北市信義區信義路五段7號",
+  "paymentMethod": 1,
+  "totalPrice": -100,
+  "totalAmount": 1,
+  "items": [
+    {
+      "bookId": "{{bookId1}}",
+      "amount": 1
+    }
+  ]
+}
+
+### 測試驗證失敗 - 總數量為 0
+POST {{baseUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "shippingAddress": "台北市信義區信義路五段7號",
+  "paymentMethod": 1,
+  "totalPrice": 450,
+  "totalAmount": 0,
+  "items": [
+    {
+      "bookId": "{{bookId1}}",
+      "amount": 1
+    }
+  ]
+}
+
+### 測試驗證失敗 - 沒有訂單項目
+POST {{baseUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "shippingAddress": "台北市信義區信義路五段7號",
+  "paymentMethod": 1,
+  "totalPrice": 450,
+  "totalAmount": 1,
+  "items": []
+}
+
+# ========================================
+# 業務邏輯錯誤測試
+# ========================================
+
+### 測試業務錯誤 - 書籍不存在
+POST {{baseUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "shippingAddress": "台北市信義區信義路五段7號",
+  "paymentMethod": 1,
+  "totalPrice": 450,
+  "totalAmount": 1,
+  "items": [
+    {
+      "bookId": "00000000-0000-0000-0000-000000000000",
+      "amount": 1
+    }
+  ]
+}
+
+### 測試業務錯誤 - 書籍屬於不同商家（需要準備兩本不同商家的書籍）
+# 注意：這個測試需要 bookId1 和 bookId2 來自不同的商家
+POST {{baseUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "shippingAddress": "台北市信義區信義路五段7號",
+  "paymentMethod": 1,
+  "totalPrice": 900,
+  "totalAmount": 2,
+  "items": [
+    {
+      "bookId": "{{bookId1}}",
+      "amount": 1
+    },
+    {
+      "bookId": "merchant2-book-id",
+      "amount": 1
+    }
+  ]
+}
+
+### 測試業務錯誤 - 購買數量超過庫存
+POST {{baseUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "shippingAddress": "台北市信義區信義路五段7號",
+  "paymentMethod": 1,
+  "totalPrice": 45000,
+  "totalAmount": 9999,
+  "items": [
+    {
+      "bookId": "{{bookId1}}",
+      "amount": 9999
+    }
+  ]
+}
+
+# ========================================
+# 權限測試
+# ========================================
+
+### 測試權限錯誤 - 未登入（無 JWT token）
+POST {{baseUrl}}/orders
+Content-Type: application/json
+
+{
+  "shippingAddress": "台北市信義區信義路五段7號",
+  "paymentMethod": 1,
+  "totalPrice": 450,
+  "totalAmount": 1,
+  "items": [
+    {
+      "bookId": "{{bookId1}}",
+      "amount": 1
+    }
+  ]
+}
+
+### 測試權限錯誤 - 使用 Merchant token（只有 User 可以建立訂單）
+# 請先取得 Merchant 的 token
+@merchantToken = merchant-token-here
+POST {{baseUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{merchantToken}}
+
+{
+  "shippingAddress": "台北市信義區信義路五段7號",
+  "paymentMethod": 1,
+  "totalPrice": 450,
+  "totalAmount": 1,
+  "items": [
+    {
+      "bookId": "{{bookId1}}",
+      "amount": 1
+    }
+  ]
+}

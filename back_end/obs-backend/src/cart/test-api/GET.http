@@ -1,0 +1,10 @@
+# 購物車 - GET 範例
+@baseUrl = http://localhost:3000
+
+# 請替換為有效的 User access_token
+@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyNDdhY2NkYi01ZjI1LTRjMDgtODRiNS1jMTg5NjJjZjVmNGIiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2NTg4NTA1OCwiZXhwIjoxNzY1OTcxNDU4fQ.vPv1YpeE3GJ4teDIPlU1suQOga57tKOoOueBeh9ePwI
+
+
+### 取得我的購物車
+GET {{baseUrl}}/cart
+Authorization: Bearer {{userToken}}

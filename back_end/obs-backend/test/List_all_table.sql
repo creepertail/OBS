@@ -8,3 +8,9 @@ SELECT *
 FROM obs.belong_to;
 SELECT *
 FROM obs.book_images;
+SELECT *
+FROM obs.order;
+SELECT *
+FROM obs.contain;
+SELECT *
+FROM obs.subscribes;

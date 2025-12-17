@@ -6,6 +6,7 @@ import { UpdateMemberDto } from './dto/update-member.dto';
 import { LoginMemberDto } from './dto/login-member.dto';
 import { JWTGuard } from './decorators/jwt-guard.decorator';
 import { CurrentUser } from './decorators/current-user.decorator';
+import { MemberType } from './member-type.enum';
 
 @Controller('members')
 export class MemberController {
@@ -57,6 +58,19 @@ export class MemberController {
   @Get('me')
   findMe(@CurrentUser() user: any) {
     return this.memberService.findByID(user.sub);
+  }
+
+  // GET url/members/merchantWithBooks
+  @JWTGuard(MemberType.Merchant)
+  @Get('merchantWithBooks')
+  findBookByMerchantID(@CurrentUser() user: any) {
+    return this.memberService.findBookByMerchantID(user.sub);
+  }
+
+  // GET url/members/MerchantInfoWithBook/:id
+  @Get('merchantInfoWithBook/:id')
+  findMemberInfoWithBook(@Param('id') id: string) {
+    return this.memberService.findBookByMerchantID(id);
   }
 
   // GET url/members/:id
