@@ -83,12 +83,8 @@ export class SubscriptionService {
 
   // 建立訂閱
   async create(createSubscriptionDto: CreateSubscriptionDto, currentUser: { sub: string; type: MemberType; account: string }): Promise<SubscriptionResponseDto> {
-    const { userID, merchantID } = createSubscriptionDto;
-
-    // 驗證當前用戶只能為自己訂閱（除非是 Admin）
-    if (currentUser.type !== MemberType.Admin && currentUser.sub !== userID) {
-      throw new ForbiddenException('You can only subscribe for yourself');
-    }
+    const { merchantID } = createSubscriptionDto;
+    const userID = currentUser.sub;
 
     // 驗證 User 存在且類型為 User
     const user = await this.memberRepository.findOne({ where: { memberID: userID } });
@@ -107,7 +103,6 @@ export class SubscriptionService {
     if (merchant.type !== MemberType.Merchant) {
       throw new ConflictException('Can only subscribe to merchants');
     }
-
     // 檢查是否已經訂閱
     const existingSubscription = await this.subscriptionRepository.findOne({
       where: { userID, merchantID },
@@ -116,7 +111,10 @@ export class SubscriptionService {
       throw new ConflictException('Subscription already exists');
     }
 
-    const subscription = this.subscriptionRepository.create(createSubscriptionDto);
+    const subscription = this.subscriptionRepository.create({
+      ...createSubscriptionDto,
+      userID,
+    });
     await this.subscriptionRepository.save(subscription);
 
     // 更新 Merchant 的訂閱者數量

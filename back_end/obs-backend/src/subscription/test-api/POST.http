@@ -15,12 +15,12 @@
 # ----------
 
 # 先登入取得 token (請先執行 member/test-api/POST.http 中的登入 API)
-@user1_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5ZjhjODcxMS04MGI1LTQ0OTUtOGU1ZS03NzU0YzAxOTgwYjUiLCJhY2NvdW50IjoidXNlci10ZXN0LTEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2MzgxOTIwOSwiZXhwIjoxNzYzOTA1NjA5fQ._RTbrhb4j3EBrqwIu-oZ9bPKNimdcPuWJGqIOYx0A0M
+@user1_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4MGI2ZmJmYS1mOGU0LTRkNjEtODBlZS00MjEyZjljYzZmMzkiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2NTk0MDA3OCwiZXhwIjoxNzY2MDI2NDc4fQ.wxDSRsK11PUZ50pr6K3eGyPKEwbVdPjEwuDIPZtzWE0
 @user2_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MWQ3MWEzYy00NmJkLTRkMzQtYjZkNy1mZWY2YWY5NmM3YzciLCJhY2NvdW50IjoidXNlci10ZXN0LTIiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2MzgxOTIyNSwiZXhwIjoxNzYzOTA1NjI1fQ.7sD_J0pXOzEuxUm9z5sdbygl2QU-whKOAlWLWBZfdOs
 @user1_id = 9f8c8711-80b5-4495-8e5e-7754c01980b5
 @user2_id = 61d71a3c-46bd-4d34-b6d7-fef6af96c7c7
 @merchant1_id = f6aa94f4-433c-4008-a8d4-679f86532ea6
-@merchant2_id = 81afb742-89e2-43d2-8bb2-f88c2bba4a94
+@merchant2_id = 2037df73-aa38-4426-abba-9bf578e6fe44
 
 
 ### User1 為自己建立訂閱 => 成功
@@ -29,7 +29,6 @@ Content-Type: application/json
 Authorization: Bearer {{user1_token}}
 
 {
-  "userID": "{{user1_id}}",
   "merchantID": "{{merchant1_id}}",
   "notificationEnabled": false
 }
@@ -40,7 +39,6 @@ Content-Type: application/json
 Authorization: Bearer {{user2_token}}
 
 {
-  "userID": "{{user2_id}}",
   "merchantID": "{{merchant1_id}}",
   "notificationEnabled": false
 }
@@ -51,40 +49,7 @@ Content-Type: application/json
 Authorization: Bearer {{user1_token}}
 
 {
-  "userID": "{{user1_id}}",
   "merchantID": "{{merchant2_id}}",
-  "notificationEnabled": true
-}
-
-### User 為別人建立訂閱 => 失敗 403 Forbidden "You can only subscribe for yourself"
-POST http://localhost:3000/subscriptions
-Content-Type: application/json
-Authorization: Bearer {{user2_token}}
-
-{
-  "userID": "{{user1_id}}",
-  "merchantID": "{{merchant1_id}}",
-  "notificationEnabled": true
-}
-
-### Admin 為任何人建立訂閱 => 成功
-# POST http://localhost:3000/subscriptions
-# Content-Type: application/json
-# Authorization: Bearer {{admin_token}}
-
-# {
-#   "userID": "{{user_id}}",
-#   "merchantID": "{{merchant_id}}",
-#   "notificationEnabled": true
-# }
-
-### 未帶 token 建立訂閱 => 失敗 401 Unauthorized
-POST http://localhost:3000/subscriptions
-Content-Type: application/json
-
-{
-  "userID": "{{user1_id}}",
-  "merchantID": "{{merchant1_id}}",
   "notificationEnabled": true
 }
 
@@ -94,7 +59,6 @@ Content-Type: application/json
 Authorization: Bearer {{user1_token}}
 
 {
-  "userID": "{{user1_id}}",
   "merchantID": "{{merchant1_id}}",
   "notificationEnabled": true
 }
