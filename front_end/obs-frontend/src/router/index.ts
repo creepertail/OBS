@@ -6,6 +6,7 @@ import MerchantView from '../views/MerchantView.vue'
 import CartView from '../views/CartView.vue'
 import SettingView from '../views/SettingView.vue'
 import SearchView from '../views/SearchView.vue'
+import MerchantAddBookView from '../views/MerchantAddBookView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -29,6 +30,11 @@ const router = createRouter({
       path: '/merchant',
       name: 'merchant',
       component: MerchantView,
+    },
+    {
+      path: '/merchant/edit',
+      name: 'editProduct',
+      component: MerchantAddBookView,
     },
     {
       path: "/book/:bookID",
