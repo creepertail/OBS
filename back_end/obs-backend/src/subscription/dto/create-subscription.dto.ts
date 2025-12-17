@@ -3,9 +3,6 @@ import { IsBoolean, IsOptional, IsUUID } from 'class-validator';
 
 export class CreateSubscriptionDto {
   @IsUUID()
-  userID: string;
-
-  @IsUUID()
   merchantID: string;
 
   @IsBoolean()

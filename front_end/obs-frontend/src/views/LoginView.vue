@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import axios from "axios";
 import { ref } from "vue";
-import { useAuthStore} from "../stores/auth";
-import type { Member } from "../stores/auth";
+import { useRouter } from 'vue-router';
 
-const auth = useAuthStore();
+const router = useRouter();
 const account = ref("");
 const password = ref("");
 const error = ref("");
+const accessToken = ref("");
 
 async function handleLogin() {
   try {
@@ -17,25 +17,20 @@ async function handleLogin() {
     });
 
     console.log("登入成功：", res.data);
-    auth.isLogin = true;
-    const userData: Member = res.data.member;
-    userData.accessToken = res.data.accessToken;
-    console.log(userData);
-    console.log("access token", userData.accessToken);
-    console.log("id", userData.memberID);
-    console.log("email", userData.email);
-    console.log("account", userData.account);
-    console.log("phone number", userData.phoneNumber);
-    console.log("type", userData.type);
-    console.log("user name", userData.userName);
-    console.log("user level", userData.userLevel);
-    console.log("user state", userData.userState);
-    console.log("merchant name", userData.merchantName);
-    console.log("merchant state", userData.merchantState);
-    console.log("merchant subscriber count", userData.merchantSubscriberCount);
-    console.log("create at", userData.createdAt);
-    console.log("update at", userData.updatedAt);
-    console.log(auth.isLogin);
+    accessToken.value =res.data.access_token; 
+    localStorage.setItem("accessToken", accessToken.value);
+    localStorage.setItem("isLogin", "true");
+    localStorage.setItem("account", account.value);
+    router.push({ name: 'home' }).then(() => {
+      window.location.reload();
+    });
+    
+    const memberData = (await axios.get("http://localhost:3000/members/me", {
+      headers: {
+        Authorization: `Bearer ${accessToken.value}`
+      }
+    })).data;
+    localStorage.setItem("type", memberData.type);
   } catch (err) {
     console.error("登入失敗：", err);
     error.value = err.response?.data?.message;
@@ -49,12 +44,12 @@ async function handleLogin() {
       <h2 class="login-title">Welcome Back</h2>
 
       <div class="form-group">
-        <label for="username">Username</label>
+        <label for="account">Account</label>
         <input
-          id="username"
+          id="account"
           type="text"
           v-model="account"
-          placeholder="Enter your username"
+          placeholder="Enter your account"
         />
       </div>
 

@@ -1,21 +1,23 @@
 // src/member/member.controller.ts
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { MemberService } from './member.service';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
 import { LoginMemberDto } from './dto/login-member.dto';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { JWTGuard } from './decorators/jwt-guard.decorator';
 import { CurrentUser } from './decorators/current-user.decorator';
+import { MemberType } from './member-type.enum';
 
 @Controller('members')
 export class MemberController {
-  constructor(private readonly memberService: MemberService) {}
-  
+  constructor(private readonly memberService: MemberService) { }
+
   // @url = http://localhost:3000
   /**
    * API 功能：
    *
    * GET url/members            => 所有member
+   * GET url/members/me         => 取得自己的資料 (需帶 Access Token)
    * GET url/members/:id        => 用id找member
    * GET url/members/:id/type   => 用id找member的type
    * POST url/members + body     => 新增member資料，並回傳member
@@ -50,27 +52,47 @@ export class MemberController {
   findAll() {
     return this.memberService.findAll();
   }
-  
+
+  // GET url/members/me
+  @JWTGuard()
+  @Get('me')
+  findMe(@CurrentUser() user: any) {
+    return this.memberService.findByID(user.sub);
+  }
+
+  // GET url/members/merchantWithBooks
+  @JWTGuard(MemberType.Merchant)
+  @Get('merchantWithBooks')
+  findBookByMerchantID(@CurrentUser() user: any) {
+    return this.memberService.findBookByMerchantID(user.sub);
+  }
+
+  // GET url/members/MerchantInfoWithBook/:id
+  @Get('merchantInfoWithBook/:id')
+  findMemberInfoWithBook(@Param('id') id: string) {
+    return this.memberService.findBookByMerchantID(id);
+  }
+
   // GET url/members/:id
   @Get(':id')
   findByID(@Param('id') id: string) {
     return this.memberService.findByID(id);
   }
-  
+
   // GET url/members/:id/type
   @Get(':id/type')
   findMemberType(@Param('id') id: string) {
     return this.memberService.findMemberType(id);
   }
-  
+
   // POST url/members + body
   @Post()
   create(@Body() createMemberDto: CreateMemberDto) {
     return this.memberService.create(createMemberDto);
   }
-  
+
   // PATCH url/members/:id + body
-  @UseGuards(JwtAuthGuard)
+  @JWTGuard()
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -81,10 +103,9 @@ export class MemberController {
   }
 
   // DELETE url/members/:id
-  @UseGuards(JwtAuthGuard)
+  @JWTGuard()
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.memberService.remove(id);
   }
 }
-

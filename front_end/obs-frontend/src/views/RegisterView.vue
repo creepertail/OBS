@@ -9,43 +9,12 @@ const merchantRef = ref<InstanceType<typeof MerchantRegister> | null>(null);
 const router = useRouter();
 const switchToUser = ref(true)
 const successRegister = ref(false);
-const pw = ref("");
-const pw2 = ref("");
-const error = ref("");
-
-const checkPassword = (password: string, password2: string): boolean => {
-  if (password !== password2){
-    error.value = "密碼不一致";
-    return false;
-  }
-  return true;
-}
 
 async function handleRegister() {
-  pw.value = switchToUser.value ? userRef.value?.getPassword() ?? "" : merchantRef.value?.getPassword() ?? "";
-  pw2.value = switchToUser.value ? userRef.value?.getPassword2() ?? "" : merchantRef.value?.getPassword2() ?? "";
-  if (!checkPassword(pw.value, pw2.value)) {
-    switchToUser.value ? userRef.value!.setError(error.value) : merchantRef.value!.setError(error.value);
-    console.log(error.value);
-    return;
-  }
-  else{
-    error.value = "";
-  }
-
-  if (!checkPassword(pw.value, pw2.value)) {
-    userRef.value!.setError(error.value);
-    merchantRef.value!.setError(error.value);
-    return;
-  }
-  else{
-    error.value = "";
-  }
-
-  if (switchToUser.value) {
+  if (switchToUser.value && userRef.value?.isPasswordConsist) {
     successRegister.value = await userRef.value?.handleRegister() ?? false;
   }
-  else {
+  else if (!switchToUser.value && merchantRef.value?.isPasswordConsist) {
     successRegister.value = await merchantRef.value?.handleRegister() ?? false;
   }
 
@@ -62,12 +31,12 @@ async function handleRegister() {
 <template>
   <div class="register-page">
     <form class="register-form" @submit.prevent="handleRegister">
+      <UserRegister v-if="switchToUser" ref="userRef" />
+      <MerchantRegister v-if="!switchToUser" ref="merchantRef" />
+      <button type="submit" class="button">Register</button>
       <button type="button" @click="switchToUser = !switchToUser" class="button">
         切換至{{ switchToUser ? 'Merchant' : 'User' }}註冊
       </button>
-      <UserRegister v-if="switchToUser" ref="userRef" />
-      <MerchantRegister v-if="!switchToUser" ref="merchantRef" />
-      <button class="button">Register</button>
     </form>
   </div>
 </template>
@@ -79,6 +48,7 @@ async function handleRegister() {
   align-items: center;
   min-height: 100vh;
   font-family: "Inter", sans-serif;
+  padding-top: 120px;
 }
 
 .register-form {
@@ -102,6 +72,7 @@ async function handleRegister() {
   border: none;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.1s;
+  margin: 4px 0;
 }
 
 .button:hover {

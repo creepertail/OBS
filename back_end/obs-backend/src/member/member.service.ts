@@ -10,6 +10,7 @@ import { LoginMemberDto } from './dto/login-member.dto';
 import { Member } from './entities/member.entity';
 import { Subscribes } from '../subscription/entities/subscribes.entity';
 import { MemberType } from './member-type.enum';
+import { Book } from '../book/entities/book.entity';
 
 @Injectable()
 export class MemberService {
@@ -18,8 +19,10 @@ export class MemberService {
     private readonly memberRepository: Repository<Member>,
     @InjectRepository(Subscribes)
     private readonly subscribesRepository: Repository<Subscribes>,
+    @InjectRepository(Book)
+    private readonly bookRepository: Repository<Book>,
     private readonly jwtService: JwtService,
-  ) {}
+  ) { }
 
   findAll(): Promise<Member[]> {
     return this.memberRepository.find();
@@ -43,6 +46,28 @@ export class MemberService {
     }
 
     return member;
+  }
+
+  async findBookByMerchantID(id: string): Promise<Member & { books: Book[] }> {
+    const member = await this.memberRepository.findOne({ where: { memberID: id } });
+    if (!member) {
+      throw new NotFoundException(`Member with ID ${id} not found`);
+    }
+    if (member.type === MemberType.Merchant) {
+      const subscriberCount = await this.subscribesRepository.count({
+        where: { merchantID: id },
+      });
+      if (member.merchantSubscriberCount !== subscriberCount) {
+        member.merchantSubscriberCount = subscriberCount;
+        await this.memberRepository.save(member);
+      }
+    }
+    const books = await this.bookRepository.find({
+      where: { merchantId: id },
+      relations: ['images']
+    });
+
+    return { ...member, books };
   }
 
   async findMemberType(id: string): Promise<MemberType> {
@@ -179,8 +204,11 @@ export class MemberService {
   async login(loginMemberDto: LoginMemberDto): Promise<{ access_token: string }> {
     const { account, password } = loginMemberDto;
 
-    // 使用 account 找到會員
-    const member = await this.memberRepository.findOne({ where: { account } });
+    // 使用 account 找到會員，並額外選取 password 欄位
+    const member = await this.memberRepository.createQueryBuilder('member')
+      .where('member.account = :account', { account })
+      .addSelect('member.password')
+      .getOne();
 
     if (!member) {
       throw new UnauthorizedException('Invalid account or password');
@@ -233,10 +261,10 @@ export class MemberService {
         throw new ConflictException('Phone number already exists');
       }
     }
-    
-    if(dto.type === MemberType.Merchant){
-      const existingByMerchantName = await this.memberRepository.findOne({where: { type: MemberType.Merchant, merchantName: dto.merchantName }});
-      if(existingByMerchantName && existingByMerchantName.memberID !== currentId){
+
+    if (dto.type === MemberType.Merchant) {
+      const existingByMerchantName = await this.memberRepository.findOne({ where: { type: MemberType.Merchant, merchantName: dto.merchantName } });
+      if (existingByMerchantName && existingByMerchantName.memberID !== currentId) {
         throw new ConflictException('Merchant name already exists');
       }
     }

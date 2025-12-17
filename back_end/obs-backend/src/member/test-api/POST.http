@@ -103,6 +103,15 @@ Content-Type: application/json
   "password": "0000"
 }
 
+### User3 登入 API 測試
+POST http://localhost:3000/members/login
+Content-Type: application/json
+
+{
+  "account": "user1",
+  "password": "0000"
+}
+
 
 ### Admin 登入 API 測試
 POST http://localhost:3000/members/login

@@ -1,16 +1,17 @@
 // src/book/books.controller.ts
-import { Controller, Get, Post, Body, Patch, Param, Delete, ValidationPipe, UseInterceptors, UploadedFile, BadRequestException, UseGuards, Request, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ValidationPipe, UseInterceptors, UploadedFile, BadRequestException, Request, Query } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
-import { JwtAuthGuard } from '../member/guards/jwt-auth.guard';
+import { JWTGuard } from '../member/decorators/jwt-guard.decorator';
+import { MemberType } from '../member/member-type.enum';
 
 @Controller('books')
 export class BooksController {
-  constructor(private readonly booksService: BooksService) {}
+  constructor(private readonly booksService: BooksService) { }
 
   /**
    * POST /books/upload-image - 上傳書籍圖片
@@ -45,7 +46,7 @@ export class BooksController {
     }
 
     // 回傳圖片 URL（相對路徑）
-    const imageUrl = `/uploads/books/${file.filename}`;
+    const imageUrl = `http://localhost:3000/uploads/books/${file.filename}`;
     return {
       url: imageUrl,
       filename: file.filename,
@@ -60,10 +61,10 @@ export class BooksController {
    */
   // ValidationPipe 會自動檢查 request body 的資料是否符合 CreateBookDto 的驗證規則
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @JWTGuard(MemberType.Merchant)
   create(@Body(new ValidationPipe()) createBookDto: CreateBookDto, @Request() req) {
     // 從 JWT token 的 sub 欄位取得 merchantId
-    const merchantId = req.user.sub;
+    const merchantId = req.member.sub;
     return this.booksService.create(createBookDto, merchantId);
   }
 
@@ -78,15 +79,15 @@ export class BooksController {
     @Query('author') author?: string,
     @Query('publisher') publisher?: string,
     @Query('merchantName') merchantName?: string,
-    @Query('status') status?: string,
+    @Query('keyword') keyword?: string,
   ) {
     return this.booksService.search({
+      keyword,
       isbn,
       name,
       author,
       publisher,
       merchantName,
-      status: status ? parseInt(status) : undefined,
     });
   }
 
@@ -118,14 +119,14 @@ export class BooksController {
    * PATCH /books/:id - 更新書籍資訊
    */
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
+  @JWTGuard(MemberType.Merchant)
   update(
     @Param('id') id: string,
     @Body(new ValidationPipe()) updateBookDto: UpdateBookDto,
     @Request() req
   ) {
     // 從 JWT token 的 sub 欄位取得 merchantId
-    const merchantId = req.user.sub;
+    const merchantId = req.member.sub;
     return this.booksService.update(id, updateBookDto, merchantId);
   }
 
@@ -133,14 +134,14 @@ export class BooksController {
    * PATCH /books/:id/status - 更新書籍狀態
    */
   @Patch(':id/status')
-  @UseGuards(JwtAuthGuard)
+  @JWTGuard(MemberType.Merchant)
   updateStatus(
     @Param('id') id: string,
     @Body('status') status: number,
     @Request() req
   ) {
     // 從 JWT token 的 sub 欄位取得 merchantId
-    const merchantId = req.user.sub;
+    const merchantId = req.member.sub;
     return this.booksService.updateStatus(id, status, merchantId);
   }
 
@@ -148,10 +149,10 @@ export class BooksController {
    * DELETE /books/:id - 刪除書籍
    */
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @JWTGuard(MemberType.Merchant)
   remove(@Param('id') id: string, @Request() req) {
     // 從 JWT token 的 sub 欄位取得 merchantId
-    const merchantId = req.user.sub;
+    const merchantId = req.member.sub;
     return this.booksService.remove(id, merchantId);
   }
 
