@@ -76,11 +76,11 @@ const totalAmount = computed(() =>
 function goToBookPage(index: number) {
   const item = cartItems.value[index]
   router.push({
-  name: 'book',
-  params: {
-    bookID: item?.bookID
-  }
-})
+    name: 'book',
+    params: {
+      bookID: item?.bookID
+    }
+  })
 }
 
 async function removeItem(index: number) {
