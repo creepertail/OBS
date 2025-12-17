@@ -32,8 +32,8 @@ const router = createRouter({
       component: MerchantView,
     },
     {
-      path: '/merchant/edit',
-      name: 'editProduct',
+      path: '/merchant/add',
+      name: 'addProduct',
       component: MerchantAddBookView,
     },
     {

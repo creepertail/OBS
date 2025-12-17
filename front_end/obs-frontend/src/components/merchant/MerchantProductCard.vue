@@ -9,12 +9,16 @@
 
       <p class="price">$ {{ price }}</p>
 
-      <button class="edit-btn">編輯商品</button>
+      <button class="edit-btn" @click="router.push({ name: 'editProduct' })">編輯商品</button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
 defineProps({
   image: { type: String, required: true },
   title: { type: String, required: true },

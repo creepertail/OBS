@@ -4,6 +4,7 @@ import { computed } from 'vue'
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import SearchBox from './components/SearchBox.vue';
 
+const isMerchant = computed(() => localStorage.getItem("type") === "merchant");
 const router = useRouter();
 const route = useRoute()
 const hideLayout = computed(() => route.meta.hideLayout)
@@ -27,12 +28,10 @@ function handleOutsideClick(event: MouseEvent) {
 
 onMounted(() => {
   document.addEventListener("click", handleOutsideClick);
-  console.log("mounted");
 });
 
 onBeforeUnmount(() => {
   document.removeEventListener("click", handleOutsideClick);
-  console.log("unmounted");
 });
 </script>
 
@@ -40,7 +39,7 @@ onBeforeUnmount(() => {
   <header v-if="!hideLayout">
     <RouterLink :to="{name: 'home'}" class="homeButton">
       <img alt="OBS logo" class="logo" src="@/assets/logo2.png" width="80" height="80" />
-      <h1>Online Bookstore System</h1>
+      <h1 class="shopname">Online Bookstore System</h1>
     </RouterLink>
 
     <div class="routerButtons">
@@ -53,6 +52,7 @@ onBeforeUnmount(() => {
       <div class="profile-container" v-if="isLogin" ref="profileButton">
         <button class="account textButton" @click="isOpen=!isOpen">{{ account }}</button>
         <div class="profile-view" v-if="isOpen">
+          <button class="textButton" @click="router.push({ name: 'merchant' })" v-if="isMerchant">我的商品</button>
           <button class="textButton" @click="router.push({ name: 'setting' })">設置</button>
           <button class="textButton" @click="logout">登出</button>
         </div>
@@ -111,7 +111,7 @@ header {
   margin: auto 0 auto 2rem;
 }
 
-h1 {
+.shopname {
   font-size: 2em;
 }
 .account {
@@ -122,7 +122,7 @@ h1 {
   background: none;
   border: none;
   padding: 0;
-  margin: 0;
+  margin: 0 5px;
   font: inherit;
   cursor: pointer;
 }
@@ -131,7 +131,6 @@ h1 {
   display: flex;
   flex-direction: column;
   position: absolute;
-  width: 100px;
   border: 1px solid gray;
   box-shadow: 0 0 8px black;
   background-color: white;
