@@ -39,3 +39,7 @@ GET http://localhost:3000/members/0281a18a-b682-40ae-bff3-bddaf041fa57/type
 ### Merchant 拿回自己的詳細資料以及自己的商品
 GET http://localhost:3000/members/merchantWithBooks
 Authorization: Bearer {{access_token}}
+
+### User 想瀏覽該商家賣什麼
+GET http://localhost:3000/members/MerchantInfoWithBook/ef450ad3-3d09-4f78-bcbe-70cfe880d224
+

@@ -67,6 +67,12 @@ export class MemberController {
     return this.memberService.findBookByMerchantID(user.sub);
   }
 
+  // GET url/members/MerchantInfoWithBook/:id
+  @Get('merchantInfoWithBook/:id')
+  findMemberInfoWithBook(@Param('id') id: string) {
+    return this.memberService.findBookByMerchantID(id);
+  }
+
   // GET url/members/:id
   @Get(':id')
   findByID(@Param('id') id: string) {
