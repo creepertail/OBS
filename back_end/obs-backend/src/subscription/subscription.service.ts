@@ -22,9 +22,7 @@ export class SubscriptionService {
   private formatResponse(subscription: Subscribes): SubscriptionResponseDto {
     return {
       userID: subscription.userID,
-      userName: subscription.user?.userName || '',
       merchantID: subscription.merchantID,
-      merchantName: subscription.merchant?.merchantName || '',
       notificationEnabled: subscription.notificationEnabled,
     };
   }
@@ -124,20 +122,13 @@ export class SubscriptionService {
     // 回傳格式化資料
     return {
       userID,
-      userName: user.userName || '',
       merchantID,
-      merchantName: merchant.merchantName || '',
       notificationEnabled: createSubscriptionDto.notificationEnabled ?? false,
     };
   }
 
   // 更新訂閱狀態
-  async update(userID: string, merchantID: string, updateSubscriptionDto: UpdateSubscriptionDto, currentUser: { sub: string; type: MemberType; account: string }): Promise<SubscriptionResponseDto> {
-    // 驗證當前用戶只能更新自己的訂閱（除非是 Admin）
-    if (currentUser.type !== MemberType.Admin && currentUser.sub !== userID) {
-      throw new ForbiddenException('You can only update your own subscription');
-    }
-
+  async update(userID: string, merchantID: string, updateSubscriptionDto: UpdateSubscriptionDto): Promise<SubscriptionResponseDto> {
     const subscription = await this.findOneEntity(userID, merchantID);
     Object.assign(subscription, updateSubscriptionDto);
     const updatedSubscription = await this.subscriptionRepository.save(subscription);
@@ -145,12 +136,7 @@ export class SubscriptionService {
   }
 
   // 刪除訂閱
-  async remove(userID: string, merchantID: string, currentUser: { sub: string; type: MemberType; account: string }): Promise<void> {
-    // 驗證當前用戶只能刪除自己的訂閱（除非是 Admin）
-    if (currentUser.type !== MemberType.Admin && currentUser.sub !== userID) {
-      throw new ForbiddenException('You can only remove your own subscription');
-    }
-
+  async remove(userID: string, merchantID: string): Promise<void> {
     await this.findOneEntity(userID, merchantID);
     await this.subscriptionRepository.delete({ userID, merchantID });
 

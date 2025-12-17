@@ -19,7 +19,7 @@
 @user2_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MWQ3MWEzYy00NmJkLTRkMzQtYjZkNy1mZWY2YWY5NmM3YzciLCJhY2NvdW50IjoidXNlci10ZXN0LTIiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2MzgxOTIyNSwiZXhwIjoxNzYzOTA1NjI1fQ.7sD_J0pXOzEuxUm9z5sdbygl2QU-whKOAlWLWBZfdOs
 @user1_id = 9f8c8711-80b5-4495-8e5e-7754c01980b5
 @user2_id = 61d71a3c-46bd-4d34-b6d7-fef6af96c7c7
-@merchant1_id = f6aa94f4-433c-4008-a8d4-679f86532ea6
+@merchant1_id = 2037df73-aa38-4426-abba-9bf578e6fe44
 @merchant2_id = 2037df73-aa38-4426-abba-9bf578e6fe44
 
 

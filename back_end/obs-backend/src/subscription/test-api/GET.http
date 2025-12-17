@@ -15,19 +15,21 @@
 @user2_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MWQ3MWEzYy00NmJkLTRkMzQtYjZkNy1mZWY2YWY5NmM3YzciLCJhY2NvdW50IjoidXNlci10ZXN0LTIiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2MzgxOTIyNSwiZXhwIjoxNzYzOTA1NjI1fQ.7sD_J0pXOzEuxUm9z5sdbygl2QU-whKOAlWLWBZfdOs
 @user1_id = 9f8c8711-80b5-4495-8e5e-7754c01980b5
 @user2_id = 61d71a3c-46bd-4d34-b6d7-fef6af96c7c7
-@merchant1_id = f6aa94f4-433c-4008-a8d4-679f86532ea6
+@merchant1_id = 2037df73-aa38-4426-abba-9bf578e6fe44
 @merchant2_id = 81afb742-89e2-43d2-8bb2-f88c2bba4a94
+@user1_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4MGI2ZmJmYS1mOGU0LTRkNjEtODBlZS00MjEyZjljYzZmMzkiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2NTk0MDA3OCwiZXhwIjoxNzY2MDI2NDc4fQ.wxDSRsK11PUZ50pr6K3eGyPKEwbVdPjEwuDIPZtzWE0
+@merchant1_token = dafsefsfdf
+
 
 
 ### 取得某 User 的所有訂閱
-GET http://localhost:3000/subscriptions/user/{{user1_id}}
+GET http://localhost:3000/subscriptions/user
+Authorization: Bearer {{user1_token}}
 
 ### 取得某 Merchant 的所有訂閱者
-GET http://localhost:3000/subscriptions/merchant/{{merchant1_id}}
+# GET http://localhost:3000/subscriptions/merchant/
+# Authorization: Bearer {{merchant1_token}}
 
 ### 取得特定訂閱關係
-GET http://localhost:3000/subscriptions/{{user1_id}}/{{merchant1_id}}
-
-### 測試查詢不存在的訂閱 => 應該回傳 404 Not Found
-GET http://localhost:3000/subscriptions/00000000-0000-0000-0000-000000000000/00000000-0000-0000-0000-000000000001
-
+GET http://localhost:3000/subscriptions/isUserSubscribedToMerchant/{{merchant1_id}}
+Authorization: Bearer {{user1_token}}
