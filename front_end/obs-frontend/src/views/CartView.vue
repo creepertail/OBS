@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from "vue-router"
 import axios from 'axios'
 
 interface RawCartItem {
@@ -30,6 +31,7 @@ interface CartItem {
 }
 
 const cartItems = ref<CartItem[]>([])
+const router = useRouter()
 
 onMounted(async () => {
   try {
@@ -70,6 +72,16 @@ const totalAmount = computed(() =>
     0
   )
 )
+
+function goToBookPage(index: number) {
+  const item = cartItems.value[index]
+  router.push({
+  name: 'book',
+  params: {
+    bookID: item?.bookID
+  }
+})
+}
 
 async function removeItem(index: number) {
   const item = cartItems.value[index]
@@ -152,6 +164,7 @@ async function deleteAllCartItem(){
             :src="item.imageUrl"
             alt="book cover"
             class="cart-item__image"
+            v-on:click="goToBookPage(index)"
           />
 
           <div class="cart-item__content">

@@ -12,3 +12,5 @@ SELECT *
 FROM obs.order;
 SELECT *
 FROM obs.contain;
+SELECT *
+FROM obs.subscribes;

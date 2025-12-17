@@ -7,24 +7,15 @@ import type { Book } from "../type/book"
 import type { BookCard } from "../type/bookCard"
 
 const route = useRoute()
-const memberID = ref(route.params.memberID as string)
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMGU1MWRkNi02NDg4LTQ4MDQtOGQwMy1lMmM4Y2VlYTMzMTAiLCJhY2NvdW50IjoibWVyY2hhbnQzIiwidHlwZSI6Im1lcmNoYW50IiwiaWF0IjoxNzY1OTAwMDU4LCJleHAiOjE3NjU5ODY0NTh9.TofhuLWU1qOEw3mNNtCUnNC09sdGE7ReO4gYCU7nq1k"
+const merchantID = ref(route.params.merchantID as string)
 
 const merchant = ref<any>(null)
 const books = ref<BookCard[]>([])
 const loading = ref(false)
 
 const fetchMerchant = async () => {
-  loading.value = true
   try {
-    const res = await axios.get(
-      "http://localhost:3000/members/merchantWithBooks/",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }
-    )
+    const res = await axios.get(`http://localhost:3000/members/MerchantInfoWithBook/${merchantID.value}`)
     console.log("res", res)
 
     merchant.value = res.data

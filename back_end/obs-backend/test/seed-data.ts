@@ -12,6 +12,7 @@ import { BookImage } from '../src/book/entities/book-image.entity';
 import { BelongsTo } from '../src/belongs-to/entities/belongs-to.entity';
 import { Order } from '../src/order/entities/order.entity';
 import { Contains } from '../src/order/entities/contains.entity';
+import { AddsToCart } from '../src/cart/entities/adds-to-cart.entity';
 
 // 載入環境變數
 config();
@@ -24,7 +25,7 @@ const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME || 'root',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_DATABASE || 'OBS',
-  entities: [Member, Category, Book, BookImage, BelongsTo, Order, Contains],
+  entities: [Member, Category, Book, BookImage, BelongsTo, Order, Contains, AddsToCart],
   synchronize: false,
   logging: true,
 });

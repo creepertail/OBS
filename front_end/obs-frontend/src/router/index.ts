@@ -42,7 +42,7 @@ const router = createRouter({
       component: () => import("@/views/BookView.vue")
     },
     {
-      path: "/search/merchant/:memberID",
+      path: "/search/merchant/:merchantID",
       name: "searchMerchant",
       component: () => import("@/views/SearchMerchantView.vue")
     },
