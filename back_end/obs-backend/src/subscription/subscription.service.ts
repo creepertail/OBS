@@ -49,9 +49,18 @@ export class SubscriptionService {
 
   // 根據 UserID 和 MerchantID 取得特定訂閱（API 使用，回傳簡化資料）
   async findOne(userID: string, merchantID: string): Promise<SubscriptionResponseDto> {
-    const subscription = await this.findOneEntity(userID, merchantID);
-    return this.formatResponse(subscription);
-  }
+    try {
+      const subscription = await this.findOneEntity(userID, merchantID);
+      return this.formatResponse(subscription);
+    } catch (error) {
+      // 當找不到訂閱資料時，回傳空字串 ID
+      return {
+        userID: "",
+        merchantID: "",
+        notificationEnabled: false,
+      };
+    }
+}
 
   // 取得某 User 的所有訂閱
   async findByUser(userID: string): Promise<SubscriptionResponseDto[]> {
