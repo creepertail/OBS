@@ -36,7 +36,6 @@ const props = defineProps({
 
 const isSoldOut = (props.inventoryQuantity == 0)? true: false; 
 
-// console.log("bookID =", props.bookID);
 </script>
 
 <style scoped>
@@ -44,11 +43,8 @@ const isSoldOut = (props.inventoryQuantity == 0)? true: false;
   
   width: 200px;
   height: 100%;
-  /* border: 1px solid #ddd; */
-  /* border-radius: 8px; */
   overflow: hidden;
   padding: 12px;
-  /* background: gray; */
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -63,7 +59,6 @@ const isSoldOut = (props.inventoryQuantity == 0)? true: false;
 .book-card:hover {
   border-color: var(--color-border-hover);
 }
-
 
 .image-wrapper {
   height: 250px;        
@@ -80,16 +75,11 @@ const isSoldOut = (props.inventoryQuantity == 0)? true: false;
   object-fit: contain;
 }
 
-/* .book-author,
-.book-publisher {
-} */
-
 .book-info {
   display: flex;
   flex-direction: column;
   gap: 2px;
   height: 100%;
-  /* color: black; */
   color: var(--color-text-secondary);
 }
 
@@ -99,7 +89,6 @@ const isSoldOut = (props.inventoryQuantity == 0)? true: false;
 }
 
 .book-price {
-  /* color: #d9534f; */
   color: darkred;
   font-weight: bold;
   margin-top: auto;

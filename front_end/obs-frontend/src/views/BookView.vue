@@ -118,6 +118,7 @@ async function addBookToCart(goToCardPage: boolean) {
     }
   }
 }
+
 </script>
 
 <template>
@@ -265,11 +266,13 @@ async function addBookToCart(goToCardPage: boolean) {
             </div>
           </div>
       
-          <div class="merchant-info__action">
+          <RouterLink 
+            :to="`/search/merchant/${merchant.memberID}`"
+            class="merchant-info__action">
             <button class="merchant-info__btn">
               前往商家頁面
             </button>
-          </div>
+          </RouterLink>
         </div>
       </section>
 
