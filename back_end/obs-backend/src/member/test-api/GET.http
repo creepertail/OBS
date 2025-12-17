@@ -9,8 +9,7 @@
 @admin_id = 81dc3b42-d706-4b88-8e79-4f1ed93b56e6
 @user_id = 31fde60e-6b3a-4910-ae22-a484e27764aa
 @merchant_id = 0281a18a-b682-40ae-bff3-bddaf041fa57
-@access_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlZjAzOTBjNS03MDFjLTQ5MjAtODZmZS0xZGNiOWE0MTFmMWMiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2NDQzMjEzNiwiZXhwIjoxNzY0NTE4NTM2fQ.pVXBf8cDfG5U4f-CAqipCADCy3eAnHTDxnjOUsfqrSc
-
+@access_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjNTFlMzkyZS1lMTA5LTQ3ODktYTJjYS1lYmI4Y2QyOWM1NmEiLCJhY2NvdW50IjoibWVyY2hhbnQxIiwidHlwZSI6Im1lcmNoYW50IiwiaWF0IjoxNzY1ODY3NDUwLCJleHAiOjE3NjU5NTM4NTB9.931Z2Hqe1okExQrKvwe9SY69OCPy3RlF53bIbZmgPRY
 
 
 
@@ -26,7 +25,7 @@ Authorization: Bearer {{access_token}}
 ### 拿回某成員的資料
 GET http://localhost:3000/members/81dc3b42-d706-4b88-8e79-4f1ed93b56e6
 ###
-GET http://localhost:3000/members/31fde60e-6b3a-4910-ae22-a484e27764aa
+GET http://localhost:3000/members/c51e392e-e109-4789-a2ca-ebb8cd29c56a
 ###
 GET http://localhost:3000/members/0281a18a-b682-40ae-bff3-bddaf041fa57
 
@@ -36,3 +35,11 @@ GET http://localhost:3000/members/81dc3b42-d706-4b88-8e79-4f1ed93b56e6/type
 GET http://localhost:3000/members/31fde60e-6b3a-4910-ae22-a484e27764aa/type
 ###
 GET http://localhost:3000/members/0281a18a-b682-40ae-bff3-bddaf041fa57/type
+
+### Merchant 拿回自己的詳細資料以及自己的商品
+GET http://localhost:3000/members/merchantWithBooks
+Authorization: Bearer {{access_token}}
+
+### User 想瀏覽該商家賣什麼
+GET http://localhost:3000/members/MerchantInfoWithBook/ef450ad3-3d09-4f78-bcbe-70cfe880d224
+

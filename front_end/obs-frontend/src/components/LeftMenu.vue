@@ -2,16 +2,10 @@
   <div>
     <!-- 左側選單 -->
     <aside class="left-menu" :class="{ closed: !isOpen }">
-      <div class="category" v-for="(cat, index) in categories" :key="index">
-        <div class="category-title" @click="toggleCategory(index)">
+      <div class="category" v-for="cat in categories" :key="cat.categoryID">
+        <div class="category-title" @click="getBooksInCategory(cat.categoryID)">
           {{ cat.name }}
         </div>
-
-        <ul v-show="cat.open">
-          <li class="category-text" v-for="item in cat.subs" :key="item">
-            {{ item }}
-          </li>
-        </ul>
       </div>
     </aside>
 
@@ -19,32 +13,36 @@
     <button class="toggle-btn" @click="toggleMenu">
       <i :class="isOpen ? 'pi pi-angle-double-left' : 'pi pi-angle-double-right'"></i>
     </button>
-
   </div>
 </template>
 
 <script setup>
+import axios from "axios";
 import { ref } from "vue";
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+const categories = ref([]);
 
 // 整個側邊欄是否開啟
 const isOpen = ref(true);
-
-// 書籍分類
-const categories = ref([
-  { name: "文學", open: false, subs: ["小說", "散文", "詩集"] },
-  { name: "科學", open: false, subs: ["物理", "化學", "生物"] },
-  { name: "商業", open: false, subs: ["管理", "行銷", "會計"] },
-]);
-
-// 展開/收合分類
-function toggleCategory(index) {
-  categories.value[index].open = !categories.value[index].open;
-}
 
 // 展開/收合整個側欄
 function toggleMenu() {
   isOpen.value = !isOpen.value;
 }
+
+async function getAllCategories() {
+  const res = await axios.get("http://localhost:3000/categories");
+  categories.value = res.data;
+  categories.value.sort((a, b) => a.categoryID - b.categoryID);
+}
+
+async function getBooksInCategory(id){
+  router.push({ name: 'search', query: { cat: id } });
+}
+
+getAllCategories();
 </script>
 
 <style>

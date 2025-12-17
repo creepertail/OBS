@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
-import ProductCard from './MerchantProductCard.vue'
+import MerchantProductCard from './MerchantProductCard.vue'
 
 interface Product {
   id: number
@@ -23,7 +23,7 @@ onMounted(async () => {
     <h2 class="text-2xl font-bold mb-4">商家商品列表</h2>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      <ProductCard
+      <MerchantProductCard
         v-for="item in products"
         :key="item.id"
         :product="item"

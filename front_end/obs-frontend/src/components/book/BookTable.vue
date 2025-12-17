@@ -21,17 +21,12 @@ const props = defineProps({
 
 <style scoped>
 .book-table {
-  /* width: 80%; */
-  /* margin: 20px auto; */
-
   display: grid;
 
-  /* 一列 5 個，會自動換行 */
-  grid-template-columns: repeat(5, 1fr);
+  /* 關鍵差異在 auto-fill */
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 
   gap: 20px;
-
-  /* 可視需要調整 padding */
   padding: 10px 0;
 }
 </style>

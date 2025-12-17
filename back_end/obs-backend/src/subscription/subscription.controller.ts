@@ -14,14 +14,14 @@ export class SubscriptionController {
   /**
    * API 功能：
    *
-   * GET url/subscriptions/user/:userID            => 取得某 User 的所有訂閱
-   * GET url/subscriptions/merchant/:merchantID    => 取得某 Merchant 的所有訂閱者
-   * GET url/subscriptions/:userID/:merchantID     => 取得特定訂閱關係
-   * POST url/subscriptions + body                 => 建立訂閱
-   *   - body: { userID, merchantID, state }
-   * PATCH url/subscriptions/:userID/:merchantID + body => 更新訂閱狀態
+   * GET url/subscriptions/user/:userID                         => 取得某 User 的所有訂閱
+   * GET url/subscriptions/merchant/:merchantID                 => 取得某 Merchant 的所有訂閱者
+   * GET url/subscriptions/:merchantID + user's access token    => 取得特定訂閱關係
+   * POST url/subscriptions + body + access token               => 建立訂閱
+   *   - body: { merchantID, state }
+   * PATCH url/subscriptions/:merchantID + body + user's access token => 更新訂閱狀態
    *   - body: { state }
-   * DELETE url/subscriptions/:userID/:merchantID  => 刪除訂閱
+   * DELETE url/subscriptions/:merchantID + user's access token  => 刪除訂閱
    */
 
   // // GET url/subscriptions
@@ -30,22 +30,25 @@ export class SubscriptionController {
   //   return this.subscriptionService.findAll();
   // }
 
-  // GET url/subscriptions/user/:userID
-  @Get('user/:userID')
-  findByUser(@Param('userID') userID: string) {
-    return this.subscriptionService.findByUser(userID);
+  // GET url/subscriptions/user + access token
+  @JWTGuard(MemberType.User)
+  @Get('user')
+  findByUser(@CurrentUser() user : any) {
+    return this.subscriptionService.findByUser(user.sub);
   }
 
-  // GET url/subscriptions/merchant/:merchantID
-  @Get('merchant/:merchantID')
-  findByMerchant(@Param('merchantID') merchantID: string) {
-    return this.subscriptionService.findByMerchant(merchantID);
-  }
+  // GET url/subscriptions/merchant/
+  // @JWTGuard(MemberType.Merchant)
+  // @Get('merchant')
+  // findByMerchant(@CurrentUser() merchant : any) {
+  //   return this.subscriptionService.findByMerchant(merchant.sub);
+  // }
 
-  // GET url/subscriptions/:userID/:merchantID
-  @Get(':userID/:merchantID')
-  findOne(@Param('userID') userID: string, @Param('merchantID') merchantID: string) {
-    return this.subscriptionService.findOne(userID, merchantID);
+  // GET url/subscriptions/:merchantID
+  @JWTGuard()
+  @Get('isUserSubscribedToMerchant/:id')
+  findOne(@CurrentUser() user : any, @Param('id') merchantID: string) {
+    return this.subscriptionService.findOne(user.sub, merchantID);
   }
 
   // POST url/subscriptions
@@ -55,22 +58,21 @@ export class SubscriptionController {
     return this.subscriptionService.create(createSubscriptionDto, user);
   }
 
-  // PATCH url/subscriptions/:userID/:merchantID
+  // PATCH url/subscriptions/:merchantID
   @JWTGuard(MemberType.User)
-  @Patch(':userID/:merchantID')
+  @Patch(':merchantID')
   update(
-    @Param('userID') userID: string,
+    @CurrentUser() user: any,
     @Param('merchantID') merchantID: string,
     @Body() updateSubscriptionDto: UpdateSubscriptionDto,
-    @CurrentUser() user: any,
   ) {
-    return this.subscriptionService.update(userID, merchantID, updateSubscriptionDto, user);
+    return this.subscriptionService.update(user.sub, merchantID, updateSubscriptionDto);
   }
 
-  // DELETE url/subscriptions/:userID/:merchantID
+  // DELETE url/subscriptions/:merchantID
   @JWTGuard(MemberType.User)
-  @Delete(':userID/:merchantID')
-  remove(@Param('userID') userID: string, @Param('merchantID') merchantID: string, @CurrentUser() user: any) {
-    return this.subscriptionService.remove(userID, merchantID, user);
+  @Delete(':merchantID')
+  remove(@CurrentUser() user: any, @Param('merchantID') merchantID: string) {
+    return this.subscriptionService.remove(user.sub, merchantID);
   }
 }

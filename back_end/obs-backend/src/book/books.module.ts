@@ -3,8 +3,8 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BooksController } from './books.controller';
 import { BooksService } from './books.service';
-import { Book } from './entityies/book.entity';
-import { BookImage } from './entityies/book-image.entity';
+import { Book } from './entities/book.entity';
+import { BookImage } from './entities/book-image.entity';
 import { Member } from '../member/entities/member.entity';
 
 @Module({
@@ -13,4 +13,4 @@ import { Member } from '../member/entities/member.entity';
   providers: [BooksService],
   exports: [BooksService],
 })
-export class BooksModule {}
+export class BooksModule { }

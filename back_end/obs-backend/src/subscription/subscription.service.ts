@@ -22,9 +22,7 @@ export class SubscriptionService {
   private formatResponse(subscription: Subscribes): SubscriptionResponseDto {
     return {
       userID: subscription.userID,
-      userName: subscription.user?.userName || '',
       merchantID: subscription.merchantID,
-      merchantName: subscription.merchant?.merchantName || '',
       notificationEnabled: subscription.notificationEnabled,
     };
   }
@@ -51,9 +49,18 @@ export class SubscriptionService {
 
   // 根據 UserID 和 MerchantID 取得特定訂閱（API 使用，回傳簡化資料）
   async findOne(userID: string, merchantID: string): Promise<SubscriptionResponseDto> {
-    const subscription = await this.findOneEntity(userID, merchantID);
-    return this.formatResponse(subscription);
-  }
+    try {
+      const subscription = await this.findOneEntity(userID, merchantID);
+      return this.formatResponse(subscription);
+    } catch (error) {
+      // 當找不到訂閱資料時，回傳空字串 ID
+      return {
+        userID: "",
+        merchantID: "",
+        notificationEnabled: false,
+      };
+    }
+}
 
   // 取得某 User 的所有訂閱
   async findByUser(userID: string): Promise<SubscriptionResponseDto[]> {
@@ -83,12 +90,8 @@ export class SubscriptionService {
 
   // 建立訂閱
   async create(createSubscriptionDto: CreateSubscriptionDto, currentUser: { sub: string; type: MemberType; account: string }): Promise<SubscriptionResponseDto> {
-    const { userID, merchantID } = createSubscriptionDto;
-
-    // 驗證當前用戶只能為自己訂閱（除非是 Admin）
-    if (currentUser.type !== MemberType.Admin && currentUser.sub !== userID) {
-      throw new ForbiddenException('You can only subscribe for yourself');
-    }
+    const { merchantID } = createSubscriptionDto;
+    const userID = currentUser.sub;
 
     // 驗證 User 存在且類型為 User
     const user = await this.memberRepository.findOne({ where: { memberID: userID } });
@@ -107,7 +110,6 @@ export class SubscriptionService {
     if (merchant.type !== MemberType.Merchant) {
       throw new ConflictException('Can only subscribe to merchants');
     }
-
     // 檢查是否已經訂閱
     const existingSubscription = await this.subscriptionRepository.findOne({
       where: { userID, merchantID },
@@ -116,7 +118,10 @@ export class SubscriptionService {
       throw new ConflictException('Subscription already exists');
     }
 
-    const subscription = this.subscriptionRepository.create(createSubscriptionDto);
+    const subscription = this.subscriptionRepository.create({
+      ...createSubscriptionDto,
+      userID,
+    });
     await this.subscriptionRepository.save(subscription);
 
     // 更新 Merchant 的訂閱者數量
@@ -126,20 +131,13 @@ export class SubscriptionService {
     // 回傳格式化資料
     return {
       userID,
-      userName: user.userName || '',
       merchantID,
-      merchantName: merchant.merchantName || '',
       notificationEnabled: createSubscriptionDto.notificationEnabled ?? false,
     };
   }
 
   // 更新訂閱狀態
-  async update(userID: string, merchantID: string, updateSubscriptionDto: UpdateSubscriptionDto, currentUser: { sub: string; type: MemberType; account: string }): Promise<SubscriptionResponseDto> {
-    // 驗證當前用戶只能更新自己的訂閱（除非是 Admin）
-    if (currentUser.type !== MemberType.Admin && currentUser.sub !== userID) {
-      throw new ForbiddenException('You can only update your own subscription');
-    }
-
+  async update(userID: string, merchantID: string, updateSubscriptionDto: UpdateSubscriptionDto): Promise<SubscriptionResponseDto> {
     const subscription = await this.findOneEntity(userID, merchantID);
     Object.assign(subscription, updateSubscriptionDto);
     const updatedSubscription = await this.subscriptionRepository.save(subscription);
@@ -147,12 +145,7 @@ export class SubscriptionService {
   }
 
   // 刪除訂閱
-  async remove(userID: string, merchantID: string, currentUser: { sub: string; type: MemberType; account: string }): Promise<void> {
-    // 驗證當前用戶只能刪除自己的訂閱（除非是 Admin）
-    if (currentUser.type !== MemberType.Admin && currentUser.sub !== userID) {
-      throw new ForbiddenException('You can only remove your own subscription');
-    }
-
+  async remove(userID: string, merchantID: string): Promise<void> {
     await this.findOneEntity(userID, merchantID);
     await this.subscriptionRepository.delete({ userID, merchantID });
 
