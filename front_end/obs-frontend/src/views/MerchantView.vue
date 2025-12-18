@@ -28,8 +28,8 @@ onMounted(async () => {
 
 <template>
   <main style="padding-top: 100px;">
-    <div class="product-title">
-      <div style="display: flex; align-items: center; justify-content: space-between;">
+    <div class="page">
+      <div class="product-title">
         <h1>商家商品列表</h1>
         <button class="button" @click="router.push({ name: 'addProduct' })">新增商品</button>
       </div>
@@ -40,9 +40,14 @@ onMounted(async () => {
 
 
 <style scoped>
-.product-title {
+.page{
   padding: 20px;
   margin: 0 auto;
   padding-top: 10px;
+}
+.product-title {
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between;
 };
 </style>
