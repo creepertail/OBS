@@ -130,15 +130,28 @@ header {
 .profile-view {
   display: flex;
   flex-direction: column;
+  padding: 10px 16px;
   position: absolute;
-  border: 1px solid gray;
+  border-radius: 8px;
   box-shadow: 0 0 8px black;
-  background-color: white;
+  background-color: var(--color-bg-card);
   z-index: 1000;
   right: 5px;
 }
 
-.profile-view .textButton:hover {
-  background-color: lightgray;
+.profile-view .textButton {
+  width: 100%;
+  padding: 10px 16px;
+
+  text-align: left;
+  font-size: 20px;
+
+  color: var(--color-text-primary);
+  border-radius: 8px;
 }
+
+.profile-view .textButton:hover {
+  background-color: var(--color-border-hover);
+}
+
 </style>
