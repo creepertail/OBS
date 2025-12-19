@@ -2,9 +2,16 @@
 @baseUrl = http://localhost:3000
 
 # 請替換為有效的 User access_token
-@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyNDdhY2NkYi01ZjI1LTRjMDgtODRiNS1jMTg5NjJjZjVmNGIiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2NTg4NTA1OCwiZXhwIjoxNzY1OTcxNDU4fQ.vPv1YpeE3GJ4teDIPlU1suQOga57tKOoOueBeh9ePwI
+@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxYWVkZDVlNC04ODBmLTQ4MDQtYjIxMS1lNjQ2MjIxZGQzYmMiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2NjEzMDUyMywiZXhwIjoxNzY2MjE2OTIzfQ.yhpNtSLf693Kvw9M3bENjGbpKH9nsfyVMxkLmEriZUY
+
+@merchantID = 42cd48c5-a8e2-4cab-876c-c0b9b200382b
 
 
 ### 取得我的購物車
 GET {{baseUrl}}/cart
+Authorization: Bearer {{userToken}}
+
+
+### 取得我的購物車中，屬於 Merchant 的商品
+GET {{baseUrl}}/cart/{{merchantID}}
 Authorization: Bearer {{userToken}}

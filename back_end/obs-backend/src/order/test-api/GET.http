@@ -13,12 +13,10 @@
 @baseUrl = http://localhost:3000
 
 # 請先執行登入 API 取得對應身分的 access_token
-@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NWQyMzY3ZC05ZDc4LTRhMTktOTZkMC1mOTc0OTA0ODAxNmIiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2NTI4MzcwOCwiZXhwIjoxNzY1MzcwMTA4fQ.UUSUi7skkc26hVNX_zQ_zaByNZ5m-ov2OfL_3MH9oHE
-@merchantToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjM2VlZTZmOS03ZTljLTQwODktOGRkOC02NDAzYjhmMDkzOGMiLCJhY2NvdW50IjoibWVyY2hhbnQxIiwidHlwZSI6Im1lcmNoYW50IiwiaWF0IjoxNzY1Mjg0NTIzLCJleHAiOjE3NjUzNzA5MjN9.ZzQr-2ok5u8xy8Cd8M12HqWTHDl5tp0jIRqOGtvz5cM
-@adminToken = admin-token-here
+@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxYWVkZDVlNC04ODBmLTQ4MDQtYjIxMS1lNjQ2MjIxZGQzYmMiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2NjEyOTI1OCwiZXhwIjoxNzY2MjE1NjU4fQ.WI2HY7NtxtRuhGqPEI4_zCVgNQvM-w6DlXjtASPZBTE
+@merchantToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYzZjY2FmOC1kNDM5LTRhMjgtOGRjOS00MGYyOWIyNDgxMGQiLCJhY2NvdW50IjoibWVyY2hhbnQxIiwidHlwZSI6Im1lcmNoYW50IiwiaWF0IjoxNzY2MTI5MjgxLCJleHAiOjE3NjYyMTU2ODF9.lWZBC3BiHBd638c-SmByZMD0zqVM4BxmsqsiOeGDuzY
 
-# 訂單 ID（請先使用 POST /orders 建立訂單後取得訂單 ID）
-@orderId = 8139e451-1df2-4cdf-8185-e602c37e3351
+@orderId = 3ebdabfa-6096-4fda-8780-aca2304336ce
 
 # ========================================
 # 查詢所有訂單（根據身分過濾）
@@ -32,9 +30,9 @@ Authorization: Bearer {{userToken}}
 GET {{baseUrl}}/orders
 Authorization: Bearer {{merchantToken}}
 
-### Admin 查詢所有訂單（可以看到所有訂單）
-GET {{baseUrl}}/orders
-Authorization: Bearer {{adminToken}}
+# ### Admin 查詢所有訂單（可以看到所有訂單）
+# GET {{baseUrl}}/orders
+# Authorization: Bearer {{adminToken}}
 
 # ========================================
 # 查詢自己的訂單
@@ -57,8 +55,8 @@ GET {{baseUrl}}/orders/{{orderId}}
 Authorization: Bearer {{merchantToken}}
 
 ### Admin 查詢任何訂單（成功）
-GET {{baseUrl}}/orders/{{orderId}}
-Authorization: Bearer {{adminToken}}
+# GET {{baseUrl}}/orders/{{orderId}}
+# Authorization: Bearer {{adminToken}}
 
 # ========================================
 # 權限測試
