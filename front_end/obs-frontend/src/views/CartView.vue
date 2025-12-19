@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from "vue-router"
 import axios from 'axios'
+import type CartItem from "../type/cartItem"
 
 interface RawCartItem {
   bookID: string
@@ -15,17 +16,6 @@ interface RawCartItem {
     displayOrder: number
     isCover: boolean
   }[]
-  author: string
-  publisher: string
-}
-
-interface CartItem {
-  bookID: string
-  name: string
-  amount: number
-  inventoryQuantity: number
-  price: number
-  imageUrl: string
   author: string
   publisher: string
 }
@@ -124,6 +114,15 @@ async function updateAmount(index: number, value: number) {
   } catch (e) {
     console.error('更新購物車資料失敗', e)
   }
+}
+
+function goToCheckout(){
+  router.push({
+    name: 'checkout',
+    query: {
+      cart: JSON.stringify(cartItems.value)
+    }
+  })
 }
 
 async function deleteAllCartItem(){
@@ -236,7 +235,10 @@ async function deleteAllCartItem(){
           <span>NT$ {{ totalAmount }}</span>
         </div>
 
-        <button class="btn btn-primary">
+        <button 
+          class="btn btn-primary"
+          @click="goToCheckout"
+        >
           前往結帳
         </button>
 
