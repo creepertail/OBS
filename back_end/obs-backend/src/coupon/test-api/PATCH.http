@@ -1,0 +1,16 @@
+@baseUrl = http://localhost:3000
+@access_token = {{access_token}}     
+@admin_token = {{admin_token}}      
+@coupon_id = {{coupon_id}}
+
+# 更新優惠券（Admin 或擁有者）
+PATCH {{baseUrl}}/coupons/{{coupon_id}}
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "amount": 120,
+  "discount": 0.85,
+  "description": "雙12優惠",
+  "validDate": "2026-01-15T00:00:00Z"
+}
