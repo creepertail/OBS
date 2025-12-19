@@ -11,11 +11,12 @@ const products = ref<ProductCard[]>([])
 
 onMounted(async () => {
   const res = await axios.get<Book[]>("http://localhost:3000/members/merchantWithBooks", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("accessToken")}`
-      }
-    });
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`
+    }
+  });
   products.value = res.data.books.map((product: Book) => ({
+    bookID: product.bookID,
     image: product.images?.find(img => img.isCover)?.imageUrl 
       ?? "http://localhost:3000/uploads/defaultImages/default_book_image.png",
     title: product.name,

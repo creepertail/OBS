@@ -9,7 +9,7 @@
 
       <p class="price">$ {{ price }}</p>
 
-      <button class="edit-btn" @click="router.push({ name: 'editProduct' })">編輯商品</button>
+      <button class="edit-btn" @click="router.push({ name: 'editProduct', params: { bookID: bookID} })">編輯商品</button>
     </div>
   </div>
 </template>
@@ -20,6 +20,7 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 
 defineProps({
+  bookID: { type: String, required: true},
   image: { type: String, required: true },
   title: { type: String, required: true },
   author: { type: String, required: true },
