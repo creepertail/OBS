@@ -90,6 +90,7 @@ export class BooksService {
    * 更新書籍資訊
    */
   async update(id: string, updateBookDto: UpdateBookDto, merchantId: string): Promise<Book> {
+    // 先查詢 book（包含 images 用於後續返回）
     const book = await this.findByID(id);
 
     // 驗證是否為書籍擁有者
@@ -137,9 +138,16 @@ export class BooksService {
       delete updateBookDto.images;
     }
 
+    // 從 book 物件中移除 images 關聯，避免 TypeORM 嘗試同步關聯
+    // 使用 as any 來繞過 TypeScript 的限制
+    delete (book as any).images;
+
     // 更新資料（不包含 images）
     Object.assign(book, updateBookDto);
-    return await this.booksRepository.save(book);
+    await this.booksRepository.save(book);
+
+    // 重新查詢並返回完整的 book（包含更新後的 images）
+    return await this.findByID(id);
   }
 
   /**

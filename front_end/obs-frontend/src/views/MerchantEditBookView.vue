@@ -9,6 +9,7 @@ const bookID = route.params.bookID as string
 const router = useRouter();
 const files = ref<File[]>([]);
 const urls = ref<string[]>([]);
+const hasNewImages = ref<boolean>(false); // 追蹤是否有新圖片
 let body = {};
 const form = ref({
   name: "",
@@ -26,42 +27,50 @@ function handleFileUpload(event: Event) {
 
   files.value = Array.from(target.files);
   urls.value = files.value.map(file => URL.createObjectURL(file));
+  hasNewImages.value = true; // 標記有新圖片
 }
 
 async function submit(status: number) {
   try {
-    for (let i: number = 0; i < files.value.length; i++) {
-      const formData = new FormData();
-      formData.append('file', files.value[i]);
-      const res = await axios.post(
-        'http://localhost:3000/books/upload-image',
-        formData
-      );
-      urls.value.push(res.data.url);
+    const uploadedUrls: string[] = [];
+
+    // 只有在有新圖片時才上傳
+    if (hasNewImages.value) {
+      for (let i: number = 0; i < files.value.length; i++) {
+        const formData = new FormData();
+        formData.append('file', files.value[i]);
+        const res = await axios.post(
+          'http://localhost:3000/books/upload-image',
+          formData
+        );
+        uploadedUrls.push(res.data.url);
+      }
     }
 
     body = {
       "ISBN": form.value.isbn,
       "name": form.value.name,
-      "status": 1,
+      "status": status,
       "productDescription": form.value.productDescription,
       "inventoryQuantity": form.value.inventoryQuantity,
       "price": form.value.price,
       "author": form.value.author,
       "publisher": form.value.publisher,
     };
-    
-    const imgs = [];
-    for (let i = 0; i < urls.value.length; i++) {
-      const url = urls.value[i];
-      imgs.push({
-        "imageUrl": url,
-        "displayOrder": i,
-        "isCover": i == 0 ? true : false
-      })
+
+    // 只有在有新圖片時才添加 images 欄位
+    if (hasNewImages.value && uploadedUrls.length > 0) {
+      const imgs = [];
+      for (let i = 0; i < uploadedUrls.length; i++) {
+        const url = uploadedUrls[i];
+        imgs.push({
+          "imageUrl": url,
+          "displayOrder": i,
+          "isCover": i == 0 ? true : false
+        })
+      }
+      body.images = imgs;
     }
-    body.images = imgs;
-    body.status = status;
 
     await axios.patch(
       `http://localhost:3000/books/${bookID}`,
@@ -71,7 +80,7 @@ async function submit(status: number) {
         Authorization: `Bearer ${localStorage.getItem("accessToken")}`
       }}
     )
-    
+
     router.push({ name: 'merchant' });
   } catch (err) {
     console.error(err);

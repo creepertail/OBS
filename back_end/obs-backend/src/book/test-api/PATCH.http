@@ -26,9 +26,9 @@
 # ----------
 @baseUrl = http://localhost:3000
 # 請將此 ID 替換為實際的書籍 ID（從建立書籍的回應中取得）
-@bookId = 75b50a22-7e92-430e-9d47-db43414d3298
+@bookId = 21a4fd03-42cc-4121-bdaf-f7457b2fbcea
 # 商家 1 的 JWT token（請先執行登入 API 取得 access_token）
-@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NTg1NzQyYy1jYmFlLTQzN2YtYmZiMi0wMGU1MWIzNmI2OGUiLCJhY2NvdW50IjoibWVyY2hhbnQtdGVzdC0xIiwidHlwZSI6Im1lcmNoYW50IiwiaWF0IjoxNzYzNDY4NDg0LCJleHAiOjE3NjM1NTQ4ODR9.im52tPcEfl4_Hkqgk2fya9WkPXUD1n6IM5-zODKZLkM
+@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDM3ZGY3My1hYTM4LTQ0MjYtYWJiYS05YmY1NzhlNmZlNDQiLCJhY2NvdW50IjoibWVyY2hhbnQxIiwidHlwZSI6Im1lcmNoYW50IiwiaWF0IjoxNzY2MzYzMTk3LCJleHAiOjE3NjY0NDk1OTd9.AlDlVaSuNoWmTA8amio2cJKHKzz_ionuO6WSrB0GMtA
 # 商家 2 的 JWT token（用於測試權限拒絕，請使用另一個商家帳號登入取得）
 @accessToken2 = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiOGJjNWZmYy1kODBiLTRmMjktYThkZS00OWZhNWFlNDQwMjYiLCJhY2NvdW50IjoibWVyY2hhbnQtdGVzdC0yIiwidHlwZSI6Im1lcmNoYW50IiwiaWF0IjoxNzYzNDcwMTI2LCJleHAiOjE3NjM1NTY1MjZ9.qPlPylkP2xK62iCIiLTyFF2ofCvupvKDJlnnENCygPA
 
@@ -42,7 +42,7 @@ Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
 {
-  "name": "更新後的書名：TypeScript 進階指南"
+  "name": "運動中的物理學: 用物理角度解讀44項運動競技, 讓你紀錄再突破! 看賽事更有趣!~"
 }
 
 ### 更新書籍價格
