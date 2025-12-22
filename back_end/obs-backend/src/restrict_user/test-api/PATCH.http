@@ -1,0 +1,12 @@
+@baseUrl = http://localhost:3000
+@admin_token = {{admin_token}}
+@user_id = {{user_id}}
+
+# Admin 更新使用者限制紀錄
+PATCH {{baseUrl}}/restrict-user/{{user_id}}
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "latestState": 2
+}

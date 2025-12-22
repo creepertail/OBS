@@ -11,6 +11,10 @@ import { CategoryModule } from './category/category.module';
 import { BelongsToModule } from './belongs-to/belongs-to.module';
 import { OrderModule } from './order/order.module';
 import { CartModule } from './cart/cart.module';
+import { CouponModule } from './coupon/coupon.module';
+import { ClaimsModule } from './claims/claims.module';
+import { RestrictUserModule } from './restrict_user/restrict-user.module';
+import { RestrictMerchantModule } from './restrict_merchant/restrict-merchant.module';
 
 @Module({
   imports: [
@@ -37,6 +41,10 @@ import { CartModule } from './cart/cart.module';
     BelongsToModule,
     OrderModule,
     CartModule,
+    CouponModule,
+    ClaimsModule,
+    RestrictUserModule,
+    RestrictMerchantModule,
   ],
   controllers: [AppController],
   providers: [AppService],
