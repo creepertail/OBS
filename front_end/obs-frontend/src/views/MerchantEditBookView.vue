@@ -57,7 +57,7 @@ async function submit(status: number) {
       imgs.push({
         "imageUrl": url,
         "displayOrder": i,
-        "isCover": i == 1 ? true : false
+        "isCover": i == 0 ? true : false
       })
     }
     body.images = imgs;

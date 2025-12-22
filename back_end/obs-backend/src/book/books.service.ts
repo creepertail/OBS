@@ -119,7 +119,25 @@ export class BooksService {
       }
     }
 
-    // 更新資料
+    // 處理圖片更新
+    if (updateBookDto.images) {
+      // 先刪除舊圖片
+      await this.bookImagesRepository.delete({ bookID: id });
+
+      // 新增新圖片，確保每個圖片都有 bookID
+      const newImages = updateBookDto.images.map((img) =>
+        this.bookImagesRepository.create({
+          ...img,
+          bookID: id,
+        })
+      );
+      await this.bookImagesRepository.save(newImages);
+
+      // 從 updateBookDto 中移除 images，避免後續的 Object.assign 處理
+      delete updateBookDto.images;
+    }
+
+    // 更新資料（不包含 images）
     Object.assign(book, updateBookDto);
     return await this.booksRepository.save(book);
   }
