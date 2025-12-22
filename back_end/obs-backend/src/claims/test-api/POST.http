@@ -1,0 +1,27 @@
+@baseUrl = http://localhost:3000
+@access_token =
+@admin_token = 
+@user_id = {{user_id}}
+@coupon_id = {{coupon_id}}
+
+# 使用者為自己領取優惠券
+POST {{baseUrl}}/claims
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "couponID": "{{coupon_id}}",
+  "remaining": 1
+}
+
+###
+# Admin 代指定 User 領取優惠券（必填 userID）
+POST {{baseUrl}}/claims
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "couponID": "{{coupon_id}}",
+  "userID": "{{user_id}}",
+  "remaining": 2
+}

@@ -1,7 +1,7 @@
 @baseUrl = http://localhost:3000
-@access_token = {{access_token}}       // 商家/使用者 token 範例
-@admin_token = {{admin_token}}         // 管理員 token 範例
-@coupon_id = {{coupon_id}}
+@access_token =
+@admin_token =
+@coupon_id = 
 
 # 取得自己擁有的優惠券（需 token）
 GET {{baseUrl}}/coupons/mine

@@ -13,6 +13,9 @@ import { BelongsTo } from '../src/belongs-to/entities/belongs-to.entity';
 import { Order } from '../src/order/entities/order.entity';
 import { Contains } from '../src/order/entities/contains.entity';
 import { AddsToCart } from '../src/cart/entities/adds-to-cart.entity';
+import { Coupon } from '../src/coupon/entities/coupon.entity';
+import { Claim } from '../src/claims/entities/claim.entity';
+import { Manage } from '../src/manage/entities/manage.entity';
 
 // 載入環境變數
 config();
@@ -25,7 +28,7 @@ const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME || 'root',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_DATABASE || 'OBS',
-  entities: [Member, Category, Book, BookImage, BelongsTo, Order, Contains, AddsToCart],
+  entities: [Member, Category, Book, BookImage, BelongsTo, Order, Contains, AddsToCart, Coupon, Claim, Manage],
   synchronize: false,
   logging: true,
 });
@@ -77,11 +80,14 @@ async function seedData() {
     console.log('\n🗑️  清空現有測試數據...');
     // 暫時禁用外鍵檢查，以便清空資料
     await AppDataSource.query('SET FOREIGN_KEY_CHECKS = 0');
+    await AppDataSource.getRepository(Claim).clear();
     await AppDataSource.getRepository(Contains).clear();
+    await AppDataSource.getRepository(Manage).clear();
     await AppDataSource.getRepository(Order).clear();
     await AppDataSource.getRepository(BelongsTo).clear();
     await AppDataSource.getRepository(BookImage).clear();
     await AppDataSource.getRepository(Book).clear();
+    await AppDataSource.getRepository(Coupon).clear();
     await AppDataSource.getRepository(Category).clear();
     await AppDataSource.getRepository(Member).clear();
     // 重新啟用外鍵檢查
@@ -177,6 +183,31 @@ async function seedData() {
     // 2. 創建分類
     console.log('\n📚 創建分類數據...');
     const categoryRepo = AppDataSource.getRepository(Category);
+    const couponRepo = AppDataSource.getRepository(Coupon);
+    const claimRepo = AppDataSource.getRepository(Claim);
+
+    // 優惠券範例
+    const coupon1 = await couponRepo.save({
+      amount: 100,
+      validDate: new Date('2025-12-31T00:00:00Z'),
+      discount: 0.9,
+      description: 'merchant1 年末折扣券',
+      memberID: merchant1.memberID,
+    });
+
+    const coupon2 = await couponRepo.save({
+      amount: 50,
+      validDate: new Date('2025-10-31T00:00:00Z'),
+      discount: 0.8,
+      description: 'merchant2 新客八折券',
+      memberID: merchant2.memberID,
+    });
+
+    await claimRepo.save([
+      { userID: user1.memberID, couponID: coupon1.couponID, remaining: 1 },
+      { userID: user2.memberID, couponID: coupon1.couponID, remaining: 2 },
+      { userID: user3.memberID, couponID: coupon2.couponID, remaining: 1 },
+    ]);
 
     const categories = await categoryRepo.save([
       {

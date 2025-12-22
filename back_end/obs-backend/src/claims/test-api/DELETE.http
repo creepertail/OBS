@@ -1,0 +1,14 @@
+@baseUrl = http://localhost:3000
+@access_token = 
+@admin_token = 
+@coupon_id = {{coupon_id}}
+@user_id = {{user_id}}
+
+# 刪除自己的領券（Admin 或持有者）
+DELETE {{baseUrl}}/claims/{{coupon_id}}
+Authorization: Bearer {{access_token}}
+
+###
+# Admin 刪除指定使用者的領券
+DELETE {{baseUrl}}/claims/{{coupon_id}}?userID={{user_id}}
+Authorization: Bearer {{admin_token}}

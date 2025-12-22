@@ -1,7 +1,7 @@
 @baseUrl = http://localhost:3000
-@access_token = {{access_token}}     
-@admin_token = {{admin_token}}      
-@coupon_id = {{coupon_id}}
+@access_token =     
+@admin_token =    
+@coupon_id = 
 
 # 更新優惠券（Admin 或擁有者）
 PATCH {{baseUrl}}/coupons/{{coupon_id}}

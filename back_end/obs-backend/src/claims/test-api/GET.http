@@ -1,0 +1,19 @@
+@baseUrl = http://localhost:3000
+@access_token = 
+@admin_token = 
+@coupon_id = {{coupon_id}}
+@user_id = {{user_id}}
+
+# 取得自己領到的優惠券
+GET {{baseUrl}}/claims/mine
+Authorization: Bearer {{access_token}}
+
+###
+# Admin 取得全部領券資料
+GET {{baseUrl}}/claims
+Authorization: Bearer {{admin_token}}
+
+###
+# 取得單一領券（Admin 可查任意 userID，User 只能查自己）
+GET {{baseUrl}}/claims/{{coupon_id}}?userID={{user_id}}
+Authorization: Bearer {{admin_token}}
