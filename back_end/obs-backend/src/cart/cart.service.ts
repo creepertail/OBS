@@ -58,18 +58,37 @@ export class CartService {
     return this.cartRepository.save(item);
   }
 
-  // 取得使用者的購物車清單(展開 book 資訊及 images,避免巢狀結構)
-  async findMyCart(userId: string): Promise<Array<{ bookID: string; amount: number } & Book>> {
+  // 取得使用者的購物車清單(依照 merchantID 分組)
+  async findMyCart(userId: string): Promise<Array<{
+    merchantId: string;
+    items: Array<{ bookID: string; amount: number } & Book>;
+  }>> {
     const items = await this.cartRepository.find({
       where: { userID: userId },
       relations: ['book', 'book.images'],
     });
 
-    return items.map(({ bookID, amount, book }) => ({
-      // bookID,
-      amount,
-      ...book,
-      images: book.images?.filter(img => img.isCover === true) || [],
+    // 將購物車項目依照 merchantId 分組
+    const groupedByMerchant = items.reduce((acc, { bookID, amount, book }) => {
+      const merchantId = book.merchantId;
+
+      if (!acc[merchantId]) {
+        acc[merchantId] = [];
+      }
+
+      acc[merchantId].push({
+        amount,
+        ...book,
+        images: book.images?.filter(img => img.isCover === true) || [],
+      });
+
+      return acc;
+    }, {} as Record<string, Array<{ bookID: string; amount: number } & Book>>);
+
+    // 將分組結果轉換為陣列格式
+    return Object.entries(groupedByMerchant).map(([merchantId, items]) => ({
+      merchantId,
+      items,
     }));
   }
 
@@ -105,5 +124,24 @@ export class CartService {
   // 清空購物車
   async clearCart(userId: string): Promise<void> {
     await this.cartRepository.delete({ userID: userId });
+  }
+
+  // 根據 merchantID 取得使用者購物車中該商家的商品
+  async findItemsInMyCartByMerchantID(userId: string, merchantId: string): Promise<Array<{ bookID: string; amount: number } & Book>> {
+    const items = await this.cartRepository.find({
+      where: { userID: userId },
+      relations: ['book', 'book.images'],
+    });
+
+    // 過濾出屬於指定商家的商品
+    const merchantItems = items
+      .filter(item => item.book.merchantId === merchantId)
+      .map(({ book, amount }) => ({
+        amount,
+        ...book,
+        images: book.images?.filter(img => img.isCover === true) || [],
+      }));
+
+    return merchantItems;
   }
 }

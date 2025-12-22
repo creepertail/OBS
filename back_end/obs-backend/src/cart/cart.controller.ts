@@ -40,6 +40,18 @@ export class CartController {
     return this.cartService.findMyCart(userId);
   }
 
+  // GET /cart/:merchantID - 根據 MerChantID 跟 Access Token 找 Cart 的商品
+  @Get(":merchanId")
+  @JWTGuard(MemberType.User)
+  findItemsInMyCartByMerchantID(
+    @Param('merchanId', ParseUUIDPipe) merchanId: string,
+    @Request() req
+  ) {
+    const userId = req.member.sub;
+    return this.cartService.findItemsInMyCartByMerchantID(userId, merchanId);
+  }
+
+
   // PATCH /cart/:bookId - 更新指定商品的數量
   @Patch(':bookId')
   @JWTGuard(MemberType.User)

@@ -14,3 +14,5 @@ SELECT *
 FROM obs.contain;
 SELECT *
 FROM obs.subscribes;
+SELECT *
+FROM obs.add_to_cart;
