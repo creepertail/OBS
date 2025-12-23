@@ -3,13 +3,12 @@
     <img :src="image" class="thumbnail" alt="商品圖片" />
 
     <div class="info">
-      <h3>{{ title }}</h3>
-      <p class="author">{{ author }}</p>
-      <p class="publisher">出版社：{{ publisher }}</p>
-
-      <p class="price">$ {{ price }}</p>
-
-      <button class="edit-btn" @click="router.push({ name: 'editProduct', params: { bookID: bookID} })">編輯商品</button>
+      <h3>{{ props.title }}</h3>
+      <p class="author">{{ props.author }}</p>
+      <p class="publisher">出版社：{{ props.publisher }}</p>
+      <p class="price">$ {{ props.price }}</p>
+      <p class="note" v-if="props.status===0">已下架</p>
+      <button class="edit-btn" @click="router.push({ name: 'editProduct', params: { bookID: props.bookID} })">編輯商品</button>
     </div>
   </div>
 </template>
@@ -19,20 +18,21 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
-defineProps({
+const props = defineProps({
   bookID: { type: String, required: true},
   image: { type: String, required: true },
   title: { type: String, required: true },
   author: { type: String, required: true },
   publisher: { type: String, required: true },
-  price: { type: Number, required: true }
+  price: { type: Number, required: true },
+  status: { type: Number, required: true }
 });
 </script>
 
 <style scoped>
 .product-card {
   width: 250px;
-  background: #fff;
+  /* background: #fff; */
   border-radius: 12px;
   overflow: hidden;
   padding-bottom: 10px;
@@ -70,6 +70,10 @@ defineProps({
   font-weight: bold;
   font-size: 20px;
   color: #e67e22;
+}
+
+.note {
+  color: red;
 }
 
 .edit-btn {

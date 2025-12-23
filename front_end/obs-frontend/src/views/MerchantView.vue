@@ -22,7 +22,8 @@ onMounted(async () => {
     title: product.name,
     author: product.author,
     publisher: product.publisher,
-    price: product.price
+    price: product.price,
+    status: product.status
   }));
 })
 </script>
@@ -32,7 +33,7 @@ onMounted(async () => {
     <div class="page">
       <div class="product-title">
         <h1>商家商品列表</h1>
-        <button class="button" @click="router.push({ name: 'addProduct' })">新增商品</button>
+        <button class="add-button" @click="router.push({ name: 'addProduct' })">新增商品</button>
       </div>
       <ProductList :products="products" />
     </div>
@@ -46,9 +47,26 @@ onMounted(async () => {
   margin: 0 auto;
   padding-top: 10px;
 }
+
 .product-title {
   display: flex; 
   align-items: center; 
   justify-content: space-between;
-};
+}
+
+.add-button {
+  margin-top: 10px;
+  padding: 8px;
+  border: none;
+  background: #3498db;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.add-button:hover {
+  background: #2980b9;
+}
 </style>
