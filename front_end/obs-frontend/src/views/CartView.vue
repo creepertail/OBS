@@ -20,107 +20,134 @@ interface RawCartItem {
   publisher: string
 }
 
-const cartItems = ref<CartItem[]>([])
+interface RawCartItemGroupByMerchant {
+  merchantId: string
+  merchantName: string
+  items: RawCartItem[]
+}
+
+interface CartGroup {
+  merchantId: string
+  merchantName: string
+  items: CartItem[]
+}
+
 const router = useRouter()
+const cartGroups = ref<CartGroup[]>([])
+const selectedMerchantId = ref<string | null>(null)
 
 onMounted(async () => {
-  try {
-    const token = localStorage.getItem('accessToken')
-    if (!token) {
-      alert('請先登入帳號')
-      return
-    }
+  const token = localStorage.getItem('accessToken')
+  if (!token) return
 
-    const res = await axios.get<RawCartItem[]>(
-      'http://localhost:3000/cart',
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+  const res = await axios.get<RawCartItemGroupByMerchant[]>(
+    'http://localhost:3000/cart',
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
       }
-    )
-    console.log(res)
-    cartItems.value = res.data.map((cartItems: RawCartItem) => ({
-    bookID: cartItems.bookID,
-    name: cartItems.name,
-    amount: cartItems.amount,
-    inventoryQuantity: cartItems.inventoryQuantity,
-    price: cartItems.price,
-    imageUrl: cartItems.images?.find(img => img.isCover)?.imageUrl 
-       ?? "http://localhost:3000/uploads/defaultImages/default_book_image.png",
-    author: cartItems.author,
-    publisher: cartItems.publisher,
+    }
+  )
+  console.log("res", res.data)
+
+  cartGroups.value = res.data.map(group => ({
+    merchantId: group.merchantId,
+    merchantName: group.merchantName,
+    items: group.items.map(item => ({
+      bookID: item.bookID,
+      name: item.name,
+      amount: item.amount,
+      inventoryQuantity: item.inventoryQuantity,
+      price: item.price,
+      imageUrl:
+        item.images?.find(img => img.isCover)?.imageUrl ??
+        'http://localhost:3000/uploads/defaultImages/default_book_image.png',
+      author: item.author,
+      publisher: item.publisher
+    }))
   }))
-  } catch (e) {
-    console.error('取得購物車資料失敗', e)
-  }
+  console.log("cart group", cartGroups.value)
 })
 
-const totalAmount = computed(() =>
-  cartItems.value.reduce(
+const totalAmount = computed(() => {
+  if (!selectedMerchantId.value) return 0
+
+  const group = cartGroups.value.find(
+    g => g.merchantId === selectedMerchantId.value
+  )
+
+  if (!group) return 0
+
+  return group.items.reduce(
     (sum, item) => sum + item.price * item.amount,
     0
   )
-)
+})
 
-function goToBookPage(index: number) {
-  const item = cartItems.value[index]
+function goToBookPage(bookID: string) {
   router.push({
     name: 'book',
-    params: {
-      bookID: item?.bookID
-    }
+    params: { bookID }
   })
 }
 
-async function removeItem(index: number) {
-  const item = cartItems.value[index]
-
-  try {
-    await axios.delete(
-      `http://localhost:3000/cart/${item?.bookID}`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`
-        }
-      }
-    )
-  } catch (e) {
-    console.error('刪除購物車資料失敗', e)
-  } finally{
-    cartItems.value.splice(index, 1)
-  }
-}
-
-async function updateAmount(index: number, value: number) {
-  const item = cartItems.value[index]
-  if (!item) return
-
+async function updateAmount(item: CartItem, value: number) {
   item.amount = Math.max(1, Math.min(value, item.inventoryQuantity))
-
-  try{
-    await axios.patch(
-      `http://localhost:3000/cart/${item.bookID}`,
-      {
-        amount: item.amount
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-          "Content-Type": "application/json"
-        }
+  await axios.patch(
+    `http://localhost:3000/cart/${item.bookID}`,
+    {
+      amount: item.amount
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        "Content-Type": "application/json"
       }
-    )
-  } catch (e) {
-    console.error('更新購物車資料失敗', e)
-  }
+    }
+  )
 }
 
-function goToCheckout(){
+async function removeItem(item: CartItem) {
+  await axios.delete(
+    `http://localhost:3000/cart/${item?.bookID}`,
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('accessToken')}`
+      }
+    }
+  )
+
+  cartGroups.value = cartGroups.value
+    .map(group => {
+      return {
+        ...group,
+        items: group.items.filter(i => i.bookID !== item.bookID)
+      }
+    })
+    .filter(group => group.items.length > 0)
+}
+
+function toggleMerchant(merchantId: string) {
+  selectedMerchantId.value =
+    selectedMerchantId.value === merchantId ? null : merchantId
+}
+
+function goToCheckout() {
+  if (!selectedMerchantId.value) {
+    alert('請先選擇一個商家進行結帳')
+    return
+  }
+
+  const selectedGroup = cartGroups.value.find(
+    g => g.merchantId === selectedMerchantId.value
+  )
+
+  if (!selectedGroup) return
+
   router.push({
     name: 'checkout',
     query: {
-      cart: JSON.stringify(cartItems.value)
+      cart: JSON.stringify(selectedGroup)
     }
   })
 }
@@ -138,7 +165,7 @@ async function deleteAllCartItem(){
   } catch (e) {
     console.error('刪除購物車資料失敗', e)
   } finally{
-    cartItems.value = []
+    cartGroups.value = []
   }
 }
 </script>
@@ -147,76 +174,101 @@ async function deleteAllCartItem(){
   <main class="cart-page">
     <h1 class="cart-title">購物車</h1>
 
-    <div v-if="cartItems.length === 0" class="cart-empty">
+    <div v-if="cartGroups.length === 0" class="cart-empty">
       購物車是空的
     </div>
 
     <div v-else class="cart-layout">
-      <!-- 左側：商品列表 -->
       <section class="cart-list">
-        <div
-          v-for="(item, index) in cartItems"
-          :key="item.bookID"
-          class="cart-item"
+        <template
+          v-for="(group, groupIndex) in cartGroups"
+          :key="group.merchantId"
         >
-          <img
-            :src="item.imageUrl"
-            alt="book cover"
-            class="cart-item__image"
-            v-on:click="goToBookPage(index)"
-          />
+          <!-- 商家名稱 -->
+          <div class="merchant-header">
+            <label class="merchant-checkbox">
+              <input
+                type="checkbox"
+                :checked="selectedMerchantId === group.merchantId"
+                @change="toggleMerchant(group.merchantId)"
+              />
+              <span class="merchant-name">
+                {{ group.merchantId }}
+              </span>
+            </label>
+          </div>
 
-          <div class="cart-item__content">
-            <div>
-              <h2 class="cart-item__title">{{ item.name }}</h2>
-              <p class="cart-item__meta">
-                {{ item.author }}｜{{ item.publisher }}
-              </p>
-              <p class="cart-item__price">
-                NT$ {{ item.price }}
-              </p>
-            </div>
+          <!-- 商家商品 -->
+          <div
+            v-for="item in group.items"
+            :key="item.bookID"
+            class="cart-item"
+          >
+            <img
+              :src="item.imageUrl"
+              class="cart-item__image"
+              @click="goToBookPage(item.bookID)"
+            />
 
-            <div class="cart-item__footer">
-              <div class="cart-item__amount">
-                <span>數量</span>
-                <div class="quantity-control">
-                  <button
-                    class="quantity-control__btn"
-                    :disabled="item.amount <= 1"
-                    @click="updateAmount(index, item.amount - 1)"
-                  >
-                    −
-                  </button>
-              
-                  <span class="quantity-control__number">{{ item.amount }}</span>
-              
-                  <button
-                    class="quantity-control__btn"
-                    :disabled="item.amount >= item.inventoryQuantity"
-                    @click="updateAmount(index, item.amount + 1)"
-                  >
-                    +
-                  </button>
-                </div>
+            <div class="cart-item__content">
+              <div>
+                <h2 class="cart-item__title">{{ item.name }}</h2>
+                <p class="cart-item__meta">
+                  {{ item.author }}｜{{ item.publisher }}
+                </p>
+                <p class="cart-item__price">
+                  NT$ {{ item.price }}
+                </p>
               </div>
 
-              <button
-                class="cart-item__remove"
-                @click="removeItem(index)"
-              >
-                移除
-              </button>
-            </div>
+              <div class="cart-item__footer">
+                <div class="cart-item__amount">
+                  <span>數量</span>
+                  <div class="quantity-control">
+                    <button
+                      class="quantity-control__btn"
+                      :disabled="item.amount <= 1"
+                      @click="updateAmount(item, item.amount - 1)"
+                    >
+                      −
+                    </button>
 
-            <div class="cart-item__subtotal">
-              小計：
-              <strong>
-                NT$ {{ item.price * item.amount }}
-              </strong>
+                    <span class="quantity-control__number">
+                      {{ item.amount }}
+                    </span>
+
+                    <button
+                      class="quantity-control__btn"
+                      :disabled="item.amount >= item.inventoryQuantity"
+                      @click="updateAmount(item, item.amount + 1)"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  class="cart-item__remove"
+                  @click="removeItem(item)"
+                >
+                  移除
+                </button>
+              </div>
+
+              <div class="cart-item__subtotal">
+                小計：
+                <strong>
+                  NT$ {{ item.price * item.amount }}
+                </strong>
+              </div>
             </div>
           </div>
-        </div>
+
+          <hr
+            v-if="groupIndex !== cartGroups.length - 1"
+            class="merchant-divider"
+          />
+        </template>
       </section>
 
       <!-- 右側：總計 -->
@@ -237,6 +289,7 @@ async function deleteAllCartItem(){
 
         <button 
           class="btn btn-primary"
+          :disabled="!selectedMerchantId"
           @click="goToCheckout"
         >
           前往結帳
@@ -282,6 +335,7 @@ async function deleteAllCartItem(){
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 32px;
+  align-items: start;
 }
 
 @media (max-width: 1024px) {
@@ -357,6 +411,37 @@ async function deleteAllCartItem(){
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.merchant-header {
+  display: flex;
+  align-items: center;
+  margin: 16px 0 8px;
+}
+
+.merchant-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.merchant-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.merchant-name {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.merchant-divider {
+  margin: 32px 0;
+  border: none;
+  border-top: 2px dashed var(--color-border);
 }
 
 .quantity-control {
@@ -477,6 +562,11 @@ async function deleteAllCartItem(){
   cursor: pointer;
   border: none;
   transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .btn-primary {

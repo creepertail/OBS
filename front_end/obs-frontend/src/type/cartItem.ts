@@ -7,4 +7,6 @@ interface CartItem {
   imageUrl: string
   author: string
   publisher: string
+  merchantID: string
+  merchantName: string
 }
