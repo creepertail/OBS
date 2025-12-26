@@ -193,7 +193,7 @@ async function deleteAllCartItem(){
                 @change="toggleMerchant(group.merchantId)"
               />
               <span class="merchant-name">
-                {{ group.merchantId }}
+                {{ group.merchantName }}
               </span>
             </label>
           </div>
