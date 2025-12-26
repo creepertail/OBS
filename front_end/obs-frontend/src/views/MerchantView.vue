@@ -29,29 +29,37 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main style="padding-top: 100px;">
-    <div class="page">
+  <main class="page">
       <div class="product-title">
         <h1>商家商品列表</h1>
         <button class="add-button" @click="router.push({ name: 'addProduct' })">新增商品</button>
       </div>
       <ProductList :products="products" />
-    </div>
   </main>
 </template>
 
 
 <style scoped>
 .page{
-  padding: 20px;
-  margin: 0 auto;
-  padding-top: 10px;
+  min-height: 100vh;
+  padding: 100px 24px 48px;
+  background: var(--color-bg-page);
+  color: var(--color-text-primary);
 }
 
 .product-title {
   display: flex; 
   align-items: center; 
   justify-content: space-between;
+  margin-bottom: 32px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.product-title h1 {
+  font-size: 32px;
+  font-weight: 800;
 }
 
 .add-button {

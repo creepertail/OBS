@@ -101,18 +101,15 @@ function claimStateText(state: number) {
   return ['未使用', '已使用'][state] ?? '未知'
 }
 
-// 計算標題
-const pageTitle = computed(() => {
-  if (userType.value === 'user') return '我的優惠券'
-  if (userType.value === 'merchant') return '我建立的優惠券'
-  if (userType.value === 'admin') return '所有優惠券'
-  return '優惠券'
-})
+const pageTitle = ref('優惠券');
 </script>
 
 <template>
   <main class="coupon-page">
-    <h1 class="coupon-title">{{ pageTitle }}</h1>
+    <div class="coupon-title">
+      <h1>{{ pageTitle }}</h1>
+      <button class="add-button">新增優惠券</button>
+    </div>
 
     <!-- 載入中 -->
     <div v-if="loading" class="coupon-state">
@@ -227,10 +224,34 @@ const pageTitle = computed(() => {
 }
 
 .coupon-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.coupon-title h1 {
   font-size: 32px;
   font-weight: 800;
-  margin-bottom: 32px;
-  text-align: center;
+}
+
+.add-button {
+  padding: 10px 20px;
+  border: none;
+  background: #3498db;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+  white-space: nowrap;
+}
+
+.add-button:hover {
+  background: #2980b9;
 }
 
 /* 狀態 */
