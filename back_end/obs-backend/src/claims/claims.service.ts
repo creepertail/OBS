@@ -57,16 +57,17 @@ export class ClaimsService {
   }
 
   async findAll(): Promise<Claim[]> {
-    return this.claimsRepository.find();
+    return this.claimsRepository.find({ relations: ['coupon'] });
   }
 
   async findMine(userID: string): Promise<Claim[]> {
-    return this.claimsRepository.find({ where: { userID } });
+    return this.claimsRepository.find({ where: { userID }, relations: ['coupon'] });
   }
 
   async findOne(claimID: string, currentUser: { sub: string; type: MemberType }): Promise<Claim> {
     const claim = await this.claimsRepository.findOne({
       where: { claimID },
+      relations: ['coupon'],
     });
     if (!claim) {
       throw new NotFoundException(`Claim ${claimID} not found`);

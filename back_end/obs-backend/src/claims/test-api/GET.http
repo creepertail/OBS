@@ -5,7 +5,7 @@
 
 # User 查詢自己的領券紀錄
 GET {{baseUrl}}/claims/mine
-Authorization: Bearer {{access_token}}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkMzYyODE0OS1hNzRmLTRkMTctYmNlNy0yZWMzOTcwMTBiZTQiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2Njc0NDkxNSwiZXhwIjoxNzY2ODMxMzE1fQ.K0mPRpDDlaHWZqfPjqTfcQcEf0grobpNJkRGQBnus_w
 
 ###
 # Admin 查詢全部領券紀錄
