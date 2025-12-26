@@ -30,6 +30,25 @@ const claims = ref<ClaimWithCoupon[]>([])
 const loading = ref(true)
 const errorMsg = ref('')
 
+// 模態框狀態
+const showModal = ref(false)
+const modalLoading = ref(false)
+const modalError = ref('')
+
+// User: 領取優惠券表單
+const claimForm = ref({
+  redemptionCode: ''
+})
+
+// Merchant/Admin: 建立優惠券表單
+const createForm = ref({
+  quantity: 1,
+  validDate: '',
+  discount: 0.9,
+  description: '',
+  redemptionCode: ''
+})
+
 onMounted(async () => {
   try {
     const token = localStorage.getItem('accessToken')
@@ -101,14 +120,157 @@ function claimStateText(state: number) {
   return ['未使用', '已使用'][state] ?? '未知'
 }
 
-const pageTitle = ref('優惠券');
+// 計算標題
+const pageTitle = ref("優惠券");
+
+// 打開新增優惠券模態框
+function openAddModal() {
+  showModal.value = true
+  modalError.value = ''
+  
+  // 重置表單
+  if (userType.value === 'user') {
+    claimForm.value.redemptionCode = ''
+  } else {
+    createForm.value = {
+      quantity: 1,
+      validDate: '',
+      discount: 0.9,
+      description: '',
+      redemptionCode: ''
+    }
+  }
+}
+
+// 關閉模態框
+function closeModal() {
+  showModal.value = false
+  modalError.value = ''
+}
+
+// User: 領取優惠券
+async function claimCoupon() {
+  try {
+    modalLoading.value = true
+    modalError.value = ''
+
+    const token = localStorage.getItem('accessToken')
+    await axios.post(
+      'http://localhost:3000/claims',
+      {
+        redemptionCode: claimForm.value.redemptionCode
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+
+    // 重新載入數據
+    const res = await axios.get<ClaimWithCoupon[]>(
+      'http://localhost:3000/claims/mine',
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    )
+    claims.value = res.data
+
+    closeModal()
+    alert('優惠券領取成功！')
+  } catch (e: any) {
+    if (e.response?.status === 409) {
+      const errorMessage = e.response?.data?.message || ''
+      if (errorMessage.includes('expired')) {
+        modalError.value = '此優惠券已過期'
+      } else if (errorMessage.includes('already claimed')) {
+        modalError.value = '您已經擁有此優惠券了'
+      } else {
+        modalError.value = errorMessage || '領取優惠券失敗'
+      }
+    } else {
+      modalError.value = e.response?.data?.message || '領取優惠券失敗'
+    }
+    console.error(e)
+  } finally {
+    modalLoading.value = false
+  }
+}
+
+// Merchant/Admin: 建立優惠券
+async function createCoupon() {
+  try {
+    modalLoading.value = true
+    modalError.value = ''
+
+    const token = localStorage.getItem('accessToken')
+    const memberID = localStorage.getItem('memberID')
+
+    // 格式化日期為後端期望的格式 (移除毫秒)
+    const validDate = new Date(createForm.value.validDate).toISOString().replace(/\.\d{3}Z$/, 'Z')
+
+    await axios.post(
+      'http://localhost:3000/coupons',
+      {
+        quantity: createForm.value.quantity,
+        validDate: validDate,
+        discount: createForm.value.discount,
+        description: createForm.value.description,
+        redemptionCode: createForm.value.redemptionCode,
+        memberID: memberID
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+
+    // 重新載入數據
+    const endpoint = userType.value === 'admin' 
+      ? 'http://localhost:3000/coupons'
+      : 'http://localhost:3000/coupons/mine'
+    
+    const res = await axios.get<Coupon[]>(endpoint, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+    coupons.value = res.data
+
+    closeModal()
+    alert('優惠券建立成功！')
+  } catch (e: any) {
+    if (e.response?.status === 409) {
+      modalError.value = '此兌換碼已經被使用了'
+    } else {
+      modalError.value = e.response?.data?.message || '建立優惠券失敗'
+    }
+    console.error(e)
+  } finally {
+    modalLoading.value = false
+  }
+}
+
+// 提交表單
+function handleSubmit() {
+  if (userType.value === 'user') {
+    claimCoupon()
+  } else {
+    createCoupon()
+  }
+}
 </script>
 
 <template>
   <main class="coupon-page">
     <div class="coupon-title">
       <h1>{{ pageTitle }}</h1>
-      <button class="add-button">新增優惠券</button>
+      <button class="add-button" @click="openAddModal">新增優惠券</button>
     </div>
 
     <!-- 載入中 -->
@@ -210,6 +372,109 @@ const pageTitle = ref('優惠券');
           </div>
         </article>
       </section>
+    </div>
+
+    <!-- 新增優惠券模態框 -->
+    <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>{{ userType === 'user' ? '領取優惠券' : '建立優惠券' }}</h2>
+          <button class="close-button" @click="closeModal">&times;</button>
+        </div>
+
+        <!-- User: 領取優惠券表單 -->
+        <form v-if="userType === 'user'" @submit.prevent="handleSubmit" class="modal-form">
+          <div class="form-group">
+            <label for="redemptionCode">兌換碼</label>
+            <input
+              id="redemptionCode"
+              type="text"
+              v-model="claimForm.redemptionCode"
+              placeholder="請輸入兌換碼"
+              required
+            />
+          </div>
+
+          <div v-if="modalError" class="modal-error">{{ modalError }}</div>
+
+          <div class="modal-actions">
+            <button type="button" @click="closeModal" class="cancel-button">取消</button>
+            <button type="submit" class="submit-button" :disabled="modalLoading">
+              {{ modalLoading ? '處理中...' : '領取' }}
+            </button>
+          </div>
+        </form>
+
+        <!-- Merchant/Admin: 建立優惠券表單 -->
+        <form v-else @submit.prevent="handleSubmit" class="modal-form">
+          <div class="form-group">
+            <label for="description">優惠券描述</label>
+            <input
+              id="description"
+              type="text"
+              v-model="createForm.description"
+              placeholder="例如：年末折扣券"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="redemptionCodeCreate">兌換碼</label>
+            <input
+              id="redemptionCodeCreate"
+              type="text"
+              v-model="createForm.redemptionCode"
+              placeholder="例如：NEWYEAR-90"
+              required
+            />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="discount">折扣（0-1之間）</label>
+              <input
+                id="discount"
+                type="number"
+                step="0.01"
+                min="0"
+                max="1"
+                v-model.number="createForm.discount"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="quantity">數量</label>
+              <input
+                id="quantity"
+                type="number"
+                min="1"
+                v-model.number="createForm.quantity"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="validDate">有效期限</label>
+            <input
+              id="validDate"
+              type="date"
+              v-model="createForm.validDate"
+              required
+            />
+          </div>
+
+          <div v-if="modalError" class="modal-error">{{ modalError }}</div>
+
+          <div class="modal-actions">
+            <button type="button" @click="closeModal" class="cancel-button">取消</button>
+            <button type="submit" class="submit-button" :disabled="modalLoading">
+              {{ modalLoading ? '處理中...' : '建立' }}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </main>
 </template>
@@ -377,8 +642,152 @@ const pageTitle = ref('優惠券');
     grid-template-columns: 1fr;
   }
   
-  .coupon-title {
+  .coupon-title h1 {
     font-size: 24px;
   }
+}
+
+/* ===== Modal ===== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 32px;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.close-button:hover {
+  color: #333;
+}
+
+.modal-form {
+  padding: 24px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.modal-error {
+  background: #fee;
+  color: #c33;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.cancel-button,
+.submit-button {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancel-button {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.cancel-button:hover {
+  background: #e0e0e0;
+}
+
+.submit-button {
+  background: #3498db;
+  color: white;
+}
+
+.submit-button:hover:not(:disabled) {
+  background: #2980b9;
+}
+
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>

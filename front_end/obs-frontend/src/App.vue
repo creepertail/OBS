@@ -5,6 +5,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue';
 import SearchBox from './components/SearchBox.vue';
 
 const isMerchant = computed(() => localStorage.getItem("type") === "merchant");
+const isAdmin = computed(() => localStorage.getItem("type") === "admin");
 const router = useRouter();
 const route = useRoute()
 const hideLayout = computed(() => route.meta.hideLayout)
@@ -56,6 +57,7 @@ onBeforeUnmount(() => {
         <button class="account textButton" @click="isOpen=!isOpen">{{ account }}</button>
         <div class="profile-view" v-if="isOpen">
           <button class="textButton" @click="router.push({ name: 'merchant' })" v-if="isMerchant">我的商品</button>
+          <button class="textButton" @click="router.push({ name: 'admin' })" v-if="isAdmin">管理</button>
           <button class="textButton" @click="router.push({ name: 'coupon' })">我的優惠券</button>
           <button class="textButton" @click="router.push({ name: 'setting' })">設置</button>
           <button class="textButton" @click="logout">登出</button>

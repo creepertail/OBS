@@ -21,32 +21,34 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main style="padding-top: 100px;">
-    <div class="page">
+  <main class="page">
       <div class="member-title">
         <h1>會員管理列表</h1>
       </div>
       <MemberList :members="members" />
-    </div>
   </main>
 </template>
 
 <style scoped>
 .page {
-  padding: 20px;
-  margin: 0 auto;
-  padding-top: 10px;
-  max-width: 1400px;
+  min-height: 100vh;
+  padding: 100px 24px 48px;
+  background: var(--color-bg-page);
+  color: var(--color-text-primary);
 }
 
 .member-title {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 32px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .member-title h1 {
-  margin: 0;
+  font-size: 32px;
+  font-weight: 800;
 }
 </style>

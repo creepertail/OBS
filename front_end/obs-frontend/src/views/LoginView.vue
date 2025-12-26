@@ -28,6 +28,7 @@ async function handleLogin() {
       }
     })).data;
     localStorage.setItem("type", memberData.type);
+    localStorage.setItem("memberID", memberData.memberID);
 
     if (memberData.type === "user") {
       router.push({ name: 'home' }).then(() => {
