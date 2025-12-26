@@ -16,7 +16,7 @@ async function handleLogin() {
       password: password.value
     });
 
-    console.log("登入成功：", res.data);
+    console.log("登入成功");
     accessToken.value =res.data.access_token; 
     localStorage.setItem("accessToken", accessToken.value);
     localStorage.setItem("isLogin", "true");
@@ -36,6 +36,11 @@ async function handleLogin() {
     }
     else if (memberData.type === "merchant") {
       router.push({ name: 'merchant' }).then(() => {
+        window.location.reload();
+      });
+    }
+    else if (memberData.type === "admin") {
+      router.push({ name: 'admin' }).then(() => {
         window.location.reload();
       });
     }
