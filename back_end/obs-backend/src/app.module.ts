@@ -3,7 +3,6 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UsersModule } from './users/users.module';
 import { BooksModule } from './book/books.module';
 import { MemberModule } from './member/member.module';
 import { SubscriptionModule } from './subscription/subscription.module';
@@ -29,7 +28,6 @@ import { CartModule } from './cart/cart.module';
       // 注意：當你新增或修改 Entity 時，需要手動執行 SQL 或使用 migration
       // logging: ['query', 'error', 'schema'],
     }),
-    UsersModule,
     BooksModule,
     MemberModule,
     SubscriptionModule,
