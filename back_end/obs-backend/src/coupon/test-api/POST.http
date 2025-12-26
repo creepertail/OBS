@@ -10,7 +10,7 @@ Content-Type: application/json
 Authorization: Bearer {{admin_token}}
 
 {
-  "amount": 100,
+  "quantity": 100,
   "validDate": "2025-12-31T00:00:00Z",
   "discount": 0.9,
   "description": "年末特價",
@@ -25,7 +25,7 @@ Content-Type: application/json
 Authorization: Bearer {{merchant_token}}
 
 {
-  "amount": 50,
+  "quantity": 50,
   "discount": 0.8,
   "description": "新客八折券",
   "redemptionCode": "SHOP-WELCOME-80",
