@@ -26,7 +26,7 @@ import { ClaimsModule } from './claims/claims.module';
       password: process.env.DB_PASSWORD || '',
       database: process.env.DB_DATABASE || 'OBS',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],  // 這行會自動掃描所有 .entity.ts 檔案
-      synchronize: true, // 關閉自動同步，避免重複建表錯誤
+      synchronize: false, // 關閉自動同步，避免重複建表錯誤
       // 注意：當你新增或修改 Entity 時，需要手動執行 SQL 或使用 migration
       // logging: ['query', 'error', 'schema'],
     }),
