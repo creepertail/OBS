@@ -130,7 +130,7 @@ async function addBookToCart(goToCardPage: boolean) {
       "http://localhost:3000/cart",
       {
         bookID: book.value?.bookID,
-        amount: quantity.value
+        quantity: quantity.value
       },
       {
         headers: {
