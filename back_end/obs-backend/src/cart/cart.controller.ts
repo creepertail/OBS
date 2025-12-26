@@ -64,6 +64,17 @@ export class CartController {
     return this.cartService.updateItem(userId, bookId, updateCartItemDto);
   }
 
+  // DELETE /cart/merchant/:merchantId - 刪除購物車中屬於指定商家的商品
+  @Delete('merchant/:merchantId')
+  @JWTGuard(MemberType.User)
+  removeItemsByMerchantID(
+    @Param('merchantId', ParseUUIDPipe) merchantId: string,
+    @Request() req,
+  ) {
+    const userId = req.member.sub;
+    return this.cartService.removeItemsByMerchantID(userId, merchantId);
+  }
+
   // DELETE /cart/:bookId - 移除單一商品
   @Delete(':bookId')
   @JWTGuard(MemberType.User)

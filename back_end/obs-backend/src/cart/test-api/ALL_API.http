@@ -15,7 +15,7 @@ Authorization: Bearer {{userToken}}
 
 {
   "bookID": "{{bookId1}}",
-  "amount": 1
+  "quantity": 1
 }
 
 ### 再次新增書籍 1（累加）
@@ -25,7 +25,7 @@ Authorization: Bearer {{userToken}}
 
 {
   "bookID": "{{bookId1}}",
-  "amount": 2
+  "quantity": 2
 }
 
 ### 新增書籍 2
@@ -35,7 +35,7 @@ Authorization: Bearer {{userToken}}
 
 {
   "bookID": "{{bookId2}}",
-  "amount": 1
+  "quantity": 1
 }
 
 ### 查看購物車
@@ -48,7 +48,7 @@ Content-Type: application/json
 Authorization: Bearer {{userToken}}
 
 {
-  "amount": 3
+  "quantity": 3
 }
 
 ### 移除書籍 2

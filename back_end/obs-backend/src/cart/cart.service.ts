@@ -142,6 +142,28 @@ export class CartService {
     await this.cartRepository.delete({ userID: userId });
   }
 
+  // 刪掉購物車中，屬於 merchantId 的書
+  async removeItemsByMerchantID(userId: string, merchantId: string): Promise<void> {
+    const items = await this.cartRepository.find({
+      where: { userID: userId },
+      relations: ['book'],
+    });
+
+    // 找出所有屬於指定商家的購物車項目
+    const merchantBookIDs = items
+      .filter(item => item.book.merchantId === merchantId)
+      .map(item => item.bookID);
+
+    if (merchantBookIDs.length === 0) {
+      return;
+    }
+
+    // 刪除這些項目
+    await this.cartRepository.delete(
+      merchantBookIDs.map(bookID => ({ userID: userId, bookID }))
+    );
+  }
+
   // 根據 merchantID 取得使用者購物車中該商家的商品
   async findItemsInMyCartByMerchantID(userId: string, merchantId: string): Promise<Array<{ bookID: string; quantity: number } & Book>> {
     const items = await this.cartRepository.find({

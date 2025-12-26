@@ -2,10 +2,13 @@
 @baseUrl = http://localhost:3000
 
 # 請替換為有效的 User access_token
-@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMTM2NTEwZi0zMDhlLTQ3YWYtYjc3ZS1jZTI0YTIxMDlhZDQiLCJhY2NvdW50IjoidXNlci10ZXN0LTEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2NTQyNzkzMywiZXhwIjoxNzY1NTE0MzMzfQ.JCW9jQwWkbImhSk9yAfkil8UcE24DzVHaQSfaHy1BHw
+@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiYWVmZjgxOC0yN2EyLTQ4NDgtYjEwNC1lN2Q3MDE0NWRiNDUiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2Njc0MjcyOCwiZXhwIjoxNzY2ODI5MTI4fQ.aXA6olnOOe92EzR2ozjQweym3iiB5hF_KqnRPqgYwro
 
 # 請替換為購物車中已有的書籍 ID
 @bookId1 = 1f2e4a59-1a6c-41ac-826d-49e653b8ee0a
+
+# 請替換為購物車中已有的 MerchantID
+@merchantId = feba8eba-f862-4b9d-ae3c-30734e65f5ba
 
 ### 移除購物車中的單一商品
 DELETE {{baseUrl}}/cart/{{bookId1}}
@@ -13,4 +16,8 @@ Authorization: Bearer {{userToken}}
 
 ### 清空購物車
 DELETE {{baseUrl}}/cart
+Authorization: Bearer {{userToken}}
+
+### 清空購物車中，屬於 merchantId 的書
+DELETE {{baseUrl}}/cart/merchant/{{merchantId}}
 Authorization: Bearer {{userToken}}
