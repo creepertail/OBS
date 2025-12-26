@@ -21,6 +21,9 @@ export class Coupon {
   @Column({ type: 'varchar', length: 200, nullable: false })
   description: string;
 
+  @Column({ type: 'varchar', length: 50, nullable: false, unique: true })
+  redemptionCode: string;
+
   @Column({ type: 'char', length: 36, nullable: false })
   memberID: string;
 

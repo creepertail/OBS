@@ -21,22 +21,37 @@ export class ClaimsService {
   ) {}
 
   async create(createClaimDto: CreateClaimDto, currentUser: { sub: string; type: MemberType }): Promise<Claim> {
-    const targetUserID = this.resolveTargetUser(createClaimDto.userID, currentUser);
+    // 僅 User 可領取
+    if (currentUser.type !== MemberType.User) {
+      throw new ForbiddenException('Only users can claim coupons');
+    }
 
-    await this.ensureUserExists(targetUserID);
-    await this.ensureCouponExists(createClaimDto.couponID);
-
-    const existing = await this.claimsRepository.findOne({
-      where: { userID: targetUserID, couponID: createClaimDto.couponID },
+    const coupon = await this.couponRepository.findOne({
+      where: { redemptionCode: createClaimDto.redemptionCode },
     });
-    if (existing) {
-      throw new ConflictException('Claim already exists for this user and coupon');
+    if (!coupon) {
+      throw new NotFoundException('Coupon not found for this redemption code');
+    }
+
+    await this.ensureUserExists(currentUser.sub);
+
+    // 不可重複兌換同一券
+    const existingClaim = await this.claimsRepository.findOne({
+      where: { userID: currentUser.sub, couponID: coupon.couponID },
+    });
+    if (existingClaim) {
+      throw new ConflictException('You have already claimed this coupon');
+    }
+
+    // 檢查有效期
+    if (coupon.validDate && coupon.validDate.getTime() < Date.now()) {
+      throw new ConflictException('Coupon is expired');
     }
 
     const claim = this.claimsRepository.create({
-      userID: targetUserID,
-      couponID: createClaimDto.couponID,
-      remaining: createClaimDto.remaining,
+      userID: currentUser.sub,
+      couponID: coupon.couponID,
+      state: 0,
     });
     return this.claimsRepository.save(claim);
   }
@@ -49,54 +64,39 @@ export class ClaimsService {
     return this.claimsRepository.find({ where: { userID } });
   }
 
-  async findOne(couponID: string, currentUser: { sub: string; type: MemberType }, userID?: string): Promise<Claim> {
-    const targetUserID = this.resolveTargetUser(userID, currentUser);
+  async findOne(claimID: string, currentUser: { sub: string; type: MemberType }): Promise<Claim> {
     const claim = await this.claimsRepository.findOne({
-      where: { userID: targetUserID, couponID },
+      where: { claimID },
     });
     if (!claim) {
-      throw new NotFoundException(`Claim not found for user ${targetUserID} and coupon ${couponID}`);
+      throw new NotFoundException(`Claim ${claimID} not found`);
     }
     this.ensureCanAccess(claim, currentUser);
     return claim;
   }
 
   async update(
-    couponID: string,
+    claimID: string,
     updateClaimDto: UpdateClaimDto,
     currentUser: { sub: string; type: MemberType },
-    userID?: string,
   ): Promise<Claim> {
-    const claim = await this.findOne(couponID, currentUser, userID);
+    const claim = await this.findOne(claimID, currentUser);
 
-    if (updateClaimDto.remaining !== undefined) {
-      claim.remaining = updateClaimDto.remaining;
+    if (updateClaimDto.state !== undefined) {
+      claim.state = updateClaimDto.state;
+      if (updateClaimDto.state === 1) {
+        claim.usedAt = new Date();
+      } else {
+        claim.usedAt = null;
+      }
     }
 
     return this.claimsRepository.save(claim);
   }
 
-  async remove(couponID: string, currentUser: { sub: string; type: MemberType }, userID?: string): Promise<void> {
-    const claim = await this.findOne(couponID, currentUser, userID);
+  async remove(claimID: string, currentUser: { sub: string; type: MemberType }): Promise<void> {
+    const claim = await this.findOne(claimID, currentUser);
     await this.claimsRepository.remove(claim);
-  }
-
-  private resolveTargetUser(userID: string | undefined, currentUser: { sub: string; type: MemberType }): string {
-    if (currentUser.type === MemberType.Admin) {
-      if (!userID) {
-        throw new ForbiddenException('Admin must specify userID when creating or managing claims');
-      }
-      return userID;
-    }
-
-    if (currentUser.type === MemberType.User) {
-      if (userID && userID !== currentUser.sub) {
-        throw new ForbiddenException('You can only manage your own claims');
-      }
-      return currentUser.sub;
-    }
-
-    throw new ForbiddenException('Only admin or user can manage claims');
   }
 
   private ensureCanAccess(claim: Claim, currentUser: { sub: string; type: MemberType }): void {
@@ -113,9 +113,6 @@ export class ClaimsService {
     if (!member) {
       throw new NotFoundException(`Member with ID ${userID} not found`);
     }
-    if (member.type !== MemberType.User) {
-      throw new ForbiddenException('Claims can only be created for users');
-    }
   }
 
   private async ensureCouponExists(couponID: string): Promise<void> {
@@ -125,4 +122,3 @@ export class ClaimsService {
     }
   }
 }
-

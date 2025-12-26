@@ -1,24 +1,23 @@
 @baseUrl = http://localhost:3000
-@access_token =
-@admin_token =
-@coupon_id = {{coupon_id}}
-@user_id = {{user_id}}
+@access_token = {{user_access_token}}       // 使用者 token 範例
+@admin_token = {{admin_access_token}}       // 管理員 token 範例
+@claim_id = {{claim_id}}
 
-# 更新自己的領券剩餘數量（Admin 或持有者）
-PATCH {{baseUrl}}/claims/{{coupon_id}}
+# 更新自己的領券狀態（0未使用/1已使用/2作廢）
+PATCH {{baseUrl}}/claims/{{claim_id}}
 Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
 {
-  "remaining": 3
+  "state": 1
 }
 
 ###
-# Admin 更新指定使用者的領券
-PATCH {{baseUrl}}/claims/{{coupon_id}}?userID={{user_id}}
+# Admin 更新任意領券狀態
+PATCH {{baseUrl}}/claims/{{claim_id}}
 Content-Type: application/json
 Authorization: Bearer {{admin_token}}
 
 {
-  "remaining": 5
+  "state": 2
 }

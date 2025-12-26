@@ -1,16 +1,9 @@
 // src/claims/dto/create-claim.dto.ts
-import { IsInt, IsOptional, IsPositive, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
 export class CreateClaimDto {
-  @IsUUID()
-  couponID: string;
-
-  @IsUUID()
-  @IsOptional()
-  userID?: string;
-
-  @IsInt()
-  @IsPositive()
-  remaining: number;
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(50)
+  redemptionCode: string;
 }
-

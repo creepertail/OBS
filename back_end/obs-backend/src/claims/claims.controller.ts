@@ -1,5 +1,5 @@
 // src/claims/claims.controller.ts
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { ClaimsService } from './claims.service';
 import { CreateClaimDto } from './dto/create-claim.dto';
 import { UpdateClaimDto } from './dto/update-claim.dto';
@@ -11,8 +11,8 @@ import { MemberType } from '../member/member-type.enum';
 export class ClaimsController {
   constructor(private readonly claimsService: ClaimsService) {}
 
-  // 建立領券：User 為自己領，Admin 必須指定 userID
-  @JWTGuard(MemberType.User, MemberType.Admin)
+  // 使用者兌換優惠碼領券
+  @JWTGuard(MemberType.User)
   @Post()
   create(@Body() createClaimDto: CreateClaimDto, @CurrentUser() user: any) {
     return this.claimsService.create(createClaimDto, user);
@@ -32,30 +32,24 @@ export class ClaimsController {
     return this.claimsService.findAll();
   }
 
-  // 依 CouponID 取得單筆（Admin 可指定 userID，User 只能查自己）
+  // 依 ClaimID 取得單筆（Admin 可看全部，User 只能看自己）
   @JWTGuard(MemberType.User, MemberType.Admin)
-  @Get(':couponID')
-  findOne(@Param('couponID') couponID: string, @CurrentUser() user: any, @Query('userID') userID?: string) {
-    return this.claimsService.findOne(couponID, user, userID);
+  @Get(':claimID')
+  findOne(@Param('claimID') claimID: string, @CurrentUser() user: any) {
+    return this.claimsService.findOne(claimID, user);
   }
 
-  // 更新剩餘張數（Admin 或持有者）
+  // 更新狀態（Admin 或持有者）
   @JWTGuard(MemberType.User, MemberType.Admin)
-  @Patch(':couponID')
-  update(
-    @Param('couponID') couponID: string,
-    @Body() updateClaimDto: UpdateClaimDto,
-    @CurrentUser() user: any,
-    @Query('userID') userID?: string,
-  ) {
-    return this.claimsService.update(couponID, updateClaimDto, user, userID);
+  @Patch(':claimID')
+  update(@Param('claimID') claimID: string, @Body() updateClaimDto: UpdateClaimDto, @CurrentUser() user: any) {
+    return this.claimsService.update(claimID, updateClaimDto, user);
   }
 
   // 刪除領券（Admin 或持有者）
   @JWTGuard(MemberType.User, MemberType.Admin)
-  @Delete(':couponID')
-  remove(@Param('couponID') couponID: string, @CurrentUser() user: any, @Query('userID') userID?: string) {
-    return this.claimsService.remove(couponID, user, userID);
+  @Delete(':claimID')
+  remove(@Param('claimID') claimID: string, @CurrentUser() user: any) {
+    return this.claimsService.remove(claimID, user);
   }
 }
-

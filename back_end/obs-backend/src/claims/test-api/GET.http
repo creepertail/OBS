@@ -1,8 +1,7 @@
 @baseUrl = http://localhost:3000
-@access_token = 
-@admin_token = 
-@coupon_id = {{coupon_id}}
-@user_id = {{user_id}}
+@access_token =
+@admin_token =
+@claim_id = {{claim_id}}
 
 # 取得自己領到的優惠券
 GET {{baseUrl}}/claims/mine
@@ -14,6 +13,6 @@ GET {{baseUrl}}/claims
 Authorization: Bearer {{admin_token}}
 
 ###
-# 取得單一領券（Admin 可查任意 userID，User 只能查自己）
-GET {{baseUrl}}/claims/{{coupon_id}}?userID={{user_id}}
-Authorization: Bearer {{admin_token}}
+# 依 ClaimID 取得單一領券（Admin 可看全部，User 只能看自己）
+GET {{baseUrl}}/claims/{{claim_id}}
+Authorization: Bearer {{access_token}}

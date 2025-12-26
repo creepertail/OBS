@@ -18,6 +18,11 @@ export class CreateCouponDto {
   @MaxLength(200)
   description: string;
 
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(50)
+  redemptionCode: string;
+
   @IsUUID('4')
   memberID: string;
 }

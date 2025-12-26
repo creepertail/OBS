@@ -192,6 +192,7 @@ async function seedData() {
       validDate: new Date('2025-12-31T00:00:00Z'),
       discount: 0.9,
       description: 'merchant1 年末折扣券',
+      redemptionCode: 'MERCHANT1-NEWYEAR-90',
       memberID: merchant1.memberID,
     });
 
@@ -200,13 +201,14 @@ async function seedData() {
       validDate: new Date('2025-10-31T00:00:00Z'),
       discount: 0.8,
       description: 'merchant2 新客八折券',
+      redemptionCode: 'MERCHANT2-WELCOME-80',
       memberID: merchant2.memberID,
     });
 
     await claimRepo.save([
-      { userID: user1.memberID, couponID: coupon1.couponID, remaining: 1 },
-      { userID: user2.memberID, couponID: coupon1.couponID, remaining: 2 },
-      { userID: user3.memberID, couponID: coupon2.couponID, remaining: 1 },
+      { userID: user1.memberID, couponID: coupon1.couponID, state: 0 },
+      { userID: user2.memberID, couponID: coupon1.couponID, state: 0 },
+      { userID: user3.memberID, couponID: coupon2.couponID, state: 0 },
     ]);
 
     const categories = await categoryRepo.save([
