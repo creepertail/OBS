@@ -74,8 +74,8 @@ function paymentMethodText(method: number) {
         <!-- 上方 -->
         <div class="order-card__header">
           <div>
-            <div class="order-id">
-              訂單編號：{{ order.orderId }}
+            <div class="order-merchant">
+              訂單商家：{{ order.merchant.merchantName }}
             </div>
             <div class="order-date">
               下單時間：{{ new Date(order.orderDate).toLocaleString() }}
@@ -89,9 +89,9 @@ function paymentMethodText(method: number) {
 
         <hr />
 
-        <!-- 商家 -->
-        <div class="order-merchant">
-          <strong>{{ order.merchant.merchantName }}</strong>
+        <!-- 商家 info -->
+        <div class="order-merchant-info">
+          <strong>地址：</strong>
           <p>{{ order.merchant.merchantAddress }}</p>
         </div>
 
@@ -151,6 +151,8 @@ function paymentMethodText(method: number) {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  width: 80%;
+  margin: 16px auto 0;
 }
 
 /* ===== Card ===== */
@@ -168,7 +170,7 @@ function paymentMethodText(method: number) {
   align-items: flex-start;
 }
 
-.order-id {
+.order-merchant {
   font-weight: 600;
 }
 
@@ -187,11 +189,11 @@ function paymentMethodText(method: number) {
 }
 
 /* 商家 */
-.order-merchant {
+.order-merchant-info {
   margin-top: 16px;
 }
 
-.order-merchant p {
+.order-merchant-info p {
   font-size: 14px;
   color: var(--color-text-secondary);
 }
@@ -200,7 +202,7 @@ function paymentMethodText(method: number) {
 .order-info {
   margin-top: 16px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: 1fr;
   gap: 12px;
   font-size: 14px;
 }

@@ -1,7 +1,7 @@
 interface CartItem {
   bookID: string
   name: string
-  amount: number
+  quantity: number
   inventoryQuantity: number
   price: number
   imageUrl: string

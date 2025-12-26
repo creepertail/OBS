@@ -13,7 +13,7 @@ Content-Type: application/json
 Authorization: Bearer {{userToken}}
 
 {
-  "amount": 2
+  "quantity": 2
 }
 
 ### 修改為超過庫存（預期回 400）
@@ -22,5 +22,5 @@ Content-Type: application/json
 Authorization: Bearer {{userToken}}
 
 {
-  "amount": 999
+  "quantity": 999
 }

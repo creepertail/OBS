@@ -9,7 +9,7 @@ Content-Type: application/json
 Authorization: Bearer {{merchant_token}}
 
 {
-  "amount": 120,
+  "quantity": 120,
   "discount": 0.85,
   "description": "雙12優惠",
   "validDate": "2026-01-15T00:00:00Z"

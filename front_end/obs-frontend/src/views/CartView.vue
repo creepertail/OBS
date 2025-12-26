@@ -7,7 +7,7 @@ import type CartItem from "../type/cartItem"
 interface RawCartItem {
   bookID: string
   name: string
-  amount: number
+  quantity: number
   inventoryQuantity: number
   price: number
   images: { 
@@ -56,7 +56,7 @@ onMounted(async () => {
     items: group.items.map(item => ({
       bookID: item.bookID,
       name: item.name,
-      amount: item.amount,
+      quantity: item.quantity,
       inventoryQuantity: item.inventoryQuantity,
       price: item.price,
       imageUrl:
@@ -79,7 +79,7 @@ const totalAmount = computed(() => {
   if (!group) return 0
 
   return group.items.reduce(
-    (sum: number, item: CartItem) => sum + item.price * item.amount,
+    (sum: number, item: CartItem) => sum + item.price * item.quantity,
     0
   )
 })
@@ -91,12 +91,12 @@ function goToBookPage(bookID: string) {
   })
 }
 
-async function updateAmount(item: CartItem, value: number) {
-  item.amount = Math.max(1, Math.min(value, item.inventoryQuantity))
+async function updateQuantity(item: CartItem, value: number) {
+  item.quantity = Math.max(1, Math.min(value, item.inventoryQuantity))
   await axios.patch(
     `http://localhost:3000/cart/${item.bookID}`,
     {
-      amount: item.amount
+      quantity: item.quantity
     },
     {
       headers: {
@@ -222,25 +222,25 @@ async function deleteAllCartItem(){
               </div>
 
               <div class="cart-item__footer">
-                <div class="cart-item__amount">
+                <div class="cart-item__quantity">
                   <span>數量</span>
                   <div class="quantity-control">
                     <button
                       class="quantity-control__btn"
-                      :disabled="item.amount <= 1"
-                      @click="updateAmount(item, item.amount - 1)"
+                      :disabled="item.quantity <= 1"
+                      @click="updateQuantity(item, item.quantity - 1)"
                     >
                       −
                     </button>
 
                     <span class="quantity-control__number">
-                      {{ item.amount }}
+                      {{ item.quantity }}
                     </span>
 
                     <button
                       class="quantity-control__btn"
-                      :disabled="item.amount >= item.inventoryQuantity"
-                      @click="updateAmount(item, item.amount + 1)"
+                      :disabled="item.quantity >= item.inventoryQuantity"
+                      @click="updateQuantity(item, item.quantity + 1)"
                     >
                       +
                     </button>
@@ -258,7 +258,7 @@ async function deleteAllCartItem(){
               <div class="cart-item__subtotal">
                 小計：
                 <strong>
-                  NT$ {{ item.price * item.amount }}
+                  NT$ {{ item.price * item.quantity }}
                 </strong>
               </div>
             </div>
@@ -407,7 +407,7 @@ async function deleteAllCartItem(){
   margin-top: 16px;
 }
 
-.cart-item__amount {
+.cart-item__quantity {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -484,8 +484,8 @@ async function deleteAllCartItem(){
 
 
 /* 移除 number input 箭頭 */
-.cart-item__amount input::-webkit-inner-spin-button,
-.cart-item__amount input::-webkit-outer-spin-button {
+.cart-item__quantity input::-webkit-inner-spin-button,
+.cart-item__quantity input::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }

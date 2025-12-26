@@ -1,22 +1,17 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue"
-import { useRoute } from "vue-router"
+import { useRoute, useRouter } from "vue-router"
 import axios from "axios"
 import type CartItem from "../type/cartItem"
+import type Coupon from "../type/coupon"
 
 /* ========= 型別 ========= */
 type PaymentMethod = "cash" | "credit_card"
 
-interface Coupon {
-  code: string
-  discountType: "amount" | "percent"
-  discountValue: number
-}
-
 interface RawCartItem {
   bookID: string
   name: string
-  amount: number
+  quantity: number
   inventoryQuantity: number
   price: number
   images: { 
@@ -31,6 +26,7 @@ interface RawCartItem {
 
 /* ========= 狀態 ========= */
 const route = useRoute()
+const router = useRouter()
 const merchantID = ref(route.params.merchantID as string)
 const cartItems = ref<CartItem[]>([])
 
@@ -48,13 +44,10 @@ onMounted(async () => {
   )
   console.log("res", res.data)
 
-// GET {{baseUrl}}/cart/{{merchantID}}
-// Authorization: Bearer {{userToken}}
-
   cartItems.value = res.data.map(item => ({
       bookID: item.bookID,
       name: item.name,
-      amount: item.amount,
+      quantity: item.quantity,
       inventoryQuantity: item.inventoryQuantity,
       price: item.price,
       imageUrl:
@@ -66,11 +59,6 @@ onMounted(async () => {
   console.log("cart item", cartItems.value)
 })
 
-// const cartItems = ref<CartItem[]>(
-//   route.query.cart
-//     ? JSON.parse(route.query.cart as string)
-//     : []
-// )
 const couponInput = ref("")
 const coupon = ref<Coupon | null>(null)
 const couponError = ref("")
@@ -81,7 +69,7 @@ const isSubmitting = ref(false)
 /* ========= 計算金額 ========= */
 const subtotal = computed(() =>
   cartItems.value.reduce(
-    (sum: number, item: CartItem) => sum + (item.price * item.amount),
+    (sum: number, item: CartItem) => sum + (item.price * item.quantity),
     0
   )
 )
@@ -147,13 +135,13 @@ async function checkout() {
     }
 
     const totalAmount = cartItems.value.reduce(
-      (sum: number, item: CartItem) => sum + item.amount,
+      (sum: number, item: CartItem) => sum + item.quantity,
       0
     )
 
     const items = cartItems.value.map((item: CartItem) => ({
       bookId: item.bookID,
-      amount: item.amount
+      quantity: item.quantity
     }))
 
     await axios.post(
@@ -184,6 +172,10 @@ async function checkout() {
     
     cartItems.value = []
     alert("訂單建立成功！")
+
+    router.push({
+      name: 'orderList'
+    })
     
   } catch (e) {
     console.error(e)
@@ -206,8 +198,8 @@ async function checkout() {
         :key="item.bookID"
         class="item-row"
       >
-        <span>{{ item.name }} × {{ item.amount }}</span>
-        <span>NT$ {{ item.price * item.amount }}</span>
+        <span>{{ item.name }} × {{ item.quantity }}</span>
+        <span>NT$ {{ item.price * item.quantity }}</span>
       </div>
     </section>
 

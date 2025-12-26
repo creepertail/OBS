@@ -1,3 +1,5 @@
+import type { Book } from "./book"
+
 interface Order {
   orderId: string
   shippingAddress: string
@@ -11,8 +13,9 @@ interface Order {
     merchantName: string
     merchantAddress: string
   }
+  couponId: string
   contains: {
-    bookId: string
-    amount: number
+    quantity: number
+    book: Book
   }[]
 }

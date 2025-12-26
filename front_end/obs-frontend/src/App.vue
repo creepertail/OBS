@@ -49,6 +49,9 @@ onBeforeUnmount(() => {
       <RouterLink :to="{name: 'cart'}" v-if="isLogin">
         <i class="pi pi-spin pi-shopping-cart" style="font-size: 2rem" v-if="!isMerchant"></i>
       </RouterLink>
+      <RouterLink :to="{name: 'orderList'}" v-if="isLogin">
+        <i class="pi pi-spin pi-clipboard" style="font-size: 2rem" v-if="!isMerchant"></i>
+      </RouterLink>
       <div class="profile-container" v-if="isLogin" ref="profileButton">
         <button class="account textButton" @click="isOpen=!isOpen">{{ account }}</button>
         <div class="profile-view" v-if="isOpen">

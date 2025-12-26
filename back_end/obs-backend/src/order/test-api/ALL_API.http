@@ -5,8 +5,8 @@
 #    *
 #    * POST /orders + body              => 建立新訂單（需要 JWT token，User 類型）
 #    *   - body:
-#    *   - shippingAddress, paymentMethod, totalPrice, totalAmount, couponId (optional)
-#    *   - items: [{ bookId, amount }]
+#    *   - shippingAddress, paymentMethod, totalPrice, totalQuantity, couponId (optional)
+#    *   - items: [{ bookId, quantity }]
 #    *   - 注意：userId 從 JWT token 自動取得，merchantId 從書籍資料自動取得
 #    *   - 所有書籍必須屬於同一個商家
 #    *
@@ -63,11 +63,11 @@ Authorization: Bearer {{userToken}}
   "shippingAddress": "台北市信義區信義路五段7號",
   "paymentMethod": 1,
   "totalPrice": 450,
-  "totalAmount": 1,
+  "totalQuantity": 1,
   "items": [
     {
       "bookId": "{{bookId1}}",
-      "amount": 1
+      "quantity": 1
     }
   ]
 }
@@ -81,15 +81,15 @@ Authorization: Bearer {{userToken}}
   "shippingAddress": "新北市板橋區文化路一段188號",
   "paymentMethod": 2,
   "totalPrice": 1320,
-  "totalAmount": 3,
+  "totalQuantity": 3,
   "items": [
     {
       "bookId": "{{bookId1}}",
-      "amount": 2
+      "quantity": 2
     },
     {
       "bookId": "{{bookId2}}",
-      "amount": 1
+      "quantity": 1
     }
   ]
 }
@@ -181,7 +181,7 @@ Authorization: Bearer {{adminToken}}
   "paymentMethod": 2,
   "state": 2,
   "totalPrice": 1200,
-  "totalAmount": 3
+  "totalQuantity": 3
 }
 
 # ===========================================
@@ -209,11 +209,11 @@ Authorization: Bearer {{userToken}}
   "shippingAddress": "台北市大安區羅斯福路四段1號",
   "paymentMethod": 1,
   "totalPrice": 520,
-  "totalAmount": 1,
+  "totalQuantity": 1,
   "items": [
     {
       "bookId": "{{bookId1}}",
-      "amount": 1
+      "quantity": 1
     }
   ]
 }
@@ -290,11 +290,11 @@ Content-Type: application/json
   "shippingAddress": "台北市信義區信義路五段7號",
   "paymentMethod": 1,
   "totalPrice": 450,
-  "totalAmount": 1,
+  "totalQuantity": 1,
   "items": [
     {
       "bookId": "{{bookId1}}",
-      "amount": 1
+      "quantity": 1
     }
   ]
 }
@@ -308,11 +308,11 @@ Authorization: Bearer {{userToken}}
   "shippingAddress": "台北市信義區信義路五段7號",
   "paymentMethod": 1,
   "totalPrice": 450,
-  "totalAmount": 1,
+  "totalQuantity": 1,
   "items": [
     {
       "bookId": "00000000-0000-0000-0000-000000000000",
-      "amount": 1
+      "quantity": 1
     }
   ]
 }
@@ -326,6 +326,6 @@ Authorization: Bearer {{userToken}}
   "shippingAddress": "台北市信義區信義路五段7號",
   "paymentMethod": 1,
   "totalPrice": 450,
-  "totalAmount": 1,
+  "totalQuantity": 1,
   "items": []
 }

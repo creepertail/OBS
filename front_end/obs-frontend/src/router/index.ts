@@ -9,7 +9,7 @@ import SearchView from '../views/SearchView.vue'
 import MerchantAddBookView from '../views/MerchantAddBookView.vue'
 import CheckoutView from '../views/CheckoutView.vue'
 import MerchantEditBookView from '../views/MerchantEditBookView.vue'
-import OrderView from '@/views/OrderView.vue'
+import OrderListView from '@/views/OrderListView.vue'
 import AdminView from '@/views/AdminView.vue'
 import CouponView from '@/views/CouponView.vue'
 
@@ -72,9 +72,9 @@ const router = createRouter({
       component: SearchView,
     },
     {
-      path: '/order',
-      name: 'order',
-      component: OrderView
+      path: '/order/list',
+      name: 'orderList',
+      component: OrderListView
     },
     {
       path: '/checkout/:merchantID',

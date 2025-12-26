@@ -2,11 +2,11 @@
 @baseUrl = http://localhost:3000
 
 # 請替換為有效的 User access_token
-@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMTM2NTEwZi0zMDhlLTQ3YWYtYjc3ZS1jZTI0YTIxMDlhZDQiLCJhY2NvdW50IjoidXNlci10ZXN0LTEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2NTQyNzkzMywiZXhwIjoxNzY1NTE0MzMzfQ.JCW9jQwWkbImhSk9yAfkil8UcE24DzVHaQSfaHy1BHw
+@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiYWVmZjgxOC0yN2EyLTQ4NDgtYjEwNC1lN2Q3MDE0NWRiNDUiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2Njc0MjcyOCwiZXhwIjoxNzY2ODI5MTI4fQ.aXA6olnOOe92EzR2ozjQweym3iiB5hF_KqnRPqgYwro
 
 # 請替換為實際書籍 ID（可先用 GET /books 查詢）
-@bookId1 = 1f2e4a59-1a6c-41ac-826d-49e653b8ee0a
-@bookId2 = 390c5ec8-3c75-4daf-904a-3213e10c9754
+@bookId1 = 0290f3e9-1872-494e-b37e-692f0ee9c979
+@bookId2 = 42eb8033-c3e5-4cd6-8765-015767f159f6
 
 ### 新增一筆商品到購物車
 POST {{baseUrl}}/cart
@@ -15,7 +15,7 @@ Authorization: Bearer {{userToken}}
 
 {
   "bookID": "{{bookId1}}",
-  "amount": 1
+  "quantity": 1
 }
 
 ### 再次新增同一本書（應累加數量）
@@ -25,7 +25,7 @@ Authorization: Bearer {{userToken}}
 
 {
   "bookID": "{{bookId1}}",
-  "amount": 2
+  "quantity": 2
 }
 
 ### 新增另一個商品
@@ -35,7 +35,7 @@ Authorization: Bearer {{userToken}}
 
 {
   "bookID": "{{bookId2}}",
-  "amount": 1
+  "quantity": 1
 }
 
 ### 嘗試超過庫存（預期回 400）
@@ -45,5 +45,5 @@ Authorization: Bearer {{userToken}}
 
 {
   "bookID": "{{bookId1}}",
-  "amount": 999
+  "quantity": 999
 }
