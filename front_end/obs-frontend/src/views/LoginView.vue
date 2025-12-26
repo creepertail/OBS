@@ -21,9 +21,6 @@ async function handleLogin() {
     localStorage.setItem("accessToken", accessToken.value);
     localStorage.setItem("isLogin", "true");
     localStorage.setItem("account", account.value);
-    router.push({ name: 'home' }).then(() => {
-      window.location.reload();
-    });
     
     const memberData = (await axios.get("http://localhost:3000/members/me", {
       headers: {
@@ -31,6 +28,17 @@ async function handleLogin() {
       }
     })).data;
     localStorage.setItem("type", memberData.type);
+
+    if (memberData.type === "user") {
+      router.push({ name: 'home' }).then(() => {
+        window.location.reload();
+      });
+    }
+    else if (memberData.type === "merchant") {
+      router.push({ name: 'merchant' }).then(() => {
+        window.location.reload();
+      });
+    }
   } catch (err) {
     console.error("登入失敗：", err);
     error.value = err.response?.data?.message;

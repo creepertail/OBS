@@ -121,6 +121,7 @@ export class OrderService {
     let query = this.orderRepository
       .createQueryBuilder('order')
       .leftJoinAndSelect('order.contains', 'contains')
+      .leftJoinAndSelect('contains.book', 'book')
       .leftJoin('order.user', 'user')
       .leftJoin('order.merchant', 'merchant')
       .addSelect([

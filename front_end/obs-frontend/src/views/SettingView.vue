@@ -100,7 +100,7 @@ async function handleSetting() {
         <div class="error" v-if="error.includes('address')" style="color:red">{{ error }}</div>
       </div>
 
-      <button type="submit" class="button">Confirm</button>
+      <button type="submit" class="setting-button">Confirm</button>
     </form>
   </div>
 </template>
@@ -161,7 +161,7 @@ input:focus {
   box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
 }
 
-.button {
+.setting-button {
   background-color: #667eea;
   color: #ffffff;
   padding: 12px;
@@ -174,12 +174,12 @@ input:focus {
   margin: 4px 0;
 }
 
-.button:hover {
+.setting-button:hover {
   background-color: #5563d6;
   transform: translateY(-1px);
 }
 
-.button:active {
+.setting-button:active {
   transform: translateY(0);
 }
 </style>

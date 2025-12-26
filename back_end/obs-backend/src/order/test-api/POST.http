@@ -21,11 +21,11 @@
 @baseUrl = http://localhost:3000
 
 # 請先執行登入 API 取得 User 的 access_token，然後將 token 貼到下面
-@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NWQyMzY3ZC05ZDc4LTRhMTktOTZkMC1mOTc0OTA0ODAxNmIiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2NTI4MzcwOCwiZXhwIjoxNzY1MzcwMTA4fQ.UUSUi7skkc26hVNX_zQ_zaByNZ5m-ov2OfL_3MH9oHE
+@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyNDdhY2NkYi01ZjI1LTRjMDgtODRiNS1jMTg5NjJjZjVmNGIiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2NjEyODgyNywiZXhwIjoxNzY2MjE1MjI3fQ.K3ODPNlo_8gNXajWWpcF1pGW0hWcoh936NP4-apkY9U
 
 # 書籍 ID（請先使用 GET /books 取得實際的書籍 ID）
-@bookId1 = 17650374-3db5-4a54-b465-989db68fca41
-@bookId2 = 09f0eb59-e9ec-4a93-966a-12184c7d55db
+@bookId1 = 61b0f338-d64d-45d2-85f9-459b03cb2aaa
+@bookId2 = 6dd4f88c-f226-44ff-91c9-d37f3f8c3912
 
 # ========================================
 # 建立訂單測試

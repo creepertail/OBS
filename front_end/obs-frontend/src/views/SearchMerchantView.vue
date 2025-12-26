@@ -3,15 +3,34 @@ import { ref, onMounted, watch } from "vue"
 import { useRoute } from "vue-router"
 import axios from "axios"
 import BookTable from "@/components/book/BookTable.vue"
+import SubscribeButton from '../components/SubscribeMerchantButton.vue'
 import type { Book } from "../type/book"
 import type { BookCard } from "../type/bookCard"
+import type { Subscribe } from "../type/subscribe"
 
 const route = useRoute()
 const merchantID = ref(route.params.merchantID as string)
-
 const merchant = ref<any>(null)
+const subscribe = ref<Subscribe>({
+  userID: "",
+  merchantID: "",
+  notificationEnabled: false
+})
 const books = ref<BookCard[]>([])
 const loading = ref(false)
+
+const isSubscribed = ref(false)
+watch(
+  () => subscribe.value,
+  (val) => {
+    isSubscribed.value = !!(
+      val &&
+      val.userID &&
+      val.merchantID
+    )
+  },
+  { immediate: true }
+)
 
 const fetchMerchant = async () => {
   try {
@@ -40,9 +59,26 @@ const fetchMerchant = async () => {
   } finally {
     loading.value = false
   }
+  
+  try {
+    const token = localStorage.getItem("accessToken")
+    if (!token) return
+
+    const res = await axios.get<Subscribe>(
+      `http://localhost:3000/subscriptions/isUserSubscribedToMerchant/${merchantID.value}`,
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    )
+
+    subscribe.value = res.data ?? null
+  } catch {
+    subscribe.value = null
+  }
 }
 
 onMounted(fetchMerchant)
+
 </script>
 
 <template>
@@ -57,6 +93,12 @@ onMounted(fetchMerchant)
         <div class="merchant-header">
           <h2 class="merchant-name">{{ merchant.merchantName }}</h2>
           <span class="merchant-tag">商家</span>
+          <SubscribeButton
+            :merchantID="merchant.memberID"
+            v-model:isSubscribed="isSubscribed"
+            v-model:notificationEnabled="subscribe.notificationEnabled"
+            style="margin-left: auto"
+          />
         </div>
 
         <ul class="merchant-meta">

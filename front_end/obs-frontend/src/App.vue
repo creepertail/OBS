@@ -4,6 +4,7 @@ import { computed } from 'vue'
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import SearchBox from './components/SearchBox.vue';
 
+const isMerchant = computed(() => localStorage.getItem("type") === "merchant");
 const router = useRouter();
 const route = useRoute()
 const hideLayout = computed(() => route.meta.hideLayout)
@@ -27,12 +28,10 @@ function handleOutsideClick(event: MouseEvent) {
 
 onMounted(() => {
   document.addEventListener("click", handleOutsideClick);
-  console.log("mounted");
 });
 
 onBeforeUnmount(() => {
   document.removeEventListener("click", handleOutsideClick);
-  console.log("unmounted");
 });
 </script>
 
@@ -40,7 +39,7 @@ onBeforeUnmount(() => {
   <header v-if="!hideLayout">
     <RouterLink :to="{name: 'home'}" class="homeButton">
       <img alt="OBS logo" class="logo" src="@/assets/logo2.png" width="80" height="80" />
-      <h1>Online Bookstore System</h1>
+      <h1 class="shopname">Online Bookstore System</h1>
     </RouterLink>
 
     <div class="routerButtons">
@@ -48,11 +47,12 @@ onBeforeUnmount(() => {
       <RouterLink :to="{name: 'login'}" v-if="!isLogin">Login</RouterLink>
       <RouterLink :to="{name: 'register'}" v-if="!isLogin">Register</RouterLink>
       <RouterLink :to="{name: 'cart'}" v-if="isLogin">
-        <i class="pi pi-spin pi-shopping-cart" style="font-size: 2rem"></i>
+        <i class="pi pi-spin pi-shopping-cart" style="font-size: 2rem" v-if="!isMerchant"></i>
       </RouterLink>
       <div class="profile-container" v-if="isLogin" ref="profileButton">
         <button class="account textButton" @click="isOpen=!isOpen">{{ account }}</button>
         <div class="profile-view" v-if="isOpen">
+          <button class="textButton" @click="router.push({ name: 'merchant' })" v-if="isMerchant">我的商品</button>
           <button class="textButton" @click="router.push({ name: 'setting' })">設置</button>
           <button class="textButton" @click="logout">登出</button>
         </div>
@@ -111,7 +111,7 @@ header {
   margin: auto 0 auto 2rem;
 }
 
-h1 {
+.shopname {
   font-size: 2em;
 }
 .account {
@@ -122,7 +122,7 @@ h1 {
   background: none;
   border: none;
   padding: 0;
-  margin: 0;
+  margin: 0 5px;
   font: inherit;
   cursor: pointer;
 }
@@ -130,16 +130,28 @@ h1 {
 .profile-view {
   display: flex;
   flex-direction: column;
+  padding: 10px 16px;
   position: absolute;
-  width: 100px;
-  border: 1px solid gray;
+  border-radius: 8px;
   box-shadow: 0 0 8px black;
-  background-color: white;
+  background-color: var(--color-bg-card);
   z-index: 1000;
   right: 5px;
 }
 
-.profile-view .textButton:hover {
-  background-color: lightgray;
+.profile-view .textButton {
+  width: 100%;
+  padding: 10px 16px;
+
+  text-align: left;
+  font-size: 20px;
+
+  color: var(--color-text-primary);
+  border-radius: 8px;
 }
+
+.profile-view .textButton:hover {
+  background-color: var(--color-border-hover);
+}
+
 </style>

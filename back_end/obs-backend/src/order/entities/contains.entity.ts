@@ -1,7 +1,7 @@
 // src/order/entities/contains.entity.ts
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { Order } from './order.entity';
-// import { Book } from '../../book/entityies/book.entity';
+import { Book } from '../../book/entities/book.entity';
 
 @Entity('contain')
 export class Contains {
@@ -18,9 +18,7 @@ export class Contains {
   @JoinColumn({ name: 'orderId', referencedColumnName: 'orderId' })
   order: Order;
 
-  // TODO: Uncomment when Book entity is available 
-
-  // @ManyToOne(() => Book, { onDelete: 'CASCADE' })
-  // @JoinColumn({ name: 'bookId', referencedColumnName: 'bookID' })
-  // book: Book;
+  @ManyToOne(() => Book, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'bookId', referencedColumnName: 'bookID' })
+  book: Book;
 }

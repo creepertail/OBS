@@ -2,6 +2,7 @@
 import { ref, watch  } from 'vue';
 import axios from "axios";
 import { useRoute } from 'vue-router';
+import LeftMenu from '../components/LeftMenu.vue'
 import BookTable from '../components/book/BookTable.vue'
 import Book from '../type/book.ts'
 
@@ -51,6 +52,7 @@ search();
 </script>
 
 <template>
+  <LeftMenu />
   <div class="book-title">
     <BookTable :books="results" />
   </div>
