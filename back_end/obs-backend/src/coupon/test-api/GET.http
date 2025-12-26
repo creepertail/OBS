@@ -1,0 +1,18 @@
+﻿@baseUrl = http://localhost:3000
+@admin_token = {{admin_token}}         // 管理員 access token 範例
+@merchant_token = {{merchant_token}}   // 商家 access token 範例
+@coupon_id = {{coupon_id}}
+
+# 商家取得自己的優惠券
+GET {{baseUrl}}/coupons/mine
+Authorization: Bearer {{merchant_token}}
+
+###
+# Admin 取得全部優惠券
+GET {{baseUrl}}/coupons
+Authorization: Bearer {{admin_token}}
+
+###
+# 依 ID 取得單一優惠券（Admin 可看全部，商家只能看自己）
+GET {{baseUrl}}/coupons/{{coupon_id}}
+Authorization: Bearer {{merchant_token}}

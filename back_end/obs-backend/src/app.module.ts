@@ -10,6 +10,8 @@ import { CategoryModule } from './category/category.module';
 import { BelongsToModule } from './belongs-to/belongs-to.module';
 import { OrderModule } from './order/order.module';
 import { CartModule } from './cart/cart.module';
+import { CouponModule } from './coupon/coupon.module';
+import { ClaimsModule } from './claims/claims.module';
 
 @Module({
   imports: [
@@ -24,7 +26,7 @@ import { CartModule } from './cart/cart.module';
       password: process.env.DB_PASSWORD || '',
       database: process.env.DB_DATABASE || 'OBS',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],  // 這行會自動掃描所有 .entity.ts 檔案
-      synchronize: false, // 關閉自動同步，避免重複建表錯誤
+      synchronize: true, // 關閉自動同步，避免重複建表錯誤
       // 注意：當你新增或修改 Entity 時，需要手動執行 SQL 或使用 migration
       // logging: ['query', 'error', 'schema'],
     }),
@@ -35,6 +37,8 @@ import { CartModule } from './cart/cart.module';
     BelongsToModule,
     OrderModule,
     CartModule,
+    CouponModule,
+    ClaimsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
