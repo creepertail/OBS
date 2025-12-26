@@ -1,11 +1,11 @@
-@baseUrl = http://localhost:3000
-@access_token = {{user_access_token}}       // 使用者 token 範例
+﻿@baseUrl = http://localhost:3000
+@access_token = {{access_token}}   // 使用者 access token（User）
 
-# 使用者兌換優惠碼領取優惠券
+# 使用兌換碼領取優惠券（避免重複領取或兌換過期券）
 POST {{baseUrl}}/claims
 Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
 {
-  "redemptionCode": "REDEMPTION_CODE_SAMPLE"
+  "redemptionCode": "SHOP-WELCOME-80"
 }

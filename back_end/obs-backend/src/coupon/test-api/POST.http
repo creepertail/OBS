@@ -1,30 +1,33 @@
-@baseUrl = http://localhost:3000
-# @access_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwZTU1YmYxOS02MjEwLTQ3ZjctYTA4NS01ODM0YzgyOWU1NmMiLCJhY2NvdW50IjoiYWRtaW4iLCJ0eXBlIjoiYWRtaW4iLCJpYXQiOjE3NjYxMTk5NjgsImV4cCI6MTc2NjIwNjM2OH0.INUFcs-cDdiGqKk1cM2xPkogvhC1pY_8kjWArW0fErQ
-@access_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYzc1YWYyMy0xM2Y4LTQ2ZDItODZiNS0xMzJiNjkyZjBlYWUiLCJhY2NvdW50IjoibWVyY2hhbnQxIiwidHlwZSI6Im1lcmNoYW50IiwiaWF0IjoxNzY2MTIwMjQyLCJleHAiOjE3NjYyMDY2NDJ9.HNn3eFtIt7AIWuRvaWnCKKJAtFHttwO-ZGmbUluNPC4
-@merchant_id = b00ac511-ac7d-4dcb-b8b1-b51e41c8158e
+﻿@baseUrl = http://localhost:3000
+@admin_token = {{admin_token}}         // 管理員 access token 範例
+@merchant_token = {{merchant_token}}   // 商家 access token 範例
+@admin_id = {{admin_id}}
+@merchant_id = {{merchant_id}}
 
-# 建立優惠券（商家/管理員可建立；商家只能建立給自己，Admin 可指定任意 memberID）
+# Admin 建立全商城優惠券（只能給自己）
 POST {{baseUrl}}/coupons
 Content-Type: application/json
-Authorization: Bearer {{access_token}}
+Authorization: Bearer {{admin_token}}
 
 {
   "amount": 100,
   "validDate": "2025-12-31T00:00:00Z",
   "discount": 0.9,
-  "description": "年底特價",
-  "memberID": "{{merchant_id}}"
+  "description": "年末特價",
+  "redemptionCode": "PLATFORM-NEWYEAR-90",
+  "memberID": "{{admin_id}}"
 }
 
 ###
-# 建立「無到期日」的優惠券（Admin 範例，可指定目標 member）
+# 商家建立自家優惠券（只能給自己）
 POST {{baseUrl}}/coupons
 Content-Type: application/json
-Authorization: Bearer {{access_token}}
+Authorization: Bearer {{merchant_token}}
 
 {
   "amount": 50,
   "discount": 0.8,
-  "description": "新會員 8 折券",
+  "description": "新客八折券",
+  "redemptionCode": "SHOP-WELCOME-80",
   "memberID": "{{merchant_id}}"
 }

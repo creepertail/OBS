@@ -1,23 +1,13 @@
-@baseUrl = http://localhost:3000
-@access_token = {{user_access_token}}       // 使用者 token 範例
-@admin_token = {{admin_access_token}}       // 管理員 token 範例
+﻿@baseUrl = http://localhost:3000
+@access_token = {{access_token}}   // 使用者 access token（僅能操作自己的紀錄）
+@admin_token = {{admin_token}}     // 管理員 access token
 @claim_id = {{claim_id}}
 
-# 更新自己的領券狀態（0未使用/1已使用/2作廢）
-PATCH {{baseUrl}}/claims/{{claim_id}}
-Content-Type: application/json
-Authorization: Bearer {{access_token}}
-
-{
-  "state": 1
-}
-
-###
-# Admin 更新任意領券狀態
+# 管理員或本人更新領券狀態（0 未使用 / 1 已使用 / 2 作廢）
 PATCH {{baseUrl}}/claims/{{claim_id}}
 Content-Type: application/json
 Authorization: Bearer {{admin_token}}
 
 {
-  "state": 2
+  "state": 1
 }

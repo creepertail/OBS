@@ -1,13 +1,8 @@
-@baseUrl = http://localhost:3000
-@access_token =
-@admin_token =
+﻿@baseUrl = http://localhost:3000
+@access_token = {{access_token}}   // 使用者 access token（僅能刪自己的紀錄）
+@admin_token = {{admin_token}}     // 管理員 access token
 @claim_id = {{claim_id}}
 
-# 刪除自己的領券紀錄
-DELETE {{baseUrl}}/claims/{{claim_id}}
-Authorization: Bearer {{access_token}}
-
-###
-# Admin 刪除任意領券紀錄
+# 管理員或本人刪除領券紀錄
 DELETE {{baseUrl}}/claims/{{claim_id}}
 Authorization: Bearer {{admin_token}}
