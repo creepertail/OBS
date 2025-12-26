@@ -77,7 +77,7 @@ const router = createRouter({
       component: OrderView
     },
     {
-      path: '/checkout',
+      path: '/checkout/:merchantID',
       name: 'checkout',
       component: CheckoutView
     },

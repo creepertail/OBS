@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue"
+import { ref, computed, onMounted } from "vue"
 import { useRoute } from "vue-router"
 import axios from "axios"
 import type CartItem from "../type/cartItem"
@@ -13,13 +13,64 @@ interface Coupon {
   discountValue: number
 }
 
+interface RawCartItem {
+  bookID: string
+  name: string
+  amount: number
+  inventoryQuantity: number
+  price: number
+  images: { 
+    imageId: string
+    imageUrl: string
+    displayOrder: number
+    isCover: boolean
+  }[]
+  author: string
+  publisher: string
+}
+
 /* ========= 狀態 ========= */
 const route = useRoute()
-const cartItems = ref<CartItem[]>(
-  route.query.cart
-    ? JSON.parse(route.query.cart as string)
-    : []
-)
+const merchantID = ref(route.params.merchantID as string)
+const cartItems = ref<CartItem[]>([])
+
+onMounted(async () => {
+  const token = localStorage.getItem('accessToken')
+  if (!token) return
+
+  const res = await axios.get<RawCartItem[]>(
+    `http://localhost:3000/cart/${merchantID.value}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  )
+  console.log("res", res.data)
+
+// GET {{baseUrl}}/cart/{{merchantID}}
+// Authorization: Bearer {{userToken}}
+
+  cartItems.value = res.data.map(item => ({
+      bookID: item.bookID,
+      name: item.name,
+      amount: item.amount,
+      inventoryQuantity: item.inventoryQuantity,
+      price: item.price,
+      imageUrl:
+        item.images?.find(img => img.isCover)?.imageUrl ??
+        'http://localhost:3000/uploads/defaultImages/default_book_image.png',
+      author: item.author,
+      publisher: item.publisher
+  }))
+  console.log("cart item", cartItems.value)
+})
+
+// const cartItems = ref<CartItem[]>(
+//   route.query.cart
+//     ? JSON.parse(route.query.cart as string)
+//     : []
+// )
 const couponInput = ref("")
 const coupon = ref<Coupon | null>(null)
 const couponError = ref("")

@@ -79,7 +79,7 @@ const totalAmount = computed(() => {
   if (!group) return 0
 
   return group.items.reduce(
-    (sum, item) => sum + item.price * item.amount,
+    (sum: number, item: CartItem) => sum + item.price * item.amount,
     0
   )
 })
@@ -146,8 +146,8 @@ function goToCheckout() {
 
   router.push({
     name: 'checkout',
-    query: {
-      cart: JSON.stringify(selectedGroup)
+    params: {
+      merchantID: selectedMerchantId.value
     }
   })
 }
