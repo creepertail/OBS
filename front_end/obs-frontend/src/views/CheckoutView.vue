@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue"
-import { useRoute } from "vue-router"
+import { useRoute, useRouter } from "vue-router"
 import axios from "axios"
 import type CartItem from "../type/cartItem"
 
@@ -31,6 +31,7 @@ interface RawCartItem {
 
 /* ========= 狀態 ========= */
 const route = useRoute()
+const router = useRouter()
 const merchantID = ref(route.params.merchantID as string)
 const cartItems = ref<CartItem[]>([])
 
@@ -48,9 +49,6 @@ onMounted(async () => {
   )
   console.log("res", res.data)
 
-// GET {{baseUrl}}/cart/{{merchantID}}
-// Authorization: Bearer {{userToken}}
-
   cartItems.value = res.data.map(item => ({
       bookID: item.bookID,
       name: item.name,
@@ -66,11 +64,6 @@ onMounted(async () => {
   console.log("cart item", cartItems.value)
 })
 
-// const cartItems = ref<CartItem[]>(
-//   route.query.cart
-//     ? JSON.parse(route.query.cart as string)
-//     : []
-// )
 const couponInput = ref("")
 const coupon = ref<Coupon | null>(null)
 const couponError = ref("")
@@ -184,6 +177,10 @@ async function checkout() {
     
     cartItems.value = []
     alert("訂單建立成功！")
+
+    router.push({
+      name: 'orderList'
+    })
     
   } catch (e) {
     console.error(e)
