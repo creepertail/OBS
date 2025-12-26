@@ -10,7 +10,7 @@ export class Coupon {
   couponID: string;
 
   @Column({ type: 'int', nullable: false, default: 1 })
-  amount: number;
+  quantity: number;
 
   @Column({ type: 'timestamp', nullable: true })
   validDate?: Date;

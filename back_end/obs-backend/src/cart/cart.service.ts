@@ -35,27 +35,27 @@ export class CartService {
 
   // 新增商品到購物車,會累加數量,數量不可超過庫存
   async addItem(userId: string, createCartItemDto: CreateCartItemDto): Promise<AddsToCart> {
-    const { bookID, amount } = createCartItemDto;
+    const { bookID, quantity } = createCartItemDto;
 
     const book = await this.ensureBookAvailable(bookID);
     const existing = await this.cartRepository.findOne({
       where: { userID: userId, bookID },
     });
 
-    const newAmount = (existing?.amount ?? 0) + amount;
-    if (newAmount > book.inventoryQuantity) {
-      throw new BadRequestException('Amount exceeds inventory');
+    const newQuantity = (existing?.quantity ?? 0) + quantity;
+    if (newQuantity > book.inventoryQuantity) {
+      throw new BadRequestException('Quantity exceeds inventory');
     }
 
     if (existing) {
-      existing.amount = newAmount;
+      existing.quantity = newQuantity;
       return this.cartRepository.save(existing);
     }
 
     const item = this.cartRepository.create({
       userID: userId,
       bookID,
-      amount: newAmount,
+      quantity: newQuantity,
     });
 
     return this.cartRepository.save(item);
@@ -65,7 +65,7 @@ export class CartService {
   async findMyCart(userId: string): Promise<Array<{
     merchantId: string;
     merchantName: string;
-    items: Array<{ bookID: string; amount: number } & Book>;
+    items: Array<{ bookID: string; quantity: number } & Book>;
   }>> {
     const items = await this.cartRepository.find({
       where: { userID: userId },
@@ -73,7 +73,7 @@ export class CartService {
     });
 
     // 將購物車項目依照 merchantId 分組
-    const groupedByMerchant = items.reduce((acc, { bookID, amount, book }) => {
+    const groupedByMerchant = items.reduce((acc, { bookID, quantity, book }) => {
       const merchantId = book.merchantId;
 
       if (!acc[merchantId]) {
@@ -81,13 +81,13 @@ export class CartService {
       }
 
       acc[merchantId].push({
-        amount,
+        quantity,
         ...book,
         images: book.images?.filter(img => img.isCover === true) || [],
       });
 
       return acc;
-    }, {} as Record<string, Array<{ bookID: string; amount: number } & Book>>);
+    }, {} as Record<string, Array<{ bookID: string; quantity: number } & Book>>);
 
     // 取得所有商家資訊
     const merchantIds = Object.keys(groupedByMerchant);
@@ -120,11 +120,11 @@ export class CartService {
 
     const book = await this.ensureBookAvailable(bookId);
 
-    if (updateCartItemDto.amount > book.inventoryQuantity) {
-      throw new BadRequestException('Amount exceeds inventory');
+    if (updateCartItemDto.quantity > book.inventoryQuantity) {
+      throw new BadRequestException('Quantity exceeds inventory');
     }
 
-    cartItem.amount = updateCartItemDto.amount;
+    cartItem.quantity = updateCartItemDto.quantity;
     return this.cartRepository.save(cartItem);
   }
 
@@ -143,7 +143,7 @@ export class CartService {
   }
 
   // 根據 merchantID 取得使用者購物車中該商家的商品
-  async findItemsInMyCartByMerchantID(userId: string, merchantId: string): Promise<Array<{ bookID: string; amount: number } & Book>> {
+  async findItemsInMyCartByMerchantID(userId: string, merchantId: string): Promise<Array<{ bookID: string; quantity: number } & Book>> {
     const items = await this.cartRepository.find({
       where: { userID: userId },
       relations: ['book', 'book.images'],
@@ -152,8 +152,8 @@ export class CartService {
     // 過濾出屬於指定商家的商品
     const merchantItems = items
       .filter(item => item.book.merchantId === merchantId)
-      .map(({ book, amount }) => ({
-        amount,
+      .map(({ book, quantity }) => ({
+        quantity,
         ...book,
         images: book.images?.filter(img => img.isCover === true) || [],
       }));

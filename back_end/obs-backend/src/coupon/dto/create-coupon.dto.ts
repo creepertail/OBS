@@ -4,7 +4,7 @@ import { IsDateString, IsInt, IsNotEmpty, IsOptional, IsPositive, IsString, IsUU
 export class CreateCouponDto {
   @IsInt()
   @IsPositive()
-  amount: number;
+  quantity: number;
 
   @IsOptional()
   @IsDateString()

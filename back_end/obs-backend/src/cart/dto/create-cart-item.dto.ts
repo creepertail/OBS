@@ -7,5 +7,5 @@ export class CreateCartItemDto {
 
   @IsInt()
   @IsPositive()
-  amount: number;
+  quantity: number;
 }

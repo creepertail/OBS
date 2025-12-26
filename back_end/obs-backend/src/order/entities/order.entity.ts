@@ -22,7 +22,7 @@ export class Order {
   state: number;
 
   @Column({ type: 'int', nullable: false, default: 0 })
-  totalAmount: number;
+  totalQuantity: number;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   orderDate: Date;

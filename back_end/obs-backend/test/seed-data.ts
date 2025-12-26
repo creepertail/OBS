@@ -188,7 +188,7 @@ async function seedData() {
 
     // 優惠券範例
     const coupon1 = await couponRepo.save({
-      amount: 100,
+      quantity: 100,
       validDate: new Date('2025-12-31T00:00:00Z'),
       discount: 0.9,
       description: 'merchant1 年末折扣券',
@@ -197,7 +197,7 @@ async function seedData() {
     });
 
     const coupon2 = await couponRepo.save({
-      amount: 50,
+      quantity: 50,
       validDate: new Date('2025-10-31T00:00:00Z'),
       discount: 0.8,
       description: 'merchant2 新客八折券',
@@ -656,7 +656,7 @@ async function seedData() {
       shippingAddress: '台北市大安區羅斯福路四段1號',
       paymentMethod: 1,
       totalPrice: 360,
-      totalAmount: 1,
+      totalQuantity: 1,
       state: 1, // 處理中
       userId: user1.memberID,
       merchantId: merchant1.memberID,
@@ -665,7 +665,7 @@ async function seedData() {
     await containsRepo.save({
       orderId: order1.orderId,
       bookId: book1.bookID,
-      amount: 1,
+      quantity: 1,
     });
 
     // User1 的第二筆訂單 - 向 merchant2 購買多本書
@@ -673,7 +673,7 @@ async function seedData() {
       shippingAddress: '台北市中山區南京東路三段219號',
       paymentMethod: 1,
       totalPrice: 1629, // 1300 + 149 + 180
-      totalAmount: 3,
+      totalQuantity: 3,
       state: 2, // 已出貨
       userId: user1.memberID,
       merchantId: merchant2.memberID,
@@ -683,17 +683,17 @@ async function seedData() {
       {
         orderId: order2.orderId,
         bookId: book3.bookID,
-        amount: 1,
+        quantity: 1,
       },
       {
         orderId: order2.orderId,
         bookId: book4.bookID,
-        amount: 1,
+        quantity: 1,
       },
       {
         orderId: order2.orderId,
         bookId: book7.bookID,
-        amount: 1,
+        quantity: 1,
       },
     ]);
 
@@ -702,7 +702,7 @@ async function seedData() {
       shippingAddress: '新北市板橋區文化路一段188號',
       paymentMethod: 1,
       totalPrice: 680,
-      totalAmount: 2,
+      totalQuantity: 2,
       state: 0, // 待處理
       userId: user2.memberID,
       merchantId: merchant3.memberID,
@@ -712,12 +712,12 @@ async function seedData() {
       {
         orderId: order3.orderId,
         bookId: book5.bookID,
-        amount: 1,
+        quantity: 1,
       },
       {
         orderId: order3.orderId,
         bookId: book8.bookID,
-        amount: 1,
+        quantity: 1,
       },
     ]);
 
@@ -726,7 +726,7 @@ async function seedData() {
       shippingAddress: '高雄市前金區中正四路211號',
       paymentMethod: 1,
       totalPrice: 758,
-      totalAmount: 1,
+      totalQuantity: 1,
       state: 3, // 已完成
       userId: user3.memberID,
       merchantId: merchant2.memberID,
@@ -735,7 +735,7 @@ async function seedData() {
     await containsRepo.save({
       orderId: order4.orderId,
       bookId: book6.bookID,
-      amount: 1,
+      quantity: 1,
     });
 
     // User2 的第二筆訂單 - 向 merchant1 購買
@@ -743,7 +743,7 @@ async function seedData() {
       shippingAddress: '台南市中西區民族路二段76號',
       paymentMethod: 1,
       totalPrice: 560,
-      totalAmount: 2,
+      totalQuantity: 2,
       state: 1, // 處理中
       userId: user2.memberID,
       merchantId: merchant1.memberID,
@@ -753,7 +753,7 @@ async function seedData() {
       {
         orderId: order5.orderId,
         bookId: book9.bookID,
-        amount: 2,
+        quantity: 2,
       },
     ]);
 
@@ -762,7 +762,7 @@ async function seedData() {
       shippingAddress: '桃園市中壢區中北路200號',
       paymentMethod: 1,
       totalPrice: 880,
-      totalAmount: 2,
+      totalQuantity: 2,
       state: 0, // 待處理
       userId: user3.memberID,
       merchantId: merchant1.memberID,
@@ -772,12 +772,12 @@ async function seedData() {
       {
         orderId: order6.orderId,
         bookId: book1.bookID,
-        amount: 1,
+        quantity: 1,
       },
       {
         orderId: order6.orderId,
         bookId: book12.bookID,
-        amount: 1,
+        quantity: 1,
       },
     ]);
 

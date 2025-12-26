@@ -11,8 +11,8 @@ export class AddsToCart {
   @PrimaryColumn({ type: 'char', length: 36, name: 'BookID' })
   bookID: string;
 
-  @Column({ type: 'int', nullable: false, name: 'Amount' })
-  amount: number;
+  @Column({ type: 'int', nullable: false })
+  quantity: number;
 
   @ManyToOne(() => Member, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'UserID', referencedColumnName: 'memberID' })
