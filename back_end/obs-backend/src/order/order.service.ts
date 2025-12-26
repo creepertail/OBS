@@ -12,7 +12,7 @@ import { Book } from '../book/entities/book.entity';
 
 export interface CreateOrderItem {
   bookId: string;
-  amount: number;
+  quantity: number;
 }
 
 @Injectable()
@@ -65,7 +65,7 @@ export class OrderService {
       if (!book) {
         throw new NotFoundException(`Book with ID ${item.bookId} not found`);
       }
-      if (book.inventoryQuantity < item.amount) {
+      if (book.inventoryQuantity < item.quantity) {
         throw new BadRequestException(`Insufficient inventory for book: ${book.name}`);
       }
       if (book.status !== 1) {
@@ -105,7 +105,7 @@ export class OrderService {
       const contains = this.containsRepository.create({
         orderId: savedOrder.orderId,
         bookId: item.bookId,
-        amount: item.amount,
+        quantity: item.quantity,
       });
       await this.containsRepository.save(contains);
     }
@@ -208,7 +208,7 @@ export class OrderService {
       // User 只能修改配送地址和付款方式
       if (updateOrderDto.state !== undefined ||
         updateOrderDto.totalPrice !== undefined ||
-        updateOrderDto.totalAmount !== undefined) {
+        updateOrderDto.totalQuantity !== undefined) {
         throw new ForbiddenException('Users can only update shipping address and payment method');
       }
 
@@ -220,7 +220,7 @@ export class OrderService {
       if (updateOrderDto.shippingAddress !== undefined ||
         updateOrderDto.paymentMethod !== undefined ||
         updateOrderDto.totalPrice !== undefined ||
-        updateOrderDto.totalAmount !== undefined) {
+        updateOrderDto.totalQuantity !== undefined) {
         throw new ForbiddenException('Merchants can only update order state');
       }
 

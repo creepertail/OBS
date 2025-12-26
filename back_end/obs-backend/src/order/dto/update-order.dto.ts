@@ -26,7 +26,7 @@ export class UpdateOrderDto {
   @IsInt()
   @Min(1)
   @IsOptional()
-  totalAmount?: number;
+  totalQuantity?: number;
 
   @IsUUID()
   @IsOptional()

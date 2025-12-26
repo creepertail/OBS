@@ -12,7 +12,7 @@ export class Contains {
   bookId: string;
 
   @Column({ type: 'int', nullable: false })
-  amount: number;
+  quantity: number;
 
   @ManyToOne(() => Order, (order) => order.contains, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'orderId', referencedColumnName: 'orderId' })

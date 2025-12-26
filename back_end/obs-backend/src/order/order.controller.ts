@@ -18,7 +18,7 @@ import { MemberType } from '../member/member-type.enum';
 
 interface CreateOrderItem {
   bookId: string;
-  amount: number;
+  quantity: number;
 }
 
 @Controller('orders')
@@ -30,8 +30,8 @@ export class OrderController {
    *
    * POST /orders + body              => 建立新訂單（需要 JWT token，User 類型）
    *   - body:
-   *   - shippingAddress, paymentMethod, totalPrice, totalAmount, couponId (optional)
-   *   - items: [{ bookId, amount }]
+   *   - shippingAddress, paymentMethod, totalPrice, totalQuantity, couponId (optional)
+   *   - items: [{ bookId, quantity }]
    *   - 注意：userId 從 JWT token 自動取得，merchantId 從書籍資料自動取得
    *   - 所有書籍必須屬於同一個商家
    *

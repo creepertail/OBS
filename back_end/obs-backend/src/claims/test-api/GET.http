@@ -1,0 +1,18 @@
+﻿@baseUrl = http://localhost:3000
+@access_token = {{access_token}}   // 使用者 access token（User）
+@admin_token = {{admin_token}}     // 管理員 access token
+@claim_id = {{claim_id}}
+
+# User 查詢自己的領券紀錄
+GET {{baseUrl}}/claims/mine
+Authorization: Bearer {{access_token}}
+
+###
+# Admin 查詢全部領券紀錄
+GET {{baseUrl}}/claims
+Authorization: Bearer {{admin_token}}
+
+###
+# 依 ClaimID 取得單筆（Admin 任意；User 僅能查自己的）
+GET {{baseUrl}}/claims/{{claim_id}}
+Authorization: Bearer {{access_token}}
