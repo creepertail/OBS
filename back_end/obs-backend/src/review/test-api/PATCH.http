@@ -1,0 +1,13 @@
+@baseUrl = http://localhost:3000
+@access_token = {{access_token}}   // 使用者 access token
+@book_id = {{book_id}}
+
+# 更新自己的評論
+PATCH {{baseUrl}}/reviews/{{book_id}}
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "stars": 4,
+  "description": "更新評論內容"
+}

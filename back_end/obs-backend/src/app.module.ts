@@ -14,6 +14,8 @@ import { CouponModule } from './coupon/coupon.module';
 import { ClaimsModule } from './claims/claims.module';
 import { RestrictUserModule } from './restrict_user/restrict-user.module';
 import { RestrictMerchantModule } from './restrict_merchant/restrict-merchant.module';
+import { FavoriteModule } from './favorite/favorite.module';
+import { ReviewModule } from './review/review.module';
 
 @Module({
   imports: [
@@ -43,6 +45,8 @@ import { RestrictMerchantModule } from './restrict_merchant/restrict-merchant.mo
     ClaimsModule,
     RestrictUserModule,
     RestrictMerchantModule,
+    FavoriteModule,
+    ReviewModule,
   ],
   controllers: [AppController],
   providers: [AppService],
