@@ -13,6 +13,9 @@ import { BelongsTo } from '../src/belongs-to/entities/belongs-to.entity';
 import { Order } from '../src/order/entities/order.entity';
 import { Contains } from '../src/order/entities/contains.entity';
 import { AddsToCart } from '../src/cart/entities/adds-to-cart.entity';
+import { Coupon } from '../src/coupon/entities/coupon.entity';
+import { Claim } from '../src/claims/entities/claim.entity';
+import { Manage } from '../src/manage/entities/manage.entity';
 
 // 載入環境變數
 config();
@@ -25,7 +28,7 @@ const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME || 'root',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_DATABASE || 'OBS',
-  entities: [Member, Category, Book, BookImage, BelongsTo, Order, Contains, AddsToCart],
+  entities: [Member, Category, Book, BookImage, BelongsTo, Order, Contains, AddsToCart, Coupon, Claim, Manage],
   synchronize: false,
   logging: true,
 });
@@ -77,11 +80,14 @@ async function seedData() {
     console.log('\n🗑️  清空現有測試數據...');
     // 暫時禁用外鍵檢查，以便清空資料
     await AppDataSource.query('SET FOREIGN_KEY_CHECKS = 0');
+    await AppDataSource.getRepository(Claim).clear();
     await AppDataSource.getRepository(Contains).clear();
+    await AppDataSource.getRepository(Manage).clear();
     await AppDataSource.getRepository(Order).clear();
     await AppDataSource.getRepository(BelongsTo).clear();
     await AppDataSource.getRepository(BookImage).clear();
     await AppDataSource.getRepository(Book).clear();
+    await AppDataSource.getRepository(Coupon).clear();
     await AppDataSource.getRepository(Category).clear();
     await AppDataSource.getRepository(Member).clear();
     // 重新啟用外鍵檢查
@@ -177,6 +183,33 @@ async function seedData() {
     // 2. 創建分類
     console.log('\n📚 創建分類數據...');
     const categoryRepo = AppDataSource.getRepository(Category);
+    const couponRepo = AppDataSource.getRepository(Coupon);
+    const claimRepo = AppDataSource.getRepository(Claim);
+
+    // 優惠券範例
+    const coupon1 = await couponRepo.save({
+      quantity: 100,
+      validDate: new Date('2025-12-31T00:00:00Z'),
+      discount: 0.9,
+      description: 'merchant1 年末折扣券',
+      redemptionCode: 'MERCHANT1-NEWYEAR-90',
+      memberID: merchant1.memberID,
+    });
+
+    const coupon2 = await couponRepo.save({
+      quantity: 50,
+      validDate: new Date('2025-10-31T00:00:00Z'),
+      discount: 0.8,
+      description: 'merchant2 新客八折券',
+      redemptionCode: 'MERCHANT2-WELCOME-80',
+      memberID: merchant2.memberID,
+    });
+
+    await claimRepo.save([
+      { userID: user1.memberID, couponID: coupon1.couponID, state: 0 },
+      { userID: user2.memberID, couponID: coupon1.couponID, state: 0 },
+      { userID: user3.memberID, couponID: coupon2.couponID, state: 0 },
+    ]);
 
     const categories = await categoryRepo.save([
       {
@@ -623,7 +656,7 @@ async function seedData() {
       shippingAddress: '台北市大安區羅斯福路四段1號',
       paymentMethod: 1,
       totalPrice: 360,
-      totalAmount: 1,
+      totalQuantity: 1,
       state: 1, // 處理中
       userId: user1.memberID,
       merchantId: merchant1.memberID,
@@ -632,7 +665,7 @@ async function seedData() {
     await containsRepo.save({
       orderId: order1.orderId,
       bookId: book1.bookID,
-      amount: 1,
+      quantity: 1,
     });
 
     // User1 的第二筆訂單 - 向 merchant2 購買多本書
@@ -640,7 +673,7 @@ async function seedData() {
       shippingAddress: '台北市中山區南京東路三段219號',
       paymentMethod: 1,
       totalPrice: 1629, // 1300 + 149 + 180
-      totalAmount: 3,
+      totalQuantity: 3,
       state: 2, // 已出貨
       userId: user1.memberID,
       merchantId: merchant2.memberID,
@@ -650,17 +683,17 @@ async function seedData() {
       {
         orderId: order2.orderId,
         bookId: book3.bookID,
-        amount: 1,
+        quantity: 1,
       },
       {
         orderId: order2.orderId,
         bookId: book4.bookID,
-        amount: 1,
+        quantity: 1,
       },
       {
         orderId: order2.orderId,
         bookId: book7.bookID,
-        amount: 1,
+        quantity: 1,
       },
     ]);
 
@@ -669,7 +702,7 @@ async function seedData() {
       shippingAddress: '新北市板橋區文化路一段188號',
       paymentMethod: 1,
       totalPrice: 680,
-      totalAmount: 2,
+      totalQuantity: 2,
       state: 0, // 待處理
       userId: user2.memberID,
       merchantId: merchant3.memberID,
@@ -679,12 +712,12 @@ async function seedData() {
       {
         orderId: order3.orderId,
         bookId: book5.bookID,
-        amount: 1,
+        quantity: 1,
       },
       {
         orderId: order3.orderId,
         bookId: book8.bookID,
-        amount: 1,
+        quantity: 1,
       },
     ]);
 
@@ -693,7 +726,7 @@ async function seedData() {
       shippingAddress: '高雄市前金區中正四路211號',
       paymentMethod: 1,
       totalPrice: 758,
-      totalAmount: 1,
+      totalQuantity: 1,
       state: 3, // 已完成
       userId: user3.memberID,
       merchantId: merchant2.memberID,
@@ -702,7 +735,7 @@ async function seedData() {
     await containsRepo.save({
       orderId: order4.orderId,
       bookId: book6.bookID,
-      amount: 1,
+      quantity: 1,
     });
 
     // User2 的第二筆訂單 - 向 merchant1 購買
@@ -710,7 +743,7 @@ async function seedData() {
       shippingAddress: '台南市中西區民族路二段76號',
       paymentMethod: 1,
       totalPrice: 560,
-      totalAmount: 2,
+      totalQuantity: 2,
       state: 1, // 處理中
       userId: user2.memberID,
       merchantId: merchant1.memberID,
@@ -720,7 +753,7 @@ async function seedData() {
       {
         orderId: order5.orderId,
         bookId: book9.bookID,
-        amount: 2,
+        quantity: 2,
       },
     ]);
 
@@ -729,7 +762,7 @@ async function seedData() {
       shippingAddress: '桃園市中壢區中北路200號',
       paymentMethod: 1,
       totalPrice: 880,
-      totalAmount: 2,
+      totalQuantity: 2,
       state: 0, // 待處理
       userId: user3.memberID,
       merchantId: merchant1.memberID,
@@ -739,12 +772,12 @@ async function seedData() {
       {
         orderId: order6.orderId,
         bookId: book1.bookID,
-        amount: 1,
+        quantity: 1,
       },
       {
         orderId: order6.orderId,
         bookId: book12.bookID,
-        amount: 1,
+        quantity: 1,
       },
     ]);
 

@@ -1,0 +1,33 @@
+﻿@baseUrl = http://localhost:3000
+@admin_token = {{admin_token}}         // 管理員 access token 範例
+@merchant_token = {{merchant_token}}   // 商家 access token 範例
+@admin_id = {{admin_id}}
+@merchant_id = {{merchant_id}}
+
+# Admin 建立全商城優惠券（只能給自己）
+POST {{baseUrl}}/coupons
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "quantity": 100,
+  "validDate": "2025-12-31T00:00:00Z",
+  "discount": 0.9,
+  "description": "年末特價",
+  "redemptionCode": "PLATFORM-NEWYEAR-90",
+  "memberID": "{{admin_id}}"
+}
+
+###
+# 商家建立自家優惠券（只能給自己）
+POST {{baseUrl}}/coupons
+Content-Type: application/json
+Authorization: Bearer {{merchant_token}}
+
+{
+  "quantity": 50,
+  "discount": 0.8,
+  "description": "新客八折券",
+  "redemptionCode": "SHOP-WELCOME-80",
+  "memberID": "{{merchant_id}}"
+}

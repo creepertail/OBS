@@ -6,6 +6,12 @@ import MerchantView from '../views/MerchantView.vue'
 import CartView from '../views/CartView.vue'
 import SettingView from '../views/SettingView.vue'
 import SearchView from '../views/SearchView.vue'
+import MerchantAddBookView from '../views/MerchantAddBookView.vue'
+import CheckoutView from '../views/CheckoutView.vue'
+import MerchantEditBookView from '../views/MerchantEditBookView.vue'
+import OrderListView from '@/views/OrderListView.vue'
+import AdminView from '@/views/AdminView.vue'
+import CouponView from '@/views/CouponView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -31,6 +37,16 @@ const router = createRouter({
       component: MerchantView,
     },
     {
+      path: '/merchant/add',
+      name: 'addProduct',
+      component: MerchantAddBookView,
+    },
+    {
+      path: '/merchant/edit/:bookID',
+      name: 'editProduct',
+      component: MerchantEditBookView,
+    },
+    {
       path: "/book/:bookID",
       name: "book",
       component: () => import("@/views/BookView.vue")
@@ -54,8 +70,28 @@ const router = createRouter({
       path: '/search',
       name: 'search',
       component: SearchView,
+    },
+    {
+      path: '/order/list',
+      name: 'orderList',
+      component: OrderListView
+    },
+    {
+      path: '/checkout/:merchantID',
+      name: 'checkout',
+      component: CheckoutView
+    },
+    {
+      path: '/coupon',
+      name: 'coupon',
+      component: CouponView
+    },
+    {
+      path: '/admin',
+      name: 'admin',
+      component: AdminView
     }
-  ],
+  ]
 })
 
 export default router

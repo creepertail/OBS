@@ -1,65 +1,11 @@
-<template>
-  <div class="add-book-page" style="padding-top: 100px;">
-
-    <h1>新增商品</h1>
-
-    <!-- 商品封面圖片上傳 -->
-    <div class="form-group">
-      <label>商品圖片</label>
-      <input type="file" multiple @change="handleFileUpload" />
-
-      <!-- 圖片預覽 -->
-      <div class="image-preview" v-if="previewImages.length">
-        <img v-for="(img, i) in previewImages" :src="img" :key="i" />
-      </div>
-    </div>
-
-    <!-- 書籍資訊 -->
-    <div class="form-group">
-      <label>書名</label>
-      <input v-model="form.name" type="text" />
-    </div>
-
-    <div class="form-group">
-      <label>作者</label>
-      <input v-model="form.author" type="text" />
-    </div>
-
-    <div class="form-group">
-      <label>出版社</label>
-      <input v-model="form.publisher" type="text" />
-    </div>
-
-    <div class="form-group">
-      <label>ISBN</label>
-      <input v-model="form.isbn" type="text" />
-    </div>
-
-    <div class="form-group">
-      <label>價格</label>
-      <input v-model.number="form.price" type="number" />
-    </div>
-
-    <div class="form-group">
-      <label>庫存數量</label>
-      <input v-model.number="form.inventoryQuantity" type="number" />
-    </div>
-
-    <div class="form-group">
-      <label>商品描述</label>
-      <textarea v-model="form.productDescription"></textarea>
-    </div>
-
-    <button @click="submit">送出商品</button>
-
-  </div>
-</template>
-
 <script setup lang="ts">
 import { ref } from "vue";
 import axios from "axios";
+import { useRouter } from 'vue-router';
 
-// 商品表單資料
+const router = useRouter();
+const urls = ref<string[]>([]);
+let body = {};
 const form = ref({
   name: "",
   author: "",
@@ -70,53 +16,124 @@ const form = ref({
   productDescription: "",
 });
 
-// 上傳的圖片檔案
 const files = ref<File[]>([]);
 const previewImages = ref<string[]>([]);
 
-// 處理圖片上傳（前端預覽）
 function handleFileUpload(event: Event) {
   const target = event.target as HTMLInputElement;
   if (!target.files?.length) return;
 
   files.value = Array.from(target.files);
-
   previewImages.value = files.value.map(file => URL.createObjectURL(file));
 }
 
-// 提交商品
 async function submit() {
   try {
-    const formData = new FormData();
+    for (let i: number = 0; i < files.value.length; i++) {
+      const formData = new FormData();
+      formData.append('file', files.value[i]);
+      const res = await axios.post(
+        'http://localhost:3000/books/upload-image',
+        formData
+      );
+      urls.value.push(res.data.url);
+    }
 
-    // 加入文字資料
-    Object.entries(form.value).forEach(([key, val]) => {
-      formData.append(key, String(val));
-    });
+    body = {
+      "ISBN": form.value.isbn,
+      "name": form.value.name,
+      "status": 1,
+      "productDescription": form.value.productDescription,
+      "inventoryQuantity": form.value.inventoryQuantity,
+      "price": form.value.price,
+      "author": form.value.author,
+      "publisher": form.value.publisher,
+    };
+    
+    const imgs = [];
+    for (let i = 0; i < urls.value.length; i++) {
+      const url = urls.value[i];
+      imgs.push({
+        "imageUrl": url,
+        "displayOrder": i,
+        "isCover": i == 1 ? true : false
+      })
+    }
+    body.images = imgs;
 
-    // 加入圖片
-    files.value.forEach(file => {
-      formData.append("images", file); // Nest.js 裡要用 @UploadedFiles()
-    });
-
-    // 呼叫後端 API
-    const res = await axios.post(
-      "http://localhost:3000/books",
-      formData,
+    await axios.post(
+      'http://localhost:3000/books',
+      body,
       {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
-    );
-
-    alert("商品新增成功！");
-    console.log(res.data);
-
+        headers: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`
+      }}
+    )
+    
+    router.push({ name: 'merchant' });
   } catch (err) {
     console.error(err);
     alert("新增商品失敗");
   }
 }
 </script>
+
+<template>
+  <div class="add-book-page" style="padding-top: 100px;">
+
+    <h1>新增商品</h1>
+
+    <!-- 商品封面圖片上傳 -->
+    <div class="form-group">
+      <label>商品圖片: </label>
+      <input type="file" accept=".jpg" multiple @change="handleFileUpload" />
+
+      <!-- 圖片預覽 -->
+      <div class="image-preview" v-if="previewImages.length">
+        <img v-for="(img, i) in previewImages" :src="img" :key="i" />
+      </div>
+    </div>
+
+    <!-- 書籍資訊 -->
+    <div class="form-group">
+      <label>書名: </label>
+      <input v-model="form.name" type="text" />
+    </div>
+
+    <div class="form-group">
+      <label>作者: </label>
+      <input v-model="form.author" type="text" />
+    </div>
+
+    <div class="form-group">
+      <label>出版社: </label>
+      <input v-model="form.publisher" type="text" />
+    </div>
+
+    <div class="form-group">
+      <label>ISBN: </label>
+      <input v-model="form.isbn" type="text" />
+    </div>
+
+    <div class="form-group">
+      <label>價格: </label>
+      <input v-model.number="form.price" type="number" />
+    </div>
+
+    <div class="form-group">
+      <label>庫存數量: </label>
+      <input v-model.number="form.inventoryQuantity" type="number" />
+    </div>
+
+    <div class="form-group">
+      <label>商品描述: </label>
+      <textarea v-model="form.productDescription"></textarea>
+    </div>
+
+    <button class="button" @click="submit">送出商品</button>
+
+  </div>
+</template>
 
 <style scoped>
 .add-book-page {
@@ -141,5 +158,26 @@ async function submit() {
   object-fit: cover;
   border-radius: 6px;
   border: 1px solid #ccc;
+}
+
+.button {
+  background-color: #667eea;
+  color: #ffffff;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.1s;
+}
+
+.button:hover {
+  background-color: #5563d6;
+  transform: translateY(-1px);
+}
+
+.button:active {
+  transform: translateY(0);
 }
 </style>

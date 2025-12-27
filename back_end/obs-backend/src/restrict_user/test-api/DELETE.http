@@ -1,0 +1,7 @@
+@baseUrl = http://localhost:3000
+@admin_token = {{admin_token}}
+@user_id = {{user_id}}
+
+# Admin 刪除使用者限制紀錄
+DELETE {{baseUrl}}/restrict-user/{{user_id}}
+Authorization: Bearer {{admin_token}}

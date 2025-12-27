@@ -1,35 +1,56 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue"
+import { ref, onMounted, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import axios from "axios"
 import type { Book } from "../type/book"
 import type { Member } from "../type/member"
+import type { Subscribe } from "../type/subscribe"
+import SubscribeButton from '../components/SubscribeMerchantButton.vue'
 
 const route = useRoute()
 const router = useRouter()
 const book = ref<Book | null>(null)
 const merchant = ref<Member>()
+const subscribe = ref<Subscribe>({
+  userID: "",
+  merchantID: "",
+  notificationEnabled: false
+})
 const loading = ref(true)
 const errorMsg = ref("")
 const quantity = ref(1)
-const currentImageIndex = ref(0) // 當前顯示的圖片索引
+const currentImageIndex = ref(0) 
+
+const isSubscribed = ref(false)
+watch(
+  () => subscribe.value,
+  (val) => {
+    isSubscribed.value = !!(
+      val &&
+      val.userID &&
+      val.merchantID
+    )
+  },
+  { immediate: true }
+)
 
 onMounted(async () => {
+  console.log("subscribe",subscribe)
   try {
     const bookID = route.params.bookID as string
-    const resBook = await axios.get<Book>(`http://localhost:3000/books/${bookID}`)
-    const dataBook = resBook.data
+    const res = await axios.get<Book>(`http://localhost:3000/books/${bookID}`)
+    const data = res.data
 
     // 確保 images 一定是陣列
-    if (!Array.isArray(dataBook.images)) dataBook.images = []
+    if (!Array.isArray(data.images)) data.images = []
 
     // 排序 images 依 displayOrder 升冪
-    dataBook.images.sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
+    data.images.sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
 
     // 檢查是否有封面
-    const hasCover = dataBook.images.some(img => img.isCover)
+    const hasCover = data.images.some(img => img.isCover)
     if (!hasCover) {
-      dataBook.images.unshift({
+      data.images.unshift({
         imageId: "imageId",
         imageUrl: "http://localhost:3000/uploads/defaultImages/default_book_image.png",
         displayOrder: 0,
@@ -37,27 +58,42 @@ onMounted(async () => {
       })
     }
 
-    book.value = dataBook
+    book.value = data
     // console.log("book", book.value)
-    quantity.value = Math.min(1, dataBook.inventoryQuantity || 1)
+    quantity.value = Math.min(1, data.inventoryQuantity || 1)
   } catch (e) {
     errorMsg.value = "無法載入書籍資料"
   } finally {
     loading.value = false
   }
-  try {
-    const resMerchant = await axios.get<Member>(`http://localhost:3000/members/${book.value?.merchantId}`)
-    const dataMerchant = resMerchant.data
 
-    merchant.value = dataMerchant
-    console.log("merchant", merchant.value)
+  try {
+    const res = await axios.get<Member>(`http://localhost:3000/members/${book.value?.merchantId}`)
+    
+      const data = res.data
+
+    merchant.value = data
   } catch (e) {
     errorMsg.value = "無法載入商家資料"
-  } finally {
-    loading.value = false
   }
-})
 
+  try {
+    const token = localStorage.getItem("accessToken")
+    if (!token) return
+
+    const res = await axios.get<Subscribe>(
+      `http://localhost:3000/subscriptions/isUserSubscribedToMerchant/${book.value?.merchantId}`,
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    )
+
+    subscribe.value = res.data ?? null
+  } catch {
+    subscribe.value = null
+  }
+
+})
 
 // 切換圖片
 function prevImage() {
@@ -94,7 +130,7 @@ async function addBookToCart(goToCardPage: boolean) {
       "http://localhost:3000/cart",
       {
         bookID: book.value?.bookID,
-        amount: quantity.value
+        quantity: quantity.value
       },
       {
         headers: {
@@ -104,19 +140,27 @@ async function addBookToCart(goToCardPage: boolean) {
       }
     )
 
-    // alert("已加入購物車！")
-  } catch (error) {
-    console.error(error)
-    alert("加入購物車失敗")
-  }
-  finally{
     if (goToCardPage === true) {
       router.push({ name: 'cart' })
     }
     else {
       alert("已加入購物車！")
     }
+  } catch (error) {
+    console.error(error)
+    alert("加入購物車失敗")
   }
+  finally{
+  }
+}
+
+function goToSearchMerchantPage(){
+  router.push({
+    name: 'searchMerchant',
+    params: {
+      merchantID: merchant.value?.memberID
+    }
+  })
 }
 
 </script>
@@ -185,7 +229,9 @@ async function addBookToCart(goToCardPage: boolean) {
                 ? 'book-info__stock--available'
                 : 'book-info__stock--soldout'"
             >
-              {{ book.inventoryQuantity > 0
+              {{ book.status === 0
+                ? '已下架'
+                : book.inventoryQuantity > 0
                 ? `庫存 ${book.inventoryQuantity}`
                 : '已售完' }}
             </div>
@@ -225,7 +271,7 @@ async function addBookToCart(goToCardPage: boolean) {
           <div class="book-info__actions">
             <button
               class="action-button action-button--cart"
-              :disabled="book.inventoryQuantity === 0"
+              :disabled="book.inventoryQuantity === 0 || book.status === 0"
               @click="addToCart"
             >
               加入購物車
@@ -233,7 +279,7 @@ async function addBookToCart(goToCardPage: boolean) {
 
             <button
               class="action-button action-button--buy"
-              :disabled="book.inventoryQuantity === 0"
+              :disabled="book.inventoryQuantity === 0 || book.status === 0"
               @click="buyNow"
             >
               立即購買
@@ -246,7 +292,10 @@ async function addBookToCart(goToCardPage: boolean) {
       <hr class="book-detail__divider" />
 
       <!-- 商家資訊 -->
-      <section v-if="merchant" class="merchant-info">
+      <section 
+        v-if="merchant" 
+        class="merchant-info"
+        @click="goToSearchMerchantPage">
         <h2 class="merchant-info__title">商家資訊</h2>
       
         <div class="merchant-info__card">
@@ -266,13 +315,16 @@ async function addBookToCart(goToCardPage: boolean) {
             </div>
           </div>
       
-          <RouterLink 
-            :to="`/search/merchant/${merchant.memberID}`"
-            class="merchant-info__action">
-            <button class="merchant-info__btn">
-              前往商家頁面
-            </button>
-          </RouterLink>
+          <div 
+            class="merchant-info__action"
+            @click.stop
+          >
+            <SubscribeButton
+              :merchantID="merchant.memberID"
+              v-model:isSubscribed="isSubscribed"
+              v-model:notificationEnabled="subscribe.notificationEnabled"
+            />
+          </div>
         </div>
       </section>
 
@@ -629,6 +681,25 @@ async function addBookToCart(goToCardPage: boolean) {
   background: var(--color-background-soft);
   transform: translateY(-1px);
 }
+
+/* 訂閱按鈕 */
+.merchant-info__btn--subscribe {
+  margin-bottom: 8px;
+  margin-right: 8px;
+  background: var(--color-accent);
+  color: #ffffff;
+  border: none;
+}
+
+.merchant-info__btn--subscribe:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.merchant-info__btn--subscribe:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 
 /* RWD */
 @media (max-width: 768px) {

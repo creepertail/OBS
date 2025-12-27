@@ -83,7 +83,7 @@ Content-Type: application/json
 Authorization: Bearer {{userToken}}
 
 {
-  "totalAmount": 999
+  "totalQuantity": 999
 }
 
 # ========================================
@@ -190,7 +190,7 @@ Content-Type: application/json
 Authorization: Bearer {{adminToken}}
 
 {
-  "totalAmount": 2
+  "totalQuantity": 2
 }
 
 ### Admin 同時更新多個欄位（成功）
@@ -203,7 +203,7 @@ Authorization: Bearer {{adminToken}}
   "paymentMethod": 3,
   "state": 2,
   "totalPrice": 1200,
-  "totalAmount": 3
+  "totalQuantity": 3
 }
 
 # ========================================
@@ -284,7 +284,7 @@ Content-Type: application/json
 Authorization: Bearer {{adminToken}}
 
 {
-  "totalAmount": 0
+  "totalQuantity": 0
 }
 
 # ========================================

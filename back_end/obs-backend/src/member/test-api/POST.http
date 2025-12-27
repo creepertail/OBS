@@ -90,7 +90,7 @@ POST http://localhost:3000/members/login
 Content-Type: application/json
 
 {
-  "account": "user-test-1",
+  "account": "user1",
   "password": "0000"
 }
 
@@ -118,7 +118,7 @@ POST http://localhost:3000/members/login
 Content-Type: application/json
 
 {
-  "account": "admin-test-1",
+  "account": "admin",
   "password": "0000"
 }
 
@@ -127,7 +127,7 @@ POST http://localhost:3000/members/login
 Content-Type: application/json
 
 {
-  "account": "merchant-test-1",
+  "account": "merchant1",
   "password": "0000"
 }
 

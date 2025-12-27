@@ -3,8 +3,8 @@
 #    *
 #    * POST url/orders + body              => 建立新訂單（需要 JWT token，User 類型）
 #    *   - body:
-#    *   - shippingAddress, paymentMethod, totalPrice, totalAmount, couponId (optional)
-#    *   - items: [{ bookId, amount }]
+#    *   - shippingAddress, paymentMethod, totalPrice, totalQuantity, couponId (optional)
+#    *   - items: [{ bookId, quantity }]
 #    *   - 注意：userId 從 JWT token 自動取得，merchantId 從書籍資料自動取得
 #    *   - 所有書籍必須屬於同一個商家
 #    */
@@ -21,11 +21,11 @@
 @baseUrl = http://localhost:3000
 
 # 請先執行登入 API 取得 User 的 access_token，然後將 token 貼到下面
-@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NWQyMzY3ZC05ZDc4LTRhMTktOTZkMC1mOTc0OTA0ODAxNmIiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2NTI4MzcwOCwiZXhwIjoxNzY1MzcwMTA4fQ.UUSUi7skkc26hVNX_zQ_zaByNZ5m-ov2OfL_3MH9oHE
+@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyNDdhY2NkYi01ZjI1LTRjMDgtODRiNS1jMTg5NjJjZjVmNGIiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2NjEyODgyNywiZXhwIjoxNzY2MjE1MjI3fQ.K3ODPNlo_8gNXajWWpcF1pGW0hWcoh936NP4-apkY9U
 
 # 書籍 ID（請先使用 GET /books 取得實際的書籍 ID）
-@bookId1 = 17650374-3db5-4a54-b465-989db68fca41
-@bookId2 = 09f0eb59-e9ec-4a93-966a-12184c7d55db
+@bookId1 = 61b0f338-d64d-45d2-85f9-459b03cb2aaa
+@bookId2 = 6dd4f88c-f226-44ff-91c9-d37f3f8c3912
 
 # ========================================
 # 建立訂單測試
@@ -40,11 +40,11 @@ Authorization: Bearer {{userToken}}
   "shippingAddress": "台北市信義區信義路五段7號",
   "paymentMethod": 1,
   "totalPrice": 450,
-  "totalAmount": 1,
+  "totalQuantity": 1,
   "items": [
     {
       "bookId": "{{bookId1}}",
-      "amount": 1
+      "quantity": 1
     }
   ]
 }
@@ -58,15 +58,15 @@ Authorization: Bearer {{userToken}}
   "shippingAddress": "新北市板橋區文化路一段188號",
   "paymentMethod": 2,
   "totalPrice": 1320,
-  "totalAmount": 3,
+  "totalQuantity": 3,
   "items": [
     {
       "bookId": "{{bookId1}}",
-      "amount": 2
+      "quantity": 2
     },
     {
       "bookId": "{{bookId2}}",
-      "amount": 1
+      "quantity": 1
     }
   ]
 }
@@ -80,12 +80,12 @@ Authorization: Bearer {{userToken}}
   "shippingAddress": "台中市西屯區台灣大道三段99號",
   "paymentMethod": 1,
   "totalPrice": 900,
-  "totalAmount": 2,
+  "totalQuantity": 2,
   "couponId": "coupon-id-here",
   "items": [
     {
       "bookId": "{{bookId1}}",
-      "amount": 2
+      "quantity": 2
     }
   ]
 }
@@ -102,11 +102,11 @@ Authorization: Bearer {{userToken}}
 {
   "paymentMethod": 1,
   "totalPrice": 450,
-  "totalAmount": 1,
+  "totalQuantity": 1,
   "items": [
     {
       "bookId": "{{bookId1}}",
-      "amount": 1
+      "quantity": 1
     }
   ]
 }
@@ -120,11 +120,11 @@ Authorization: Bearer {{userToken}}
   "shippingAddress": "",
   "paymentMethod": 1,
   "totalPrice": 450,
-  "totalAmount": 1,
+  "totalQuantity": 1,
   "items": [
     {
       "bookId": "{{bookId1}}",
-      "amount": 1
+      "quantity": 1
     }
   ]
 }
@@ -138,11 +138,11 @@ Authorization: Bearer {{userToken}}
   "shippingAddress": "這是一個超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級超級長的地址",
   "paymentMethod": 1,
   "totalPrice": 450,
-  "totalAmount": 1,
+  "totalQuantity": 1,
   "items": [
     {
       "bookId": "{{bookId1}}",
-      "amount": 1
+      "quantity": 1
     }
   ]
 }
@@ -156,11 +156,11 @@ Authorization: Bearer {{userToken}}
   "shippingAddress": "台北市信義區信義路五段7號",
   "paymentMethod": -1,
   "totalPrice": 450,
-  "totalAmount": 1,
+  "totalQuantity": 1,
   "items": [
     {
       "bookId": "{{bookId1}}",
-      "amount": 1
+      "quantity": 1
     }
   ]
 }
@@ -174,11 +174,11 @@ Authorization: Bearer {{userToken}}
   "shippingAddress": "台北市信義區信義路五段7號",
   "paymentMethod": 1,
   "totalPrice": -100,
-  "totalAmount": 1,
+  "totalQuantity": 1,
   "items": [
     {
       "bookId": "{{bookId1}}",
-      "amount": 1
+      "quantity": 1
     }
   ]
 }
@@ -192,11 +192,11 @@ Authorization: Bearer {{userToken}}
   "shippingAddress": "台北市信義區信義路五段7號",
   "paymentMethod": 1,
   "totalPrice": 450,
-  "totalAmount": 0,
+  "totalQuantity": 0,
   "items": [
     {
       "bookId": "{{bookId1}}",
-      "amount": 1
+      "quantity": 1
     }
   ]
 }
@@ -210,7 +210,7 @@ Authorization: Bearer {{userToken}}
   "shippingAddress": "台北市信義區信義路五段7號",
   "paymentMethod": 1,
   "totalPrice": 450,
-  "totalAmount": 1,
+  "totalQuantity": 1,
   "items": []
 }
 
@@ -227,11 +227,11 @@ Authorization: Bearer {{userToken}}
   "shippingAddress": "台北市信義區信義路五段7號",
   "paymentMethod": 1,
   "totalPrice": 450,
-  "totalAmount": 1,
+  "totalQuantity": 1,
   "items": [
     {
       "bookId": "00000000-0000-0000-0000-000000000000",
-      "amount": 1
+      "quantity": 1
     }
   ]
 }
@@ -246,15 +246,15 @@ Authorization: Bearer {{userToken}}
   "shippingAddress": "台北市信義區信義路五段7號",
   "paymentMethod": 1,
   "totalPrice": 900,
-  "totalAmount": 2,
+  "totalQuantity": 2,
   "items": [
     {
       "bookId": "{{bookId1}}",
-      "amount": 1
+      "quantity": 1
     },
     {
       "bookId": "merchant2-book-id",
-      "amount": 1
+      "quantity": 1
     }
   ]
 }
@@ -268,11 +268,11 @@ Authorization: Bearer {{userToken}}
   "shippingAddress": "台北市信義區信義路五段7號",
   "paymentMethod": 1,
   "totalPrice": 45000,
-  "totalAmount": 9999,
+  "totalQuantity": 9999,
   "items": [
     {
       "bookId": "{{bookId1}}",
-      "amount": 9999
+      "quantity": 9999
     }
   ]
 }
@@ -289,11 +289,11 @@ Content-Type: application/json
   "shippingAddress": "台北市信義區信義路五段7號",
   "paymentMethod": 1,
   "totalPrice": 450,
-  "totalAmount": 1,
+  "totalQuantity": 1,
   "items": [
     {
       "bookId": "{{bookId1}}",
-      "amount": 1
+      "quantity": 1
     }
   ]
 }
@@ -309,11 +309,11 @@ Authorization: Bearer {{merchantToken}}
   "shippingAddress": "台北市信義區信義路五段7號",
   "paymentMethod": 1,
   "totalPrice": 450,
-  "totalAmount": 1,
+  "totalQuantity": 1,
   "items": [
     {
       "bookId": "{{bookId1}}",
-      "amount": 1
+      "quantity": 1
     }
   ]
 }
