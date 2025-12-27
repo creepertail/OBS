@@ -2,9 +2,9 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne, JoinColumn} from 'typeorm';
 import { BelongsTo } from '../../belongs-to/entities/belongs-to.entity';
 import { BookImage } from './book-image.entity';
-// import { Favorite } from '../../favorite/entities/favorite.entity';
+import { Favorite } from '../../favorite/entities/favorite.entity';
 import { AddsToCart } from '../../cart/entities/adds-to-cart.entity';
-// import { Review } from '../../review/entities/review.entity';
+import { Review } from '../../review/entities/review.entity';
 // import { Contains } from '../../order/entities/contains.entity';
 import { Member } from '../../member/entities/member.entity';
 
@@ -25,15 +25,14 @@ export class Book {
   @OneToMany(() => BookImage, (image) => image.book, { cascade: true })
   images: BookImage[];
 
-  // TODO: Uncomment when Category entity is available
-  // @OneToMany(() => Favorite, (favorite) => favorite.book)
-  // favorites: Favorite[];
+  @OneToMany(() => Favorite, (favorite) => favorite.book)
+  favorites: Favorite[];
 
   @OneToMany(() => AddsToCart, (item) => item.book)
   addsToCart: AddsToCart[];
 
-  // @OneToMany(() => Review, (review) => review.book)
-  // reviews: Review[];
+  @OneToMany(() => Review, (review) => review.book)
+  reviews: Review[];
 
   // @OneToMany(() => Contains, (item) => item.book)
   // contains: Contains[];

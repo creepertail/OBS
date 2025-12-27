@@ -1,0 +1,12 @@
+@baseUrl = http://localhost:3000
+@access_token = {{access_token}}   // 使用者 access token
+@book_id = {{book_id}}
+
+# 新增收藏（User）
+POST {{baseUrl}}/favorites
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "bookID": "{{book_id}}"
+}

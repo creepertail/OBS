@@ -1,0 +1,11 @@
+@baseUrl = http://localhost:3000
+@access_token = {{access_token}}   // 使用者 access token
+@book_id = {{book_id}}
+
+# 查某本書所有評論（公開）
+GET {{baseUrl}}/reviews/book/{{book_id}}
+
+###
+# 查自己的評論
+GET {{baseUrl}}/reviews/mine
+Authorization: Bearer {{access_token}}

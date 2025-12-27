@@ -3,9 +3,6 @@ import { IsDateString, IsInt, IsNotEmpty, IsString, IsUUID, Max, MaxLength, Min 
 
 export class CreateReviewDto {
   @IsUUID()
-  userID: string;
-
-  @IsUUID()
   bookID: string;
 
   @IsDateString()
@@ -21,4 +18,3 @@ export class CreateReviewDto {
   @MaxLength(200)
   description: string;
 }
-

@@ -1,6 +1,6 @@
 import { Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { Member } from '../../member/entities/member.entity';
-// import { Book } from '../../book/entityies/book.entity';
+import { Book } from '../../book/entities/book.entity';
 
 @Entity('favorite')
 export class Favorite {
@@ -14,7 +14,7 @@ export class Favorite {
   @JoinColumn({ name: 'UserID', referencedColumnName: 'memberID' })
   user: Member;
 
-  // @ManyToOne(() => Book, { onDelete: 'CASCADE' })
-  // @JoinColumn({ name: 'BookID', referencedColumnName: 'bookID' })
-  // book: Book;
+  @ManyToOne(() => Book, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'BookID', referencedColumnName: 'bookID' })
+  book: Book;
 }

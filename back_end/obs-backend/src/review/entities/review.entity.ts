@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { Member } from '../../member/entities/member.entity';
-// import { Book } from '../../book/entityies/book.entity';
+import { Book } from '../../book/entities/book.entity';
 
 @Entity('review')
 export class Review {
@@ -23,7 +23,7 @@ export class Review {
   @JoinColumn({ name: 'UserID', referencedColumnName: 'memberID' })
   user: Member;
 
-  // @ManyToOne(() => Book, { onDelete: 'CASCADE' })
-  // @JoinColumn({ name: 'BookID', referencedColumnName: 'bookID' })
-  // book: Book;
+  @ManyToOne(() => Book, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'BookID', referencedColumnName: 'bookID' })
+  book: Book;
 }
