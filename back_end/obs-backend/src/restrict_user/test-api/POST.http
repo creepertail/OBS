@@ -1,6 +1,6 @@
 @baseUrl = http://localhost:3000
-@admin_token = {{admin_token}}
-@user_id = {{user_id}}
+@admin_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZDA4ZjkxOC0xNTFiLTQ2NzEtYTJkYS1lNTc5ZWQ5ZTc1ZmEiLCJhY2NvdW50IjoiYWRtaW4iLCJ0eXBlIjoiYWRtaW4iLCJpYXQiOjE3NjY4Mzc5NTYsImV4cCI6MTc2NjkyNDM1Nn0.fJentP55wmUK09E9HugQ1bziFy8kqE0TCZRpdmzqKgM
+@user_id = 447f3ed6-a277-4abe-b368-14fcd62bf41a
 
 # Admin 建立使用者限制紀錄
 POST {{baseUrl}}/restrict-user

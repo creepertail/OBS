@@ -35,11 +35,14 @@ export class RestrictUserService {
     return this.restrictUserRepository.find();
   }
 
-  async findOne(userID: string, currentUser: { sub: string; type: MemberType }): Promise<RestrictUser> {
+  async findOne(
+    userID: string,
+    currentUser: { sub: string; type: MemberType },
+  ): Promise<RestrictUser | { exists: false; message: string }> {
     this.ensureAdmin(currentUser);
     const record = await this.restrictUserRepository.findOne({ where: { userID } });
     if (!record) {
-      throw new NotFoundException(`RestrictUser for user ${userID} not found`);
+      return { exists: false, message: `No restriction record for user ${userID}` };
     }
     return record;
   }
@@ -49,13 +52,13 @@ export class RestrictUserService {
     updateDto: UpdateRestrictUserDto,
     currentUser: { sub: string; type: MemberType },
   ): Promise<RestrictUser> {
-    const record = await this.findOne(userID, currentUser);
+    const record = await this.findExisting(userID, currentUser);
     Object.assign(record, updateDto, { adminID: currentUser.sub });
     return this.restrictUserRepository.save(record);
   }
 
   async remove(userID: string, currentUser: { sub: string; type: MemberType }): Promise<void> {
-    const record = await this.findOne(userID, currentUser);
+    const record = await this.findExisting(userID, currentUser);
     await this.restrictUserRepository.remove(record);
   }
 
@@ -74,5 +77,13 @@ export class RestrictUserService {
       throw new ForbiddenException('Target member is not a user');
     }
   }
-}
 
+  private async findExisting(userID: string, currentUser: { sub: string; type: MemberType }): Promise<RestrictUser> {
+    this.ensureAdmin(currentUser);
+    const record = await this.restrictUserRepository.findOne({ where: { userID } });
+    if (!record) {
+      throw new NotFoundException(`RestrictUser for user ${userID} not found`);
+    }
+    return record;
+  }
+}
