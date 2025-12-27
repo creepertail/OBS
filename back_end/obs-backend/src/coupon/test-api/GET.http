@@ -1,0 +1,18 @@
+﻿@baseUrl = http://localhost:3000
+@admin_token = {{admin_token}}         // 管理員 access token 範例
+@merchant_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0YTczNTViOS1jNTFjLTQxZjgtODdhOC0xNjQwYWU2YmUxNWEiLCJhY2NvdW50IjoibWVyY2hhbnQxIiwidHlwZSI6Im1lcmNoYW50IiwiaWF0IjoxNzY2NzQyMjIwLCJleHAiOjE3NjY4Mjg2MjB9.A2GEaZaRprXGZahKnInw38K8iixdsURMD0rHbMKvNzA
+@coupon_id = {{coupon_id}}
+
+# 商家取得自己的優惠券
+GET {{baseUrl}}/coupons/mine
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0YTczNTViOS1jNTFjLTQxZjgtODdhOC0xNjQwYWU2YmUxNWEiLCJhY2NvdW50IjoibWVyY2hhbnQxIiwidHlwZSI6Im1lcmNoYW50IiwiaWF0IjoxNzY2NzQzMzgzLCJleHAiOjE3NjY4Mjk3ODN9.TgWpwtAhGqGDBvGWb5bTTVGaytBQiT-09ydXh0FrMOQ
+
+###
+# Admin 取得全部優惠券
+GET {{baseUrl}}/coupons
+Authorization: Bearer {{admin_token}}
+
+###
+# 依 ID 取得單一優惠券（Admin 可看全部，商家只能看自己）
+GET {{baseUrl}}/coupons/{{coupon_id}}
+Authorization: Bearer {{merchant_token}}

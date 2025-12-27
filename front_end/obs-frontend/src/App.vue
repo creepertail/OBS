@@ -5,6 +5,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue';
 import SearchBox from './components/SearchBox.vue';
 
 const isMerchant = computed(() => localStorage.getItem("type") === "merchant");
+const isAdmin = computed(() => localStorage.getItem("type") === "admin");
 const router = useRouter();
 const route = useRoute()
 const hideLayout = computed(() => route.meta.hideLayout)
@@ -49,10 +50,15 @@ onBeforeUnmount(() => {
       <RouterLink :to="{name: 'cart'}" v-if="isLogin">
         <i class="pi pi-spin pi-shopping-cart" style="font-size: 2rem" v-if="!isMerchant"></i>
       </RouterLink>
+      <RouterLink :to="{name: 'orderList'}" v-if="isLogin">
+        <i class="pi pi-spin pi-clipboard" style="font-size: 2rem" v-if="!isMerchant"></i>
+      </RouterLink>
       <div class="profile-container" v-if="isLogin" ref="profileButton">
         <button class="account textButton" @click="isOpen=!isOpen">{{ account }}</button>
         <div class="profile-view" v-if="isOpen">
           <button class="textButton" @click="router.push({ name: 'merchant' })" v-if="isMerchant">我的商品</button>
+          <button class="textButton" @click="router.push({ name: 'admin' })" v-if="isAdmin">管理</button>
+          <button class="textButton" @click="router.push({ name: 'coupon' })">我的優惠券</button>
           <button class="textButton" @click="router.push({ name: 'setting' })">設置</button>
           <button class="textButton" @click="logout">登出</button>
         </div>

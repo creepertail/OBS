@@ -4,6 +4,6 @@ import { IsInt, IsPositive } from 'class-validator';
 export class UpdateCartItemDto {
   @IsInt()
   @IsPositive()
-  amount: number;
+  quantity: number;
 }
 

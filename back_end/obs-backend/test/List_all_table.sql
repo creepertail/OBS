@@ -16,3 +16,7 @@ SELECT *
 FROM obs.subscribes;
 SELECT *
 FROM obs.add_to_cart;
+SELECT *
+FROM obs.claims;
+SELECT *
+FROM obs.coupon;

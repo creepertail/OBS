@@ -22,7 +22,7 @@ export class CreateOrderDto {
 
   @IsInt()
   @Min(1)
-  totalAmount: number;
+  totalQuantity: number;
 
   @IsUUID()
   @IsOptional()

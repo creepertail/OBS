@@ -9,6 +9,9 @@ import SearchView from '../views/SearchView.vue'
 import MerchantAddBookView from '../views/MerchantAddBookView.vue'
 import CheckoutView from '../views/CheckoutView.vue'
 import MerchantEditBookView from '../views/MerchantEditBookView.vue'
+import OrderListView from '@/views/OrderListView.vue'
+import AdminView from '@/views/AdminView.vue'
+import CouponView from '@/views/CouponView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -69,11 +72,26 @@ const router = createRouter({
       component: SearchView,
     },
     {
-      path: '/checkout',
+      path: '/order/list',
+      name: 'orderList',
+      component: OrderListView
+    },
+    {
+      path: '/checkout/:merchantID',
       name: 'checkout',
       component: CheckoutView
+    },
+    {
+      path: '/coupon',
+      name: 'coupon',
+      component: CouponView
+    },
+    {
+      path: '/admin',
+      name: 'admin',
+      component: AdminView
     }
-  ],
+  ]
 })
 
 export default router

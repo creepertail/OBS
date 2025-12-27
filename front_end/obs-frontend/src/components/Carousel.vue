@@ -76,7 +76,7 @@ onUnmounted(stopAutoPlay);
 .carousel {
   position: relative;
   width: 100%;
-  max-width: 600px;
+  max-width: 40%;
   aspect-ratio: 16 / 9;
   margin: auto;
   overflow: hidden;

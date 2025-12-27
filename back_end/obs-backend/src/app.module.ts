@@ -3,7 +3,6 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UsersModule } from './users/users.module';
 import { BooksModule } from './book/books.module';
 import { MemberModule } from './member/member.module';
 import { SubscriptionModule } from './subscription/subscription.module';
@@ -13,8 +12,11 @@ import { OrderModule } from './order/order.module';
 import { CartModule } from './cart/cart.module';
 import { CouponModule } from './coupon/coupon.module';
 import { ClaimsModule } from './claims/claims.module';
+<<<<<<< HEAD
 import { RestrictUserModule } from './restrict_user/restrict-user.module';
 import { RestrictMerchantModule } from './restrict_merchant/restrict-merchant.module';
+=======
+>>>>>>> main
 
 @Module({
   imports: [
@@ -33,7 +35,6 @@ import { RestrictMerchantModule } from './restrict_merchant/restrict-merchant.mo
       // 注意：當你新增或修改 Entity 時，需要手動執行 SQL 或使用 migration
       // logging: ['query', 'error', 'schema'],
     }),
-    UsersModule,
     BooksModule,
     MemberModule,
     SubscriptionModule,
@@ -43,8 +44,11 @@ import { RestrictMerchantModule } from './restrict_merchant/restrict-merchant.mo
     CartModule,
     CouponModule,
     ClaimsModule,
+<<<<<<< HEAD
     RestrictUserModule,
     RestrictMerchantModule,
+=======
+>>>>>>> main
   ],
   controllers: [AppController],
   providers: [AppService],
