@@ -12,11 +12,8 @@ import { OrderModule } from './order/order.module';
 import { CartModule } from './cart/cart.module';
 import { CouponModule } from './coupon/coupon.module';
 import { ClaimsModule } from './claims/claims.module';
-<<<<<<< HEAD
 import { RestrictUserModule } from './restrict_user/restrict-user.module';
 import { RestrictMerchantModule } from './restrict_merchant/restrict-merchant.module';
-=======
->>>>>>> main
 
 @Module({
   imports: [
@@ -44,11 +41,8 @@ import { RestrictMerchantModule } from './restrict_merchant/restrict-merchant.mo
     CartModule,
     CouponModule,
     ClaimsModule,
-<<<<<<< HEAD
     RestrictUserModule,
     RestrictMerchantModule,
-=======
->>>>>>> main
   ],
   controllers: [AppController],
   providers: [AppService],
