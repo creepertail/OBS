@@ -793,6 +793,264 @@ async function seedData() {
 
     console.log('✅ 創建了 6 筆訂單');
 
+    // 5. 新增 7-12 月的訂單資料（用於銷售報表測試）
+    console.log('\n📅 創建 7-12 月的訂單資料...');
+
+    // 7月 - merchant1 的訂單
+    const order7 = await orderRepo.save({
+      shippingAddress: '台北市信義區信義路五段7號',
+      paymentMethod: 1,
+      totalPrice: 720,
+      totalQuantity: 2,
+      state: 3, // 已完成
+      orderDate: new Date('2025-07-15'),
+      userId: user1.memberID,
+      merchantId: merchant1.memberID,
+    });
+
+    await containsRepo.save([
+      {
+        orderId: order7.orderId,
+        bookId: book1.bookID,
+        quantity: 2,
+      },
+    ]);
+
+    // 7月 - merchant2 的訂單
+    const order8 = await orderRepo.save({
+      shippingAddress: '新北市新店區北新路三段200號',
+      paymentMethod: 1,
+      totalPrice: 1449,
+      totalQuantity: 2,
+      state: 3, // 已完成
+      orderDate: new Date('2025-07-22'),
+      userId: user2.memberID,
+      merchantId: merchant2.memberID,
+    });
+
+    await containsRepo.save([
+      {
+        orderId: order8.orderId,
+        bookId: book3.bookID,
+        quantity: 1,
+      },
+      {
+        orderId: order8.orderId,
+        bookId: book4.bookID,
+        quantity: 1,
+      },
+    ]);
+
+    // 8月 - merchant3 的訂單
+    const order9 = await orderRepo.save({
+      shippingAddress: '台中市西屯區台灣大道三段99號',
+      paymentMethod: 1,
+      totalPrice: 680,
+      totalQuantity: 2,
+      state: 3, // 已完成
+      orderDate: new Date('2025-08-10'),
+      userId: user3.memberID,
+      merchantId: merchant3.memberID,
+    });
+
+    await containsRepo.save([
+      {
+        orderId: order9.orderId,
+        bookId: book5.bookID,
+        quantity: 1,
+      },
+      {
+        orderId: order9.orderId,
+        bookId: book8.bookID,
+        quantity: 1,
+      },
+    ]);
+
+    // 9月 - merchant1 的訂單
+    const order10 = await orderRepo.save({
+      shippingAddress: '高雄市苓雅區三多四路110號',
+      paymentMethod: 1,
+      totalPrice: 900,
+      totalQuantity: 3,
+      state: 3, // 已完成
+      orderDate: new Date('2025-09-05'),
+      userId: user1.memberID,
+      merchantId: merchant1.memberID,
+    });
+
+    await containsRepo.save([
+      {
+        orderId: order10.orderId,
+        bookId: book1.bookID,
+        quantity: 1,
+      },
+      {
+        orderId: order10.orderId,
+        bookId: book2.bookID,
+        quantity: 1,
+      },
+    ]);
+
+    // 9月 - merchant2 的訂單
+    const order11 = await orderRepo.save({
+      shippingAddress: '台南市東區裕農路1000號',
+      paymentMethod: 1,
+      totalPrice: 1088,
+      totalQuantity: 2,
+      state: 3, // 已完成
+      orderDate: new Date('2025-09-18'),
+      userId: user2.memberID,
+      merchantId: merchant2.memberID,
+    });
+
+    await containsRepo.save([
+      {
+        orderId: order11.orderId,
+        bookId: book7.bookID,
+        quantity: 2,
+      },
+      {
+        orderId: order11.orderId,
+        bookId: book6.bookID,
+        quantity: 1,
+      },
+    ]);
+
+    // 10月 - merchant3 的訂單
+    const order12 = await orderRepo.save({
+      shippingAddress: '桃園市桃園區中正路1366號',
+      paymentMethod: 1,
+      totalPrice: 300,
+      totalQuantity: 1,
+      state: 3, // 已完成
+      orderDate: new Date('2025-10-12'),
+      userId: user3.memberID,
+      merchantId: merchant3.memberID,
+    });
+
+    await containsRepo.save({
+      orderId: order12.orderId,
+      bookId: book5.bookID,
+      quantity: 1,
+    });
+
+    // 11月 - merchant1 的訂單
+    const order13 = await orderRepo.save({
+      shippingAddress: '新竹市東區光復路二段101號',
+      paymentMethod: 1,
+      totalPrice: 1080,
+      totalQuantity: 3,
+      state: 3, // 已完成
+      orderDate: new Date('2025-11-08'),
+      userId: user1.memberID,
+      merchantId: merchant1.memberID,
+    });
+
+    await containsRepo.save([
+      {
+        orderId: order13.orderId,
+        bookId: book1.bookID,
+        quantity: 1,
+      },
+      {
+        orderId: order13.orderId,
+        bookId: book9.bookID,
+        quantity: 2,
+      },
+    ]);
+
+    // 11月 - merchant2 的訂單
+    const order14 = await orderRepo.save({
+      shippingAddress: '嘉義市西區垂楊路243號',
+      paymentMethod: 1,
+      totalPrice: 1516,
+      totalQuantity: 3,
+      state: 3, // 已完成
+      orderDate: new Date('2025-11-20'),
+      userId: user2.memberID,
+      merchantId: merchant2.memberID,
+    });
+
+    await containsRepo.save([
+      {
+        orderId: order14.orderId,
+        bookId: book6.bookID,
+        quantity: 2,
+      },
+    ]);
+
+    // 12月 - merchant1 的訂單
+    const order15 = await orderRepo.save({
+      shippingAddress: '台北市松山區八德路四段123號',
+      paymentMethod: 1,
+      totalPrice: 640,
+      totalQuantity: 2,
+      state: 2, // 已出貨
+      orderDate: new Date('2025-12-05'),
+      userId: user3.memberID,
+      merchantId: merchant1.memberID,
+    });
+
+    await containsRepo.save([
+      {
+        orderId: order15.orderId,
+        bookId: book9.bookID,
+        quantity: 1,
+      },
+      {
+        orderId: order15.orderId,
+        bookId: book1.bookID,
+        quantity: 1,
+      },
+    ]);
+
+    // 12月 - merchant2 的訂單
+    const order16 = await orderRepo.save({
+      shippingAddress: '台北市大同區民生西路389號',
+      paymentMethod: 1,
+      totalPrice: 479,
+      totalQuantity: 2,
+      state: 2, // 已出貨
+      orderDate: new Date('2025-12-18'),
+      userId: user1.memberID,
+      merchantId: merchant2.memberID,
+    });
+
+    await containsRepo.save([
+      {
+        orderId: order16.orderId,
+        bookId: book4.bookID,
+        quantity: 2,
+      },
+      {
+        orderId: order16.orderId,
+        bookId: book7.bookID,
+        quantity: 1,
+      },
+    ]);
+
+    // 12月 - merchant3 的訂單
+    const order17 = await orderRepo.save({
+      shippingAddress: '基隆市仁愛區愛一路25號',
+      paymentMethod: 1,
+      totalPrice: 760,
+      totalQuantity: 2,
+      state: 1, // 處理中
+      orderDate: new Date('2025-12-22'),
+      userId: user2.memberID,
+      merchantId: merchant3.memberID,
+    });
+
+    await containsRepo.save([
+      {
+        orderId: order17.orderId,
+        bookId: book8.bookID,
+        quantity: 2,
+      },
+    ]);
+
+    console.log('✅ 新增了 11 筆 7-12 月的訂單（總共 17 筆訂單）');
+
     // 顯示統計資訊
     console.log('\n📊 數據統計：');
     console.log('─────────────────────────────');
