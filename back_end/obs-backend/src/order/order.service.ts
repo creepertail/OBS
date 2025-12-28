@@ -237,6 +237,11 @@ export class OrderService {
       if (order.merchantId !== requesterId) {
         throw new ForbiddenException('You can only update orders for your store');
       }
+
+      // 商家不能把狀態從 3 改成 4（收貨只能由顧客操作）
+      if (updateOrderDto.state !== undefined && order.state === 3 && updateOrderDto.state === 4) {
+        throw new ForbiddenException('Only users can confirm receipt (set state to 4)');
+      }
     }
     // Admin 可以修改所有欄位
 

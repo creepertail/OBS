@@ -20,12 +20,10 @@
 @baseUrl = http://localhost:3000
 
 # 請先執行登入 API 取得對應身分的 access_token
-@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLWlkLWhlcmUiLCJhY2NvdW50IjoidXNlci10ZXN0LTEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTcwMDAwMDAwMCwiZXhwIjoxNzAwMDg2NDAwfQ.xxxxx
-@merchantToken = merchant-token-here
-@adminToken = admin-token-here
+@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NWI5ZTcwNy01MDA3LTQ2ODMtYTI1NC1jYzE1ZThjMjBlODUiLCJhY2NvdW50IjoibWVyY2hhbnQxIiwidHlwZSI6Im1lcmNoYW50IiwiaWF0IjoxNzY2OTM3Nzc1LCJleHAiOjE3NjcwMjQxNzV9.iQjgTDnqTy9dHK2HboMoL5KJiDLmsmneP-ojoaNqywE
 
 # 訂單 ID（請先使用 POST /orders 建立訂單後取得訂單 ID）
-@orderId = xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+@orderId = b85fcd00-17b7-417a-95a4-e4d60f1b8cd3
 
 # ========================================
 # User 更新訂單測試
@@ -102,7 +100,7 @@ Authorization: Bearer {{merchantToken}}
 ### Merchant 更新訂單狀態為「已出貨」（成功）
 PATCH {{baseUrl}}/orders/{{orderId}}
 Content-Type: application/json
-Authorization: Bearer {{merchantToken}}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NWI5ZTcwNy01MDA3LTQ2ODMtYTI1NC1jYzE1ZThjMjBlODUiLCJhY2NvdW50IjoibWVyY2hhbnQxIiwidHlwZSI6Im1lcmNoYW50IiwiaWF0IjoxNzY2OTM3OTM1LCJleHAiOjE3NjcwMjQzMzV9.-niIK4n8TnHOMT8lb1BzPz-5SMy3-v5ggpqHALPqK_Q
 
 {
   "state": 2
