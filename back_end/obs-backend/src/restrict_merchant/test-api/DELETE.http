@@ -1,0 +1,7 @@
+@baseUrl = http://localhost:3000
+@admin_token = {{admin_token}}
+@merchant_id = {{merchant_id}}
+
+# Admin 刪除商家限制紀錄
+DELETE {{baseUrl}}/restrict-merchant/{{merchant_id}}
+Authorization: Bearer {{admin_token}}

@@ -1,0 +1,14 @@
+@baseUrl = http://localhost:3000
+@admin_token = {{admin_token}}
+@merchant_id = {{merchant_id}}
+
+# Admin 建立商家限制紀錄
+POST {{baseUrl}}/restrict-merchant
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "merchantID": "{{merchant_id}}",
+  "originalState": 0,
+  "latestState": 1
+}

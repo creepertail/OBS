@@ -1,0 +1,12 @@
+@baseUrl = http://localhost:3000
+@admin_token = {{admin_token}}
+@merchant_id = {{merchant_id}}
+
+# Admin 取得全部商家限制紀錄
+GET {{baseUrl}}/restrict-merchant
+Authorization: Bearer {{admin_token}}
+
+###
+# Admin 取得特定商家限制紀錄
+GET {{baseUrl}}/restrict-merchant/{{merchant_id}}
+Authorization: Bearer {{admin_token}}

@@ -1,4 +1,4 @@
-// test/seed-data.ts
+﻿// test/seed-data.ts
 import { DataSource } from 'typeorm';
 import { config } from 'dotenv';
 import * as bcrypt from 'bcrypt';
@@ -16,6 +16,10 @@ import { AddsToCart } from '../src/cart/entities/adds-to-cart.entity';
 import { Coupon } from '../src/coupon/entities/coupon.entity';
 import { Claim } from '../src/claims/entities/claim.entity';
 import { Manage } from '../src/manage/entities/manage.entity';
+import { RestrictUser } from '../src/restrict_user/entities/restrict-user.entity';
+import { RestrictMerchant } from '../src/restrict_merchant/entities/restrict-merchant.entity';
+import { Favorite } from '../src/favorite/entities/favorite.entity';
+import { Review } from '../src/review/entities/review.entity';
 
 // 載入環境變數
 config();
@@ -28,7 +32,7 @@ const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME || 'root',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_DATABASE || 'OBS',
-  entities: [Member, Category, Book, BookImage, BelongsTo, Order, Contains, AddsToCart, Coupon, Claim, Manage],
+  entities: [Member, Category, Book, BookImage, BelongsTo, Order, Contains, AddsToCart, Coupon, Claim, Manage, RestrictUser, RestrictMerchant, Favorite, Review],
   synchronize: false,
   logging: true,
 });
@@ -90,6 +94,12 @@ async function seedData() {
     await AppDataSource.getRepository(Coupon).clear();
     await AppDataSource.getRepository(Category).clear();
     await AppDataSource.getRepository(Member).clear();
+    await AppDataSource.getRepository(AddsToCart).clear();
+    await AppDataSource.getRepository(RestrictUser).clear();
+    await AppDataSource.getRepository(RestrictMerchant).clear();
+    await AppDataSource.getRepository(Favorite).clear();
+    await AppDataSource.getRepository(Review).clear();
+    
     // 重新啟用外鍵檢查
     await AppDataSource.query('SET FOREIGN_KEY_CHECKS = 1');
     console.log('✅ 清空完成！');

@@ -1,0 +1,12 @@
+@baseUrl = http://localhost:3000
+@admin_token = {{admin_token}}
+@merchant_id = {{merchant_id}}
+
+# Admin 更新商家限制紀錄
+PATCH {{baseUrl}}/restrict-merchant/{{merchant_id}}
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "latestState": 2
+}
