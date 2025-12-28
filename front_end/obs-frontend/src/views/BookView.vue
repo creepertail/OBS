@@ -19,7 +19,8 @@ const subscribe = ref<Subscribe>({
 const loading = ref(true)
 const errorMsg = ref("")
 const quantity = ref(1)
-const currentImageIndex = ref(0) 
+const currentImageIndex = ref(0)
+const currentUserType = localStorage.getItem("type")
 
 const isSubscribed = ref(false)
 watch(
@@ -163,6 +164,49 @@ function goToSearchMerchantPage(){
   })
 }
 
+async function delistBook() {
+  if (!book.value) return
+  
+  if (!confirm(`確定要下架「${book.value.name}」嗎？`)) {
+    return
+  }
+  
+  try {
+    const bookID = book.value.bookID
+    await axios.patch(
+      `http://localhost:3000/books/${bookID}`,
+      {
+        "status": 0
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`
+        }
+      }
+    )
+    
+    alert("商品已下架")
+    // 重新載入書籍資料以更新狀態
+    const res = await axios.get<Book>(`http://localhost:3000/books/${bookID}`)
+    const data = res.data
+    if (!Array.isArray(data.images)) data.images = []
+    data.images.sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
+    const hasCover = data.images.some(img => img.isCover)
+    if (!hasCover) {
+      data.images.unshift({
+        imageId: "imageId",
+        imageUrl: "http://localhost:3000/uploads/defaultImages/default_book_image.png",
+        displayOrder: 0,
+        isCover: true
+      })
+    }
+    book.value = data
+  } catch (error) {
+    console.error(error)
+    alert("下架失敗，請稍後再試")
+  }
+}
+
 </script>
 
 <template>
@@ -266,6 +310,17 @@ function goToSearchMerchantPage(){
                 +
               </button>
             </div>
+          </div>
+
+          <!-- 管理員下架按鈕 -->
+          <div v-if="currentUserType === 'admin'" class="book-info__admin-actions">
+            <button
+              class="action-button action-button--delist"
+              :disabled="book.status === 0"
+              @click="delistBook"
+            >
+              {{ book.status === 0 ? '已下架' : '下架商品' }}
+            </button>
           </div>
 
           <div class="book-info__actions">
@@ -557,6 +612,12 @@ function goToSearchMerchantPage(){
 
 
 /* ===== 按鈕 ===== */
+.book-info__admin-actions {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
 .book-info__actions {
   display: flex;
   gap: 16px;
@@ -599,6 +660,18 @@ function goToSearchMerchantPage(){
 
 .action-button--buy:hover:not(:disabled) {
   background: #b91c1c;
+  transform: translateY(-1px);
+}
+
+/* 下架商品 (管理員) */
+.action-button--delist {
+  width: 100%;
+  background: #6b7280;
+  color: #ffffff;
+}
+
+.action-button--delist:hover:not(:disabled) {
+  background: #4b5563;
   transform: translateY(-1px);
 }
 
