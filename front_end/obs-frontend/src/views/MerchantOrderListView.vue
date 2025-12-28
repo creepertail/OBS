@@ -1,18 +1,18 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
-import type Order from "../type/order"
-
+import type Order from '../type/order'
 
 const orders = ref<Order[]>([])
 const loading = ref(true)
 const errorMsg = ref('')
+const token = localStorage.getItem('accessToken')
 
 onMounted(async () => {
   try {
-    const token = localStorage.getItem('accessToken')
+    
     if (!token) {
-      errorMsg.value = '請先登入'
+      errorMsg.value = '請先登入商家帳號'
       return
     }
 
@@ -24,30 +24,72 @@ onMounted(async () => {
         }
       }
     )
+    console.log("res", res.data)
 
     orders.value = res.data
   } catch (e) {
-    errorMsg.value = '取得訂單失敗'
+    errorMsg.value = '取得商家訂單失敗'
     console.error(e)
   } finally {
     loading.value = false
   }
 })
 
-/* 狀態轉換 */
+/* 訂單狀態文字 */
 function orderStateText(state: number) {
-  return ['商家未接單', '商家備貨中', '物流運送中', '商品已抵達', '顧客已取件'][state] ?? '未知'
+  return ['未接單', '備貨中', '物流運送中', '已抵達', '已取件'][state] ?? '未知'
 }
 
-/* 付款方式轉換 */
+/* 付款方式文字 */
 function paymentMethodText(method: number) {
   return ['貨到付款', '信用卡'][method] ?? '未知'
+}
+
+async function takeOrders(order: Order) {
+  try {
+    await axios.patch(
+      `http://localhost:3000/orders/${order.orderId}`,
+      {
+        state: 1
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    )
+    order.state = 1
+  } catch (e) {
+    errorMsg.value = '更改訂單狀態失敗失敗'
+    console.error(e)
+  }
+}
+
+async function ship(order: Order) {
+  try {
+    await axios.patch(
+      `http://localhost:3000/orders/${order.orderId}`,
+      {
+        state: 2
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    )
+    order.state = 2
+  } catch (e) {
+    errorMsg.value = '更改訂單狀態失敗失敗'
+    console.error(e)
+  }
+  
 }
 </script>
 
 <template>
   <main class="order-page">
-    <h1 class="order-title">我的訂單</h1>
+    <h1 class="order-title">商家訂單管理</h1>
 
     <!-- 載入中 -->
     <div v-if="loading" class="order-state">
@@ -59,9 +101,9 @@ function paymentMethodText(method: number) {
       {{ errorMsg }}
     </div>
 
-    <!-- 空訂單 -->
+    <!-- 無訂單 -->
     <div v-else-if="orders.length === 0" class="order-state">
-      尚無任何訂單
+      目前尚無任何訂單
     </div>
 
     <!-- 訂單列表 -->
@@ -71,11 +113,11 @@ function paymentMethodText(method: number) {
         :key="order.orderId"
         class="order-card"
       >
-        <!-- 上方 -->
+        <!-- Header -->
         <div class="order-card__header">
           <div>
-            <div class="order-merchant">
-              訂單商家：{{ order.merchant.merchantName }}
+            <div class="order-customer">
+              顧客名稱：{{ order.user.userName ?? '未知顧客' }}
             </div>
             <div class="order-date">
               下單時間：{{ new Date(order.orderDate).toLocaleString() }}
@@ -89,10 +131,10 @@ function paymentMethodText(method: number) {
 
         <hr />
 
-        <!-- 商家 info -->
-        <div class="order-merchant-info">
-          <strong>商家地址：</strong>
-          <p>{{ order.merchant.merchantAddress }}</p>
+        <!-- 顧客資訊 -->
+        <div class="order-customer-info">
+          <strong>配送地址：</strong>
+          <p>{{ order.shippingAddress }}</p>
         </div>
 
         <!-- 訂單資訊 -->
@@ -105,23 +147,32 @@ function paymentMethodText(method: number) {
             <span>商品數量</span>
             <span>{{ order.totalAmount }}</span>
           </div>
-          <div>
-            <span>寄送地址</span>
-            <span>{{ order.shippingAddress }}</span>
-          </div>
         </div>
 
         <!-- 金額 -->
         <div class="order-total">
-          總金額 NT$ {{ order.totalPrice }}
+          訂單金額 NT$ {{ order.totalPrice }}
         </div>
+
+        <!-- 預留：操作按鈕 -->
+        
+        <div class="order-actions">
+          <button class="button" 
+            :disabled="order.state >= 1"
+            @click="takeOrders(order)"
+          >接單</button>
+          <button class="button" 
+            :disabled="order.state >= 2"
+            @click="ship(order)"
+          >出貨</button>
+        </div>
+       
       </article>
     </section>
   </main>
 </template>
 
 <style scoped>
-/* ===== Page ===== */
 .order-page {
   min-height: 100vh;
   padding: 100px 24px 48px;
@@ -135,7 +186,6 @@ function paymentMethodText(method: number) {
   margin-bottom: 32px;
 }
 
-/* 狀態 */
 .order-state {
   text-align: center;
   padding: 80px 0;
@@ -170,7 +220,7 @@ function paymentMethodText(method: number) {
   align-items: flex-start;
 }
 
-.order-merchant {
+.order-customer {
   font-weight: 600;
 }
 
@@ -188,17 +238,17 @@ function paymentMethodText(method: number) {
   background: var(--color-bg-muted);
 }
 
-/* 商家 */
-.order-merchant-info {
+/* 顧客 */
+.order-customer-info {
   margin-top: 16px;
 }
 
-.order-merchant-info p {
+.order-customer-info p {
   font-size: 14px;
   color: var(--color-text-secondary);
 }
 
-/* 資訊 */
+/* 訂單資訊 */
 .order-info {
   margin-top: 16px;
   display: grid;
@@ -210,7 +260,6 @@ function paymentMethodText(method: number) {
 .order-info div {
   display: flex;
   justify-content: space-between;
-  gap: 8px;
 }
 
 /* 金額 */
@@ -221,4 +270,23 @@ function paymentMethodText(method: number) {
   font-weight: 800;
   color: var(--color-danger);
 }
+
+.button {
+  background-color: #667eea;
+  color: #ffffff;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 4px 4px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.1s;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 </style>
