@@ -1,0 +1,87 @@
+# ========================================
+# Admin 權限測試 - PATCH API
+# ========================================
+# 測試 Admin 能否更新和刪除其他商家的書籍
+# Admin Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwN2ZmZDQ0Yi0xNjAzLTRmYTctODI0OC02N2E1ODgxZjhiN2QiLCJhY2NvdW50IjoiYWRtaW4iLCJ0eXBlIjoiYWRtaW4iLCJpYXQiOjE3NjY5MzU5NjEsImV4cCI6MTc2NzAyMjM2MX0.LDpk_rWIhVKIpuE1b4yKPx_hpQVcVKeCp1BoKHFOpjo
+# ========================================
+
+@baseUrl = http://localhost:3000
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwN2ZmZDQ0Yi0xNjAzLTRmYTctODI0OC02N2E1ODgxZjhiN2QiLCJhY2NvdW50IjoiYWRtaW4iLCJ0eXBlIjoiYWRtaW4iLCJpYXQiOjE3NjY5MzU5NjEsImV4cCI6MTc2NzAyMjM2MX0.LDpk_rWIhVKIpuE1b4yKPx_hpQVcVKeCp1BoKHFOpjo
+# 使用現有的書籍 ID 進行測試（從資料庫中找一個商家的書籍）
+# 測試成功案例：8455ddc0-0e88-4227-8d1f-6e8bce6afb4c (設計師的 UI/UX 入門課)
+@bookId = 8455ddc0-0e88-4227-8d1f-6e8bce6afb4c
+
+# ========================================
+# 1. Admin 更新其他商家的書籍資訊（應該成功）
+# ========================================
+
+### 測試 1: Admin 更新書籍名稱
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "[Admin 更新] 測試書名由 Admin 更新"
+}
+
+### 測試 2: Admin 更新書籍價格
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "price": 999
+}
+
+### 測試 3: Admin 更新多個欄位
+PATCH {{baseUrl}}/books/{{bookId}}
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "[Admin 更新] NestJS 權限管理指南",
+  "price": 888,
+  "inventoryQuantity": 300,
+  "productDescription": "此書籍由系統管理員更新，用於測試 Admin 權限功能。"
+}
+
+# ========================================
+# 2. Admin 更新書籍狀態（應該成功）
+# ========================================
+
+### 測試 4: Admin 將書籍下架
+PATCH {{baseUrl}}/books/{{bookId}}/status
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "status": 0
+}
+
+### 測試 5: Admin 將書籍重新上架
+PATCH {{baseUrl}}/books/{{bookId}}/status
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "status": 1
+}
+
+# ========================================
+# 3. Admin 刪除其他商家的書籍（應該成功）
+# ========================================
+
+### 測試 6: Admin 刪除書籍（謹慎使用！這會真的刪除資料）
+# 注意：執行前請確認 bookId 是測試用的書籍
+# DELETE {{baseUrl}}/books/{{bookId}}
+# Authorization: Bearer {{adminToken}}
+
+# ========================================
+# 4. 驗證結果
+# ========================================
+
+### 查看更新後的書籍資訊
+GET {{baseUrl}}/books/{{bookId}}
+
+### 查看所有書籍列表
+GET {{baseUrl}}/books

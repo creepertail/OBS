@@ -205,15 +205,25 @@ export class OrderService {
 
     // 權限檢查
     if (requesterType === MemberType.User) {
-      // User 只能修改配送地址和付款方式
-      if (updateOrderDto.state !== undefined ||
+      if (order.userId !== requesterId) {
+        throw new ForbiddenException('You can only update your own orders');
+      }
+
+      if (
+        updateOrderDto.shippingAddress !== undefined ||
+        updateOrderDto.paymentMethod !== undefined ||
         updateOrderDto.totalPrice !== undefined ||
-        updateOrderDto.totalQuantity !== undefined) {
+        updateOrderDto.totalQuantity !== undefined
+      ) {
         throw new ForbiddenException('Users can only update shipping address and payment method');
       }
 
-      if (order.userId !== requesterId) {
-        throw new ForbiddenException('You can only update your own orders');
+      // User 只能在訂單 state=3（已完成）時，把狀態改成 4（已收貨）
+      if (updateOrderDto.state !== undefined) {
+        const allowed = order.state === 3 && updateOrderDto.state === 4;
+        if (!allowed) {
+          throw new ForbiddenException('Users can only set state to 4 when current state is 3');
+        }
       }
     } else if (requesterType === MemberType.Merchant) {
       // Merchant 只能修改訂單狀態
@@ -226,6 +236,11 @@ export class OrderService {
 
       if (order.merchantId !== requesterId) {
         throw new ForbiddenException('You can only update orders for your store');
+      }
+
+      // 商家不能把狀態從 3 改成 4（收貨只能由顧客操作）
+      if (updateOrderDto.state !== undefined && order.state === 3 && updateOrderDto.state === 4) {
+        throw new ForbiddenException('Only users can confirm receipt (set state to 4)');
       }
     }
     // Admin 可以修改所有欄位
