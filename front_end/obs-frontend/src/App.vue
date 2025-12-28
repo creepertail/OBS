@@ -4,6 +4,7 @@ import { computed } from 'vue'
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import SearchBox from './components/SearchBox.vue';
 
+const isUser = computed(() => localStorage.getItem("type") === "user");
 const isMerchant = computed(() => localStorage.getItem("type") === "merchant");
 const isAdmin = computed(() => localStorage.getItem("type") === "admin");
 const router = useRouter();
@@ -47,11 +48,11 @@ onBeforeUnmount(() => {
       <SearchBox></SearchBox>
       <RouterLink :to="{name: 'login'}" v-if="!isLogin">Login</RouterLink>
       <RouterLink :to="{name: 'register'}" v-if="!isLogin">Register</RouterLink>
-      <RouterLink :to="{name: 'cart'}" v-if="isLogin">
-        <i class="pi pi-spin pi-shopping-cart" style="font-size: 2rem" v-if="!isMerchant"></i>
+      <RouterLink :to="{name: 'cart'}" v-if="isLogin && isUser">
+        <i class="pi pi-spin pi-shopping-cart" style="font-size: 2rem" ></i>
       </RouterLink>
-      <RouterLink :to="{name: 'orderList'}" v-if="isLogin">
-        <i class="pi pi-spin pi-clipboard" style="font-size: 2rem" v-if="!isMerchant"></i>
+      <RouterLink :to="isUser ? {name: 'orderList'} : {name: 'merchantOrderList'}" v-if="isLogin && !isAdmin">
+        <i class="pi pi-spin pi-clipboard" style="font-size: 2rem"></i>
       </RouterLink>
       <div class="profile-container" v-if="isLogin" ref="profileButton">
         <button class="account textButton" @click="isOpen=!isOpen">{{ account }}</button>
@@ -121,7 +122,7 @@ header {
   font-size: 2em;
 }
 .account {
-  color: hsla(160, 100%, 37%, 1);
+  color: var(--color-link);
 }
 
 .textButton {

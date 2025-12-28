@@ -1,0 +1,164 @@
+#  /**
+#    * API 功能說明：
+#    * GET url/reports/merchants/sales                          => 取得商家自己的銷售摘要報表（過去6個月）
+#    *   - 商家：查看自己的報表（merchantId 從 JWT token 取得）
+#    *   - 回傳：過去6個月的每月銷售資料（每月的總件數和總金額）
+#    *
+#    * GET url/reports/merchants/:merchantId/sales              => 依商家 ID 取得銷售摘要報表（過去6個月）
+#    *   - 商家：只能查看自己的報表
+#    *   - 管理員：可以查看任何商家的報表
+#    *   - 回傳：過去6個月的每月銷售資料
+#    *
+#    * GET url/reports/sales                                    => 取得商家自己的銷售報表（另一個快捷方式，過去6個月）
+#    *   - 商家：查看自己的報表
+#    *   - 回傳：過去6個月的每月銷售資料
+#    *
+#    * GET url/reports/merchants/:merchantId/best-sellers       => 取得商家的暢銷書籍
+#    *   - 商家：只能查看自己的暢銷書籍
+#    *   - 管理員：可以查看任何商家的暢銷書籍
+#    *
+#    * GET url/reports/merchants/:merchantId/sales-by-period    => 取得依時間區間分組的銷售統計
+#    *   - 商家：只能查看自己的銷售統計
+#    *   - 管理員：可以查看任何商家的銷售統計
+#    *
+#    * 回傳格式（銷售報表端點）：
+#    *   {
+#    *     merchantId: string,
+#    *     merchantName: string,
+#    *     period: { startDate: string, endDate: string, description: "Past 6 months" },
+#    *     summary: { totalRevenue: number, totalQuantity: number, totalOrders: number, averageOrderValue: number },
+#    *     monthlySales: [
+#    *       { month: "2024-07", totalQuantity: number, totalRevenue: number },
+#    *       { month: "2024-08", totalQuantity: number, totalRevenue: number },
+#    *       ...
+#    *     ]
+#    *   }
+#    *
+#    * 查詢參數（僅適用於 sales-by-period 端點）：
+#    *   - startDate（選填）：開始日期，ISO 格式（例如：2024-01-01）
+#    *   - endDate（選填）：結束日期，ISO 格式（例如：2024-12-31）
+#    *   - groupBy（選填）：依時間區間分組（day, week, month, year）
+#    */
+
+@baseUrl = http://localhost:3000
+
+# 請先執行登入 API 以取得對應角色的 access_token
+@merchantToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4YzNkMTNiYi1hZTI3LTQ4NzUtOWMzYy04ODMyMDJlZGYxNmMiLCJhY2NvdW50IjoibWVyY2hhbnQxIiwidHlwZSI6Im1lcmNoYW50IiwiaWF0IjoxNzY2OTM1MzQ3LCJleHAiOjE3NjcwMjE3NDd9.D9wIrUeqixNLTOM7fxXSQ2U-4z04EKnNpPWCNOIaWG0
+
+@adminToken = YOUR_ADMIN_TOKEN_HERE
+
+@merchantId = 8c3d13bb-ae27-4875-9c3c-883202edf16c
+
+# ========================================
+# 取得商家銷售摘要報表（過去6個月）
+# ========================================
+# 注意：這些端點會自動回傳過去6個月的銷售資料
+# 每個月顯示：總銷售件數和總金額
+
+### 商家查看自己的銷售報表（快捷方式 - 不需要提供 merchantId）
+# 回傳：過去6個月的每月銷售明細
+GET {{baseUrl}}/reports/merchants/sales
+Authorization: Bearer {{merchantToken}}
+
+# ========================================
+# 取得商家銷售摘要報表（依商家 ID - 過去6個月）
+# ========================================
+
+### 商家查看自己的銷售報表（使用 merchantId）
+# 回傳：過去6個月的每月銷售明細
+GET {{baseUrl}}/reports/merchants/{{merchantId}}/sales
+Authorization: Bearer {{merchantToken}}
+
+### 管理員查看商家的銷售報表
+# 回傳：過去6個月的每月銷售明細
+# GET {{baseUrl}}/reports/merchants/{{merchantId}}/sales
+# Authorization: Bearer {{adminToken}}
+
+# ========================================
+# 取得自己的銷售報表（快捷方式2 - 過去6個月）
+# ========================================
+
+### 商家查看自己的銷售報表（另一個快捷端點）
+# 回傳：過去6個月的每月銷售明細
+GET {{baseUrl}}/reports/sales
+Authorization: Bearer {{merchantToken}}
+
+# ========================================
+# 取得暢銷書籍
+# ========================================
+
+### 商家查看自己的暢銷書籍
+GET {{baseUrl}}/reports/merchants/{{merchantId}}/best-sellers
+Authorization: Bearer {{merchantToken}}
+
+### 商家查看自己的暢銷書籍（帶日期篩選）
+GET {{baseUrl}}/reports/merchants/{{merchantId}}/best-sellers?startDate=2024-01-01&endDate=2024-12-31
+Authorization: Bearer {{merchantToken}}
+
+### 管理員查看商家的暢銷書籍
+# GET {{baseUrl}}/reports/merchants/{{merchantId}}/best-sellers
+# Authorization: Bearer {{adminToken}}
+
+# ========================================
+# 取得依時間區間分組的銷售統計
+# ========================================
+
+### 商家查看依日分組的銷售統計
+GET {{baseUrl}}/reports/merchants/{{merchantId}}/sales-by-period?groupBy=day
+Authorization: Bearer {{merchantToken}}
+
+### 商家查看依週分組的銷售統計
+GET {{baseUrl}}/reports/merchants/{{merchantId}}/sales-by-period?groupBy=week
+Authorization: Bearer {{merchantToken}}
+
+### 商家查看依月分組的銷售統計
+GET {{baseUrl}}/reports/merchants/{{merchantId}}/sales-by-period?groupBy=month
+Authorization: Bearer {{merchantToken}}
+
+### 商家查看依年分組的銷售統計
+GET {{baseUrl}}/reports/merchants/{{merchantId}}/sales-by-period?groupBy=year
+Authorization: Bearer {{merchantToken}}
+
+### 商家查看依月分組的銷售統計（帶日期篩選）
+GET {{baseUrl}}/reports/merchants/{{merchantId}}/sales-by-period?groupBy=month&startDate=2024-01-01&endDate=2024-12-31
+Authorization: Bearer {{merchantToken}}
+
+### 管理員查看商家依時間區間的銷售統計
+# GET {{baseUrl}}/reports/merchants/{{merchantId}}/sales-by-period?groupBy=month
+# Authorization: Bearer {{adminToken}}
+
+# ========================================
+# 權限測試
+# ========================================
+
+### 測試權限錯誤 - 未登入（無 JWT token）
+GET {{baseUrl}}/reports/sales
+
+### 測試權限錯誤 - 商家嘗試查看其他商家的報表
+# 請將 other-merchant-id 替換成其他商家的 ID
+GET {{baseUrl}}/reports/merchants/other-merchant-id/sales
+Authorization: Bearer {{merchantToken}}
+
+### 測試權限錯誤 - 使用者嘗試查看銷售報表（不允許）
+# GET {{baseUrl}}/reports/sales
+# Authorization: Bearer {{userToken}}
+
+# ========================================
+# 錯誤測試
+# ========================================
+
+### 測試 404 - 商家不存在
+GET {{baseUrl}}/reports/merchants/00000000-0000-0000-0000-000000000000/sales
+Authorization: Bearer {{merchantToken}}
+
+### 測試 400 - 無效的日期格式
+GET {{baseUrl}}/reports/sales?startDate=invalid-date
+Authorization: Bearer {{merchantToken}}
+
+### 測試 400 - 無效的 groupBy 參數
+GET {{baseUrl}}/reports/merchants/{{merchantId}}/sales-by-period?groupBy=invalid
+Authorization: Bearer {{merchantToken}}
+
+### 測試 400 - 結束日期早於開始日期
+GET {{baseUrl}}/reports/sales?startDate=2024-12-31&endDate=2024-01-01
+Authorization: Bearer {{merchantToken}}

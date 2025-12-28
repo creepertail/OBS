@@ -16,6 +16,7 @@ import { RestrictUserModule } from './restrict_user/restrict-user.module';
 import { RestrictMerchantModule } from './restrict_merchant/restrict-merchant.module';
 import { FavoriteModule } from './favorite/favorite.module';
 import { ReviewModule } from './review/review.module';
+import { ReportModule } from './report/report.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { ReviewModule } from './review/review.module';
     RestrictMerchantModule,
     FavoriteModule,
     ReviewModule,
+    ReportModule,
   ],
   controllers: [AppController],
   providers: [AppService],

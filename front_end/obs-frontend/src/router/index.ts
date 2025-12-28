@@ -10,6 +10,7 @@ import MerchantAddBookView from '../views/MerchantAddBookView.vue'
 import CheckoutView from '../views/CheckoutView.vue'
 import MerchantEditBookView from '../views/MerchantEditBookView.vue'
 import OrderListView from '@/views/OrderListView.vue'
+import MerchantOrderListView from '@/views/MerchantOrderListView.vue'
 import AdminView from '@/views/AdminView.vue'
 import CouponView from '@/views/CouponView.vue'
 
@@ -75,6 +76,11 @@ const router = createRouter({
       path: '/order/list',
       name: 'orderList',
       component: OrderListView
+    },
+    {
+      path: '/merchant/order/list',
+      name: 'merchantOrderList',
+      component: MerchantOrderListView
     },
     {
       path: '/checkout/:merchantID',
