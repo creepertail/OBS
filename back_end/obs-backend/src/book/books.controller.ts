@@ -61,11 +61,12 @@ export class BooksController {
    */
   // ValidationPipe 會自動檢查 request body 的資料是否符合 CreateBookDto 的驗證規則
   @Post()
-  @JWTGuard(MemberType.Merchant)
+  @JWTGuard(MemberType.Merchant, MemberType.Admin)
   create(@Body(new ValidationPipe()) createBookDto: CreateBookDto, @Request() req) {
     // 從 JWT token 的 sub 欄位取得 merchantId
     const merchantId = req.member.sub;
-    return this.booksService.create(createBookDto, merchantId);
+    const memberType = req.member.type;
+    return this.booksService.create(createBookDto, merchantId, memberType);
   }
 
   /**
@@ -119,7 +120,7 @@ export class BooksController {
    * PATCH /books/:id - 更新書籍資訊
    */
   @Patch(':id')
-  @JWTGuard(MemberType.Merchant)
+  @JWTGuard(MemberType.Merchant, MemberType.Admin)
   update(
     @Param('id') id: string,
     @Body(new ValidationPipe()) updateBookDto: UpdateBookDto,
@@ -127,14 +128,15 @@ export class BooksController {
   ) {
     // 從 JWT token 的 sub 欄位取得 merchantId
     const merchantId = req.member.sub;
-    return this.booksService.update(id, updateBookDto, merchantId);
+    const memberType = req.member.type;
+    return this.booksService.update(id, updateBookDto, merchantId, memberType);
   }
 
   /**
    * PATCH /books/:id/status - 更新書籍狀態
    */
   @Patch(':id/status')
-  @JWTGuard(MemberType.Merchant)
+  @JWTGuard(MemberType.Merchant, MemberType.Admin)
   updateStatus(
     @Param('id') id: string,
     @Body('status') status: number,
@@ -142,18 +144,20 @@ export class BooksController {
   ) {
     // 從 JWT token 的 sub 欄位取得 merchantId
     const merchantId = req.member.sub;
-    return this.booksService.updateStatus(id, status, merchantId);
+    const memberType = req.member.type;
+    return this.booksService.updateStatus(id, status, merchantId, memberType);
   }
 
   /**
    * DELETE /books/:id - 刪除書籍
    */
   @Delete(':id')
-  @JWTGuard(MemberType.Merchant)
+  @JWTGuard(MemberType.Merchant, MemberType.Admin)
   remove(@Param('id') id: string, @Request() req) {
     // 從 JWT token 的 sub 欄位取得 merchantId
     const merchantId = req.member.sub;
-    return this.booksService.remove(id, merchantId);
+    const memberType = req.member.type;
+    return this.booksService.remove(id, merchantId, memberType);
   }
 
   /**

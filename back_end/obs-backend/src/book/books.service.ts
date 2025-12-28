@@ -23,7 +23,7 @@ export class BooksService {
   /**
    * 建立新書籍（包含圖片）
    */
-  async create(createBookDto: CreateBookDto, merchantId: string): Promise<Book> {
+  async create(createBookDto: CreateBookDto, merchantId: string, memberType?: string): Promise<Book> {
     // 驗證價格和庫存
     if (createBookDto.price <= 0) {
       throw new BadRequestException('Price must be greater than 0');
@@ -33,10 +33,14 @@ export class BooksService {
     }
 
     // 建立書籍（cascade: true 會自動儲存 images）
-    // merchantId 從 JWT token 取得，覆寫 DTO 中的值
+    // 如果是 Admin，使用 DTO 中的 merchantId；否則使用 JWT token 中的 merchantId
+    const finalMerchantId = memberType === MemberType.Admin && createBookDto.merchantId
+      ? createBookDto.merchantId
+      : merchantId;
+
     const book = this.booksRepository.create({
       ...createBookDto,
-      merchantId,
+      merchantId: finalMerchantId,
     });
     return await this.booksRepository.save(book);
   }
@@ -89,12 +93,12 @@ export class BooksService {
   /**
    * 更新書籍資訊
    */
-  async update(id: string, updateBookDto: UpdateBookDto, merchantId: string): Promise<Book> {
+  async update(id: string, updateBookDto: UpdateBookDto, merchantId: string, memberType?: string): Promise<Book> {
     // 先查詢 book（包含 images 用於後續返回）
     const book = await this.findByID(id);
 
-    // 驗證是否為書籍擁有者
-    if (book.merchantId !== merchantId) {
+    // 驗證是否為書籍擁有者（Admin 可以更新所有書籍）
+    if (memberType !== MemberType.Admin && book.merchantId !== merchantId) {
       throw new BadRequestException('Access denied: You can only update your own books');
     }
 
@@ -153,11 +157,11 @@ export class BooksService {
   /**
    * 刪除書籍（會自動刪除關聯的圖片，因為 onDelete: CASCADE）
    */
-  async remove(id: string, merchantId: string): Promise<void> {
+  async remove(id: string, merchantId: string, memberType?: string): Promise<void> {
     const book = await this.findByID(id);
 
-    // 驗證是否為書籍擁有者
-    if (book.merchantId !== merchantId) {
+    // 驗證是否為書籍擁有者（Admin 可以刪除所有書籍）
+    if (memberType !== MemberType.Admin && book.merchantId !== merchantId) {
       throw new BadRequestException('Access denied: You can only delete your own books');
     }
 
@@ -167,11 +171,11 @@ export class BooksService {
   /**
    * 更新書籍狀態（上架/下架）
    */
-  async updateStatus(id: string, status: number, merchantId: string): Promise<Book> {
+  async updateStatus(id: string, status: number, merchantId: string, memberType?: string): Promise<Book> {
     const book = await this.findByID(id);
 
-    // 驗證是否為書籍擁有者
-    if (book.merchantId !== merchantId) {
+    // 驗證是否為書籍擁有者（Admin 可以更新所有書籍狀態）
+    if (memberType !== MemberType.Admin && book.merchantId !== merchantId) {
       throw new BadRequestException('Access denied: You can only update your own books');
     }
 
