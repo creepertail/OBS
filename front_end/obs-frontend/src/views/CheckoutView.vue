@@ -162,7 +162,7 @@ async function checkout() {
     )
 
     await axios.delete(
-      'http://localhost:3000/cart',
+      `http://localhost:3000/cart/merchant/${merchantID.value}`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`
