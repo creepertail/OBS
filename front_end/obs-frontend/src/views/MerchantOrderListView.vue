@@ -83,8 +83,28 @@ async function ship(order: Order) {
     errorMsg.value = '更改訂單狀態失敗失敗'
     console.error(e)
   }
-  
 }
+
+async function deliveredGoods(order: Order) {
+  try {
+    await axios.patch(
+      `http://localhost:3000/orders/${order.orderId}`,
+      {
+        state: 3
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    )
+    order.state = 3
+  } catch (e) {
+    errorMsg.value = '更改訂單狀態失敗失敗'
+    console.error(e)
+  }
+}
+
 </script>
 
 <template>
@@ -158,13 +178,17 @@ async function ship(order: Order) {
         
         <div class="order-actions">
           <button class="button" 
-            :disabled="order.state >= 1"
+            :disabled="order.state !== 0"
             @click="takeOrders(order)"
           >接單</button>
           <button class="button" 
-            :disabled="order.state >= 2"
+            :disabled="order.state !== 1"
             @click="ship(order)"
           >出貨</button>
+          <button class="button" 
+            :disabled="order.state !== 2"
+            @click="deliveredGoods(order)"
+          >送達貨品</button>
         </div>
        
       </article>
