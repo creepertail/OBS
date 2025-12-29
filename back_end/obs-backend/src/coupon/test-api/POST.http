@@ -15,6 +15,7 @@ Authorization: Bearer {{admin_token}}
   "discount": 0.9,
   "description": "年末特價",
   "redemptionCode": "PLATFORM-NEWYEAR-90",
+  "discountType": 0,
   "memberID": "{{admin_id}}"
 }
 
@@ -22,12 +23,13 @@ Authorization: Bearer {{admin_token}}
 # 商家建立自家優惠券（只能給自己）
 POST {{baseUrl}}/coupons
 Content-Type: application/json
-Authorization: Bearer {{merchant_token}}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NWI5ZTcwNy01MDA3LTQ2ODMtYTI1NC1jYzE1ZThjMjBlODUiLCJhY2NvdW50IjoibWVyY2hhbnQxIiwidHlwZSI6Im1lcmNoYW50IiwiaWF0IjoxNzY2OTgzODY5LCJleHAiOjE3NjcwNzAyNjl9.4Z-5WgJKBigzF3K0kzVlRvdbiGfRQ5F_KLlY5Tkkdm0
 
 {
   "quantity": 50,
   "discount": 0.8,
   "description": "新客八折券",
   "redemptionCode": "SHOP-WELCOME-80",
-  "memberID": "{{merchant_id}}"
+  "discountType": 1,
+  "memberID": "55b9e707-5007-4683-a254-cc15e8c20e85"
 }

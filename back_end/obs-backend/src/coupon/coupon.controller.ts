@@ -1,5 +1,5 @@
 // src/coupon/coupon.controller.ts
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { CouponService } from './coupon.service';
 import { CreateCouponDto } from './dto/create-coupon.dto';
 import { UpdateCouponDto } from './dto/update-coupon.dto';
@@ -25,11 +25,31 @@ export class CouponController {
     return this.couponService.findByOwner(user.sub);
   }
 
+  // User/商家：只看可兌換的優惠券（未過期且有庫存，可選 discountType）
+  @JWTGuard()
+  @Get('available')
+  findAvailable(@Query('discountType') discountType?: string) {
+    const parsedDiscountType = discountType !== undefined ? Number(discountType) : undefined;
+    const hasValidDiscountType = parsedDiscountType !== undefined && !Number.isNaN(parsedDiscountType);
+
+    return this.couponService.findAll({
+      onlyAvailable: true,
+      discountType: hasValidDiscountType ? parsedDiscountType : undefined,
+    });
+  }
+
   // Admin 專用：取得所有優惠券
   @JWTGuard(MemberType.Admin)
   @Get()
-  findAll() {
-    return this.couponService.findAll();
+  findAll(@Query('available') available?: string, @Query('discountType') discountType?: string) {
+    const onlyAvailable = available === 'true';
+    const parsedDiscountType = discountType !== undefined ? Number(discountType) : undefined;
+    const hasValidDiscountType = parsedDiscountType !== undefined && !Number.isNaN(parsedDiscountType);
+
+    return this.couponService.findAll({
+      onlyAvailable,
+      discountType: hasValidDiscountType ? parsedDiscountType : undefined,
+    });
   }
 
   // 取得單一優惠券（Admin 可看全部，其他人只能看自己的）

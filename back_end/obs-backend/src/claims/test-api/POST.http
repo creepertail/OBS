@@ -1,5 +1,5 @@
 ﻿@baseUrl = http://localhost:3000
-@access_token = {{access_token}}   // 使用者 access token（User）
+@access_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiODMzMzA5Ny0zNmI0LTQ0OWMtOTY4Ni00ZmFmOWViNDU4ZDUiLCJhY2NvdW50IjoidXNlcjIiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2Njk4Mzc4NSwiZXhwIjoxNzY3MDcwMTg1fQ.AhH2IQoRdrwvrrVoQUGoAn0YU03tVJO4eo6k_nb6F7c
 
 # 使用兌換碼領取優惠券（避免重複領取或兌換過期券）
 POST {{baseUrl}}/claims

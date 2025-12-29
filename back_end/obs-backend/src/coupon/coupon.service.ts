@@ -1,7 +1,7 @@
 // src/coupon/coupon.service.ts
 import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, IsNull, MoreThan, Repository } from 'typeorm';
 import { Coupon } from './entities/coupon.entity';
 import { CreateCouponDto } from './dto/create-coupon.dto';
 import { UpdateCouponDto } from './dto/update-coupon.dto';
@@ -47,8 +47,21 @@ export class CouponService {
     return this.couponRepository.save(coupon);
   }
 
-  findAll(): Promise<Coupon[]> {
-    return this.couponRepository.find();
+  findAll(options?: { onlyAvailable?: boolean; discountType?: number }): Promise<Coupon[]> {
+    const filters: FindOptionsWhere<Coupon>[] = options?.onlyAvailable
+      ? [
+          { quantity: MoreThan(0), validDate: IsNull() },
+          { quantity: MoreThan(0), validDate: MoreThan(new Date()) },
+        ]
+      : [{}];
+
+    if (options?.discountType !== undefined) {
+      filters.forEach((filter) => {
+        filter.discountType = options.discountType;
+      });
+    }
+
+    return this.couponRepository.find({ where: filters });
   }
 
   async findByOwner(memberID: string): Promise<Coupon[]> {
@@ -125,4 +138,3 @@ export class CouponService {
     }
   }
 }
-

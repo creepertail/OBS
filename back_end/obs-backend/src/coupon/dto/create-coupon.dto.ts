@@ -1,5 +1,5 @@
 // src/coupon/dto/create-coupon.dto.ts
-import { IsDateString, IsInt, IsNotEmpty, IsOptional, IsPositive, IsString, IsUUID, MaxLength } from 'class-validator';
+import { IsDateString, IsIn, IsInt, IsNotEmpty, IsOptional, IsPositive, IsString, IsUUID, MaxLength } from 'class-validator';
 
 export class CreateCouponDto {
   @IsInt()
@@ -22,6 +22,10 @@ export class CreateCouponDto {
   @IsNotEmpty()
   @MaxLength(50)
   redemptionCode: string;
+
+  @IsInt()
+  @IsIn([0, 1, 2])
+  discountType: number;
 
   @IsUUID('4')
   memberID: string;

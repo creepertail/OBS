@@ -8,8 +8,12 @@ GET {{baseUrl}}/coupons/mine
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0YTczNTViOS1jNTFjLTQxZjgtODdhOC0xNjQwYWU2YmUxNWEiLCJhY2NvdW50IjoibWVyY2hhbnQxIiwidHlwZSI6Im1lcmNoYW50IiwiaWF0IjoxNzY2NzQzMzgzLCJleHAiOjE3NjY4Mjk3ODN9.TgWpwtAhGqGDBvGWb5bTTVGaytBQiT-09ydXh0FrMOQ
 
 ###
-# Admin 取得全部優惠券
-GET {{baseUrl}}/coupons
+# User/商家：只看可兌換的優惠券（未過期且有庫存；可選 discountType）
+GET {{baseUrl}}/coupons/available?discountType=1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZWI3Y2JjYi05N2Q3LTQwNjktYTExOC05M2M0MjE0NTM5NTkiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2NzAxMDc0NCwiZXhwIjoxNzY3MDk3MTQ0fQ.3bm3wQ2rvt_pIgN1UbO_utF4VLQZ1dCDpI6qTQPs7kA
+###
+# Admin 取得全部優惠券（可選 available=true、discountType）
+GET {{baseUrl}}/coupons?available=true&discountType=1
 Authorization: Bearer {{admin_token}}
 
 ###

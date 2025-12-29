@@ -23,7 +23,7 @@
 @userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NWI5ZTcwNy01MDA3LTQ2ODMtYTI1NC1jYzE1ZThjMjBlODUiLCJhY2NvdW50IjoibWVyY2hhbnQxIiwidHlwZSI6Im1lcmNoYW50IiwiaWF0IjoxNzY2OTM3Nzc1LCJleHAiOjE3NjcwMjQxNzV9.iQjgTDnqTy9dHK2HboMoL5KJiDLmsmneP-ojoaNqywE
 
 # 訂單 ID（請先使用 POST /orders 建立訂單後取得訂單 ID）
-@orderId = b85fcd00-17b7-417a-95a4-e4d60f1b8cd3
+@orderId = 4c4665e7-e47a-4ffc-9978-558ef87751e6
 
 # ========================================
 # User 更新訂單測試
@@ -60,10 +60,10 @@ Authorization: Bearer {{userToken}}
 ### User 嘗試更新訂單狀態（失敗 - 權限不足）
 PATCH {{baseUrl}}/orders/{{orderId}}
 Content-Type: application/json
-Authorization: Bearer {{userToken}}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiODMzMzA5Ny0zNmI0LTQ0OWMtOTY4Ni00ZmFmOWViNDU4ZDUiLCJhY2NvdW50IjoidXNlcjIiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2NjkzODc0MywiZXhwIjoxNzY3MDI1MTQzfQ.HuGjWqoGGWXCalAhSYd6rYNMdt2FcwoTCXaRPJvr3Hw
 
 {
-  "state": 1
+  "state": 4
 }
 
 ### User 嘗試更新總價（失敗 - 權限不足）
@@ -103,7 +103,7 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NWI5ZTcwNy01MDA3LTQ2ODMtYTI1NC1jYzE1ZThjMjBlODUiLCJhY2NvdW50IjoibWVyY2hhbnQxIiwidHlwZSI6Im1lcmNoYW50IiwiaWF0IjoxNzY2OTM3OTM1LCJleHAiOjE3NjcwMjQzMzV9.-niIK4n8TnHOMT8lb1BzPz-5SMy3-v5ggpqHALPqK_Q
 
 {
-  "state": 2
+  "state": 3
 }
 
 ### Merchant 更新訂單狀態為「已完成」（成功）
