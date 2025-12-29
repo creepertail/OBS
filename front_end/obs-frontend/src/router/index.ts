@@ -14,6 +14,7 @@ import MerchantOrderListView from '@/views/MerchantOrderListView.vue'
 import AdminView from '@/views/AdminView.vue'
 import CouponView from '@/views/CouponView.vue'
 import MerchantReportView from '@/views/MerchantReportView.vue'
+import BookReviewsView from '@/views/BookReviewsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -52,6 +53,11 @@ const router = createRouter({
       path: "/book/:bookID",
       name: "book",
       component: () => import("@/views/BookView.vue")
+    },
+    {
+      path: "/reviews/book/:bookID",
+      name: "bookReviews",
+      component: BookReviewsView
     },
     {
       path: "/search/merchant/:merchantID",

@@ -13,6 +13,7 @@ import {
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { CheckoutOrderDto } from './dto/checkout-order.dto';
 import { JWTGuard } from '../member/decorators/jwt-guard.decorator';
 import { MemberType } from '../member/member-type.enum';
 
@@ -65,6 +66,16 @@ export class OrderController {
     const userId = req.member.sub;
     const { items, ...createOrderDto } = body;
     return this.orderService.create(createOrderDto, userId, items);
+  }
+
+  /**
+   * POST /orders/checkout - 從購物車結帳（一次只能一個 merchant，支援優惠券）
+   */
+  @Post('checkout')
+  @JWTGuard(MemberType.User)
+  checkout(@Body(new ValidationPipe()) dto: CheckoutOrderDto, @Request() req) {
+    const userId = req.member.sub;
+    return this.orderService.checkout(dto, userId);
   }
 
   /**

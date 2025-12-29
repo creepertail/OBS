@@ -2,11 +2,11 @@
 @baseUrl = http://localhost:3000
 
 # 請替換為有效的 User access_token
-@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiYWVmZjgxOC0yN2EyLTQ4NDgtYjEwNC1lN2Q3MDE0NWRiNDUiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2Njc0MjcyOCwiZXhwIjoxNzY2ODI5MTI4fQ.aXA6olnOOe92EzR2ozjQweym3iiB5hF_KqnRPqgYwro
+@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZWI3Y2JjYi05N2Q3LTQwNjktYTExOC05M2M0MjE0NTM5NTkiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2NzAxNDI1MiwiZXhwIjoxNzY3MTAwNjUyfQ.bxgQ33F0Dx_H7NKMACs7pf7m42ZJ98A-S05WZ6q463g
 
 # 請替換為實際書籍 ID（可先用 GET /books 查詢）
-@bookId1 = 0290f3e9-1872-494e-b37e-692f0ee9c979
-@bookId2 = 42eb8033-c3e5-4cd6-8765-015767f159f6
+@bookId1 = 1deaf535-0d31-40be-8e8e-cbffc3a130a0
+@bookId2 = 1ebf638a-7156-4e57-ba37-2f498800cb43
 
 ### 新增一筆商品到購物車
 POST {{baseUrl}}/cart

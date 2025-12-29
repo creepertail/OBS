@@ -9,6 +9,10 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 import { Member } from '../member/entities/member.entity';
 import { MemberType } from '../member/member-type.enum';
 import { Book } from '../book/entities/book.entity';
+import { AddsToCart } from '../cart/entities/adds-to-cart.entity';
+import { CheckoutOrderDto } from './dto/checkout-order.dto';
+import { Claim } from '../claims/entities/claim.entity';
+import { Coupon } from '../coupon/entities/coupon.entity';
 
 export interface CreateOrderItem {
   bookId: string;
@@ -26,7 +30,172 @@ export class OrderService {
     private readonly memberRepository: Repository<Member>,
     @InjectRepository(Book)
     private booksRepository: Repository<Book>,
+    @InjectRepository(AddsToCart)
+    private readonly cartRepository: Repository<AddsToCart>,
+    @InjectRepository(Claim)
+    private readonly claimRepository: Repository<Claim>,
+    @InjectRepository(Coupon)
+    private readonly couponRepository: Repository<Coupon>,
   ) { }
+
+  private readonly baseShippingFee = 60;
+
+  private applyDiscount(base: number, discount: number): { value: number; discountAmount: number } {
+    const value = discount < 1 ? base * discount : Math.max(0, base - discount);
+    return { value, discountAmount: base - value };
+  }
+
+  /**
+   * Checkout from cart by merchant, calculate totals, apply coupon, create order.
+   */
+  async checkout(dto: CheckoutOrderDto, userId: string) {
+    const user = await this.memberRepository.findOne({ where: { memberID: userId, type: MemberType.User } });
+    if (!user) {
+      throw new BadRequestException('Only users can checkout');
+    }
+    if ((user.userState ?? 0) % 2 === 1) {
+      throw new ForbiddenException('You are not allowed to place an order.');
+    }
+
+    const merchant = await this.memberRepository.findOne({ where: { memberID: dto.merchantId, type: MemberType.Merchant } });
+    if (!merchant) {
+      throw new NotFoundException('Merchant not found');
+    }
+    if ((merchant.merchantState ?? 0) % 2 === 1) {
+      throw new ForbiddenException('The merchant is not allowed to sell books.');
+    }
+
+    const cartItems = await this.cartRepository.createQueryBuilder('cart')
+      .leftJoinAndSelect('cart.book', 'book')
+      .where('cart.userID = :userId', { userId })
+      .andWhere('book.merchantId = :merchantId', { merchantId: dto.merchantId })
+      .getMany();
+
+    if (!cartItems.length) {
+      throw new BadRequestException('No items in cart for this merchant');
+    }
+
+    // Validate inventory & availability, and calculate subtotal/quantity
+    let subtotal = 0;
+    let totalQuantity = 0;
+    for (const item of cartItems) {
+      if (!item.book) {
+        throw new NotFoundException('Book not found in cart item');
+      }
+      if (item.book.status !== 1) {
+        throw new BadRequestException(`Book ${item.book.name} is not available`);
+      }
+      if (item.book.inventoryQuantity < item.quantity) {
+        throw new BadRequestException(`Insufficient inventory for book: ${item.book.name}`);
+      }
+      subtotal += item.book.price * item.quantity;
+      totalQuantity += item.quantity;
+    }
+
+    let shippingFee = this.baseShippingFee;
+    let discountedSubtotal = subtotal;
+    let discountAmount = 0;
+    let appliedCouponId: string | undefined;
+
+    let claimToUpdate: Claim | undefined;
+
+    if (dto.claimId) {
+      const claim = await this.claimRepository.findOne({
+        where: { claimID: dto.claimId },
+        relations: ['coupon'],
+      });
+      if (!claim) {
+        throw new NotFoundException('Claim not found');
+      }
+      if (claim.userID !== userId) {
+        throw new ForbiddenException('Cannot use coupon claimed by another user');
+      }
+      if (claim.state !== 0) {
+        throw new BadRequestException('Coupon has already been used or voided');
+      }
+
+      const coupon = claim.coupon;
+      if (!coupon) {
+        throw new NotFoundException('Coupon not found');
+      }
+      if (coupon.validDate && coupon.validDate.getTime() < Date.now()) {
+        throw new BadRequestException('Coupon is expired');
+      }
+
+      const owner = await this.memberRepository.findOne({ where: { memberID: coupon.memberID } });
+      if (!owner) {
+        throw new NotFoundException('Coupon owner not found');
+      }
+      if (owner.type === MemberType.Merchant && coupon.memberID !== dto.merchantId) {
+        throw new ForbiddenException('Coupon is not valid for this merchant');
+      } else if (owner.type !== MemberType.Admin && owner.type !== MemberType.Merchant) {
+        throw new ForbiddenException('Invalid coupon owner');
+      }
+
+      if (coupon.discountType === 2) {
+        const result = this.applyDiscount(shippingFee, coupon.discount);
+        shippingFee = result.value;
+        discountAmount = result.discountAmount;
+      } else {
+        const result = this.applyDiscount(subtotal, coupon.discount);
+        discountedSubtotal = result.value;
+        discountAmount = result.discountAmount;
+      }
+      appliedCouponId = coupon.couponID;
+      claimToUpdate = claim;
+    }
+
+    const total = Math.round(discountedSubtotal + shippingFee);
+
+    const order = this.orderRepository.create({
+      shippingAddress: dto.shippingAddress,
+      paymentMethod: dto.paymentMethod,
+      totalPrice: total,
+      totalQuantity,
+      state: 0,
+      userId,
+      merchantId: dto.merchantId,
+      couponId: appliedCouponId,
+    });
+
+    const savedOrder = await this.orderRepository.save(order);
+
+    for (const item of cartItems) {
+      const contains = this.containsRepository.create({
+        orderId: savedOrder.orderId,
+        bookId: item.bookID,
+        quantity: item.quantity,
+      });
+      await this.containsRepository.save(contains);
+
+      // decrement inventory
+      item.book.inventoryQuantity -= item.quantity;
+      await this.booksRepository.save(item.book);
+    }
+
+    if (claimToUpdate) {
+      claimToUpdate.state = 1;
+      claimToUpdate.usedAt = new Date();
+      await this.claimRepository.save(claimToUpdate);
+    }
+
+    // clear purchased items from cart
+    await this.cartRepository.delete(
+      cartItems.map(ci => ({ userID: userId, bookID: ci.bookID }))
+    );
+
+    return {
+      order: await this.findByID(savedOrder.orderId, userId, MemberType.User),
+      pricing: {
+        subtotal,
+        discountedSubtotal,
+        shippingFee,
+        discountAmount,
+        total,
+        couponId: appliedCouponId,
+      },
+    };
+  }
 
   /**
    * 建立新訂單（User 下訂單）
