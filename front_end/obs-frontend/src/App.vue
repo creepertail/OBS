@@ -60,6 +60,7 @@ onBeforeUnmount(() => {
           <button class="textButton" @click="router.push({ name: 'merchant' })" v-if="isMerchant">我的商品</button>
           <button class="textButton" @click="router.push({ name: 'merchantReport' })" v-if="isMerchant">銷售報表</button>
           <button class="textButton" @click="router.push({ name: 'admin' })" v-if="isAdmin">管理</button>
+          <button class="textButton" @click="router.push({ name: 'favorite' })" v-if="!isAdmin && !isMerchant">我的最愛</button>
           <button class="textButton" @click="router.push({ name: 'coupon' })">我的優惠券</button>
           <button class="textButton" @click="router.push({ name: 'setting' })">設置</button>
           <button class="textButton" @click="logout">登出</button>

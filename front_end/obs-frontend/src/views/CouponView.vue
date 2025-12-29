@@ -10,6 +10,7 @@ interface Coupon {
   description: string
   redemptionCode: string
   memberID: string
+  discountType: number
   createdAt: string
   updatedAt: string
 }
@@ -123,8 +124,20 @@ function formatDate(dateString: string) {
 }
 
 // 格式化折扣
-function formatDiscount(discount: number) {
-  return `${Math.round(discount * 100)}%`
+function formatDiscount(discount: number, discountType: number) {
+  if (discountType === 2) {
+    // 貨運折扣：固定金額
+    return `折 $${discount}`
+  } else {
+    // 季節性或商家折扣：百分比
+    return `${Math.round(discount * 100)}% OFF`
+  }
+}
+
+// 格式化折扣類型
+function formatDiscountType(discountType: number) {
+  const types = ['季節性折扣', '商家折扣', '貨運折扣']
+  return types[discountType] || '未知類型'
 }
 
 // Claim狀態文字
@@ -278,6 +291,32 @@ function handleSubmit() {
     createCoupon()
   }
 }
+
+// Merchant/Admin: 刪除優惠券
+async function deleteCoupon(couponID: string) {
+  if (!confirm('確定要刪除此優惠券嗎？此操作無法復原。')) {
+    return
+  }
+
+  try {
+    const token = localStorage.getItem('accessToken')
+    await axios.delete(
+      `http://localhost:3000/coupons/${couponID}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    )
+
+    // 從列表中移除已刪除的優惠券
+    coupons.value = coupons.value.filter(c => c.couponID !== couponID)
+    alert('優惠券已成功刪除！')
+  } catch (e: any) {
+    alert(e.response?.data?.message || '刪除優惠券失敗')
+    console.error(e)
+  }
+}
 </script>
 
 <template>
@@ -312,11 +351,15 @@ function handleSubmit() {
         >
           <div class="coupon-card__header">
             <div class="coupon-discount">
-              {{ formatDiscount(claim.coupon.discount) }} OFF
+              {{ formatDiscount(claim.coupon.discount, claim.coupon.discountType) }}
             </div>
             <span class="coupon-status">
               {{ claimStateText(claim.state) }}
             </span>
+          </div>
+
+          <div class="coupon-type-tag">
+            {{ formatDiscountType(claim.coupon.discountType) }}
           </div>
 
           <div class="coupon-description">
@@ -359,11 +402,15 @@ function handleSubmit() {
         >
           <div class="coupon-card__header">
             <div class="coupon-discount">
-              {{ formatDiscount(coupon.discount) }} OFF
+              {{ formatDiscount(coupon.discount, coupon.discountType) }}
             </div>
             <span class="coupon-quantity">
               剩餘數量：{{ coupon.quantity }}
             </span>
+          </div>
+
+          <div class="coupon-type-tag">
+            {{ formatDiscountType(coupon.discountType) }}
           </div>
 
           <div class="coupon-description">
@@ -384,6 +431,10 @@ function handleSubmit() {
               <span>{{ formatDate(coupon.createdAt) }}</span>
             </div>
           </div>
+
+          <button class="delete-coupon-button" @click="deleteCoupon(coupon.couponID)">
+            刪除優惠券
+          </button>
         </article>
       </section>
     </div>
@@ -626,6 +677,18 @@ function handleSubmit() {
   backdrop-filter: blur(10px);
 }
 
+.coupon-type-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  margin-bottom: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
 .coupon-description {
   font-size: 18px;
   font-weight: 600;
@@ -665,6 +728,29 @@ function handleSubmit() {
 
 .coupon-info > div > span:last-child {
   font-weight: 600;
+}
+
+.delete-coupon-button {
+  width: 100%;
+  margin-top: 16px;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(231, 76, 60, 0.9);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.delete-coupon-button:hover {
+  background: rgba(192, 57, 43, 1);
+  transform: translateY(-1px);
+}
+
+.delete-coupon-button:active {
+  transform: translateY(0);
 }
 
 /* 響應式 */
