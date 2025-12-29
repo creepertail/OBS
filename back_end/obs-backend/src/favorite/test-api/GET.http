@@ -1,6 +1,13 @@
 @baseUrl = http://localhost:3000
-@access_token = {{access_token}}   // 使用者 access token
+@access_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiMzFlYTg3Ny0xY2U3LTRmZWItOGY2MS1mN2M3MThmNzY5MTAiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2Njk4NDk0MywiZXhwIjoxNzY3MDcxMzQzfQ.4DUa1qwtc3N__dxs07S7FkZyucGY96bU5j8rICZnYck
 
-# 取得自己的收藏列表
+@bookID = 71bd79be-c3f2-4372-aa57-1fb7916f6bd4
+
+
+### 自己的是否已收藏
+GET {{baseUrl}}/favorites/{{bookID}}
+Authorization: Bearer {{access_token}}
+
+### 取得自己的收藏列表
 GET {{baseUrl}}/favorites/mine
 Authorization: Bearer {{access_token}}
