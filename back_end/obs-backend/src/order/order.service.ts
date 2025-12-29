@@ -50,6 +50,12 @@ export class OrderService {
       throw new BadRequestException('Order must contain at least one item');
     }
 
+    const userState = (user.userState ?? 0) % 2 === 1;
+    // 驗證 User 下訂權限
+    if (userState) {
+      throw new ForbiddenException('You are not allowed to place an order.');
+    }
+
     // 從書籍資料取得 merchantId
     const bookIds = items.map(item => item.bookId);
     const books = await this.booksRepository.findByIds(bookIds);

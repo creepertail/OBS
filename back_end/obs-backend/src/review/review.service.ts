@@ -6,6 +6,7 @@ import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { MemberType } from '../member/member-type.enum';
 import { Book } from '../book/entities/book.entity';
+import { Member } from '../member/entities/member.entity';
 
 @Injectable()
 export class ReviewService {
@@ -14,6 +15,8 @@ export class ReviewService {
     private readonly reviewRepository: Repository<Review>,
     @InjectRepository(Book)
     private readonly bookRepository: Repository<Book>,
+    @InjectRepository(Member)
+    private readonly memberRepository: Repository<Member>,
   ) {}
 
   async create(createDto: CreateReviewDto, currentUser: { sub: string; type: MemberType }): Promise<Review> {
@@ -25,6 +28,12 @@ export class ReviewService {
     });
     if (existing) {
       throw new ConflictException('Review already exists for this book');
+    }
+    const user = await this.memberRepository.findOne({
+      where: { memberID: currentUser.sub, type: MemberType.User }
+    });
+    if(user && ((user.userState ?? 0) / 2) % 2 === 1) {
+      throw new ForbiddenException('You are not allowed to create a review.');
     }
 
     const review = this.reviewRepository.create({
