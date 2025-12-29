@@ -134,6 +134,7 @@ export class OrderService {
       .createQueryBuilder('order')
       .leftJoinAndSelect('order.contains', 'contains')
       .leftJoinAndSelect('contains.book', 'book')
+      .leftJoinAndSelect('book.images', 'images', 'images.isCover = :isCover', { isCover: true })
       .leftJoin('order.user', 'user')
       .leftJoin('order.merchant', 'merchant')
       .addSelect([
