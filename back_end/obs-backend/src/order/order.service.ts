@@ -50,6 +50,12 @@ export class OrderService {
       throw new BadRequestException('Order must contain at least one item');
     }
 
+    const userState = (user.userState ?? 0) % 2 === 1;
+    // 驗證 User 下訂權限
+    if (userState) {
+      throw new ForbiddenException('You are not allowed to place an order.');
+    }
+
     // 從書籍資料取得 merchantId
     const bookIds = items.map(item => item.bookId);
     const books = await this.booksRepository.findByIds(bookIds);
@@ -88,6 +94,12 @@ export class OrderService {
 
     if (!merchant) {
       throw new NotFoundException('Merchant not found');
+    }
+
+    // 驗證商家狀態
+    const merchantState = (merchant.merchantState ?? 0) % 2 === 1;
+    if(merchantState) {
+      throw new ForbiddenException('The merchant is not allowed to sell books.'); 
     }
 
     // 建立訂單（使用 JWT 的 userId 和從書籍取得的 merchantId）
