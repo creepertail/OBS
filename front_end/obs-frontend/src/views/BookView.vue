@@ -23,6 +23,7 @@ const currentImageIndex = ref(0)
 const currentUserType = localStorage.getItem("type")
 
 const isSubscribed = ref(false)
+const isFavorite = ref(false)
 watch(
   () => subscribe.value,
   (val) => {
@@ -94,6 +95,25 @@ onMounted(async () => {
     subscribe.value = null
   }
 
+  try {
+    const token = localStorage.getItem("accessToken")
+    if (!token) return
+
+    const res = await axios.get<Subscribe>(
+      `http://localhost:3000/favorites/${book.value?.bookID}`,
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    )
+
+    isFavorite.value = res.data ?? false
+  } catch {
+    isFavorite.value = false
+  }
+
+  // GET {{baseUrl}}/favorites/{{bookID}}
+  // Authorization: Bearer {{access_token}}
+
 })
 
 // 切換圖片
@@ -107,6 +127,50 @@ function nextImage() {
   if (!book.value) return
   currentImageIndex.value =
     (currentImageIndex.value + 1) % book.value.images.length
+}
+
+async function favoriteBook() {
+  const token = localStorage.getItem("accessToken")
+  if (!token) return alert("請先登入")
+
+  try {
+    await axios.post(
+      `http://localhost:3000/favorites`,
+      { 
+        bookID: book.value?.bookID 
+      },
+      { 
+        headers: { 
+          "Content-Type": 'application/json',
+          Authorization: `Bearer ${token}` 
+        }
+      }
+    )
+
+    isFavorite.value = true
+  } catch {
+    alert("新增最愛失敗")
+  }
+}
+
+async function unfavoriteBook() {
+  const token = localStorage.getItem("accessToken")
+  if (!token) return alert("請先登入")
+
+  try {
+    await axios.delete(
+      `http://localhost:3000/favorites/${book.value?.bookID}`,
+      { 
+        headers: { 
+          Authorization: `Bearer ${token}` 
+        }
+      }
+    )
+
+    isFavorite.value = false
+  } catch {
+    alert("刪除最愛失敗")
+  }
 }
 
 function addToCart() {
@@ -257,7 +321,22 @@ async function delistBook() {
 
         <!-- 書籍資訊 -->
         <div class="book-info">
-          <h1 class="book-info__title">{{ book.name }}</h1>
+          <div class="book-info__header">
+            <h1 class="book-info__title">{{ book.name }}</h1>
+
+            <button
+              class="book-info__btn book-info__btn--icon book-info__favorite"
+              @click="!isFavorite ? favoriteBook() : unfavoriteBook()"
+            >
+              <i
+                :class="[
+                  'pi',
+                  isFavorite ? 'pi-heart-fill' : 'pi-heart'
+                ]"
+              />
+            </button>
+          </div>
+          
 
           <div class="book-info__meta">
             <p><span>作者</span>{{ book.author }}</p>
@@ -500,6 +579,27 @@ async function delistBook() {
 .book-info {
   display: flex;
   flex-direction: column;
+}
+
+/* 書名 + favorite icon */
+.book-info__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 愛心按鈕微調 */
+.book-info__favorite {
+  margin-top: 4px; /* 視覺對齊文字 */
+}
+
+/* 愛心 icon 顏色 */
+.book-info__favorite i.pi-heart-fill {
+  color: #dc2626;
+}
+
+.book-info__favorite i.pi-heart {
+  color: var(--color-text-secondary);
 }
 
 .book-info__title {
@@ -806,4 +906,50 @@ async function delistBook() {
   white-space: pre-line;
 }
 
+/* icon 按鈕 */
+.book-info__action {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.book-info__btn {
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  background: var(--color-bg-card);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.book-info__btn:hover {
+  background: var(--color-background-soft);
+  transform: translateY(-1px);
+}
+
+.book-info__btn--icon {
+  padding: 10px;
+  width: 40px;
+  height: 40px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: var(--color-bg-card);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+}
+
+.book-info__btn--icon:hover {
+  background: var(--color-bg-muted);
+}
+
+.book-info__btn--icon i {
+  font-size: 16px;
+}
 </style>

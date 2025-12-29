@@ -1,126 +1,3 @@
-<!-- <script setup lang="ts">
-import { ref, watch } from "vue"
-import axios from "axios"
-
-const props = defineProps({
-  merchantID: { type: String, required: true },
-  isSubscribed: { type: Boolean, required: true },
-  notificationEnabled: { type: Boolean, required: true }
-});
-
-// console.log("props", props)
-// console.log("props.isSubscribed", props.isSubscribed)
-// console.log("props.notificationEnabled", props.notificationEnabled)
-
-const token = localStorage.getItem('accessToken')
-const isLoading = ref(false)
-const merchantID = props.merchantID
-const isSubscribing = ref(false)
-const isSubscribed = ref(props.isSubscribed) // 若之後有查詢訂閱狀態可用
-const notifyEnabled = ref(props.notificationEnabled)
-
-watch(
-  () => props.isSubscribed,
-  (val) => {
-    isSubscribed.value = val
-  }
-)
-
-watch(
-  () => props.notificationEnabled,
-  (val) => {
-    notifyEnabled.value = val
-  }
-)
-console.log("isSubscribed", isSubscribed.value)
-
-console.log("notifyEnabled", notifyEnabled.value)
-
-async function subscribeMerchant() {
-  if (!token) {
-    alert("請先登入才能訂閱商家")
-    return
-  }
-  isLoading.value = true
-
-  if (props.isSubscribed) return
-
-  try {
-    isSubscribing.value = true
-
-    await axios.post(
-      "http://localhost:3000/subscriptions",
-      {
-        merchantID: merchantID,
-        notificationEnabled: true
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
-      }
-    )
-
-    isSubscribed.value = true
-    notifyEnabled.value = true
-    alert("已成功訂閱商家！")
-  } catch (error) {
-    console.error(error)
-    alert("訂閱失敗，請稍後再試")
-  } finally {
-    isSubscribing.value = false
-  }
-}
-
-async function unsubscribeMerchant() {
-  if (!token) return alert("請先登入")
-
-  try {
-    isLoading.value = true
-
-    await axios.delete(
-      `http://localhost:3000/subscriptions/${props.merchantID}`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    )
-
-    emit("update:isSubscribed", false)
-    emit("update:notificationEnabled", false)
-  } catch {
-    alert("取消訂閱失敗")
-  } finally {
-    isLoading.value = false
-  }
-}
-
-async function changeNotifyEnabled() {
-  if (!token) {
-    alert("請先登入才能訂閱商家")
-    return
-  }
-
-  try{
-    console.log("no", notifyEnabled.value)
-    console.log("no2", !notifyEnabled.value)
-    await axios.patch(
-      `http://localhost:3000/subscriptions/${props.merchantID}`,
-      {
-        notificationEnabled: !notifyEnabled.value
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
-      }
-    )
-    notifyEnabled.value = !notifyEnabled.value
-  } catch (error) {
-    console.error(error)
-    alert("更改訂閱狀態失敗，請稍後再試")
-  }
-}
-</script> -->
 <script setup lang="ts">
 import { ref, watch } from "vue"
 import axios from "axios"
@@ -154,6 +31,7 @@ watch(
   val => (notifyEnabled.value = val),
   { immediate: true }
 )
+
 async function subscribeMerchant() {
   if (!token) return alert("請先登入")
 
@@ -177,6 +55,7 @@ async function subscribeMerchant() {
     isLoading.value = false
   }
 }
+
 async function unsubscribeMerchant() {
   if (!token) return alert("請先登入")
 
@@ -196,6 +75,7 @@ async function unsubscribeMerchant() {
     isLoading.value = false
   }
 }
+
 async function toggleNotify() {
   if (!token) return alert("請先登入")
 
