@@ -6,7 +6,7 @@ interface Order {
   paymentMethod: number
   totalPrice: number
   state: number
-  totalAmount: number
+  totalQuantity: number
   orderDate: string
   merchant: {
     memberID: string
