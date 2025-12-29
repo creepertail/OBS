@@ -14,6 +14,11 @@ const userStateOptions = [
   { value: 3, label: '不可下訂單且不可留言' }
 ]
 
+const merchantStateOptions = [
+  { value: 0, label: '可接單' },
+  { value: 1, label: '不可接單' }
+]
+
 const updating = ref<{ [key: string]: boolean }>({})
 
 const updateUserState = async (member: Member, newState: number) => {
@@ -32,6 +37,28 @@ const updateUserState = async (member: Member, newState: number) => {
     alert('權限更新成功')
   } catch (error) {
     console.error('Failed to update user state:', error)
+    alert('權限更新失敗')
+  } finally {
+    updating.value[member.memberID] = false
+  }
+}
+
+const updateMerchantState = async (member: Member, newState: number) => {
+  updating.value[member.memberID] = true
+  try {
+    await axios.patch(
+      `http://localhost:3000/members/${member.memberID}`,
+      { merchantState: newState },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`
+        }
+      }
+    )
+    member.merchantState = newState
+    alert('權限更新成功')
+  } catch (error) {
+    console.error('Failed to update merchant state:', error)
     alert('權限更新失敗')
   } finally {
     updating.value[member.memberID] = false
@@ -69,6 +96,21 @@ const updateUserState = async (member: Member, newState: number) => {
             >
               <option 
                 v-for="option in userStateOptions" 
+                :key="option.value" 
+                :value="option.value"
+              >
+                {{ option.label }}
+              </option>
+            </select>
+            <select 
+              v-else-if="member.type === 'merchant'"
+              :value="member.merchantState"
+              @change="updateMerchantState(member, parseInt(($event.target as HTMLSelectElement).value))"
+              :disabled="updating[member.memberID]"
+              class="user-state-select"
+            >
+              <option 
+                v-for="option in merchantStateOptions" 
                 :key="option.value" 
                 :value="option.value"
               >
