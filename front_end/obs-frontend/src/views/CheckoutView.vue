@@ -177,9 +177,25 @@ async function checkout() {
       name: 'orderList'
     })
     
-  } catch (e) {
+  } catch (e: any) {
     console.error(e)
-    alert("結帳失敗，請稍後再試")
+    
+    // 處理商家被限制銷售的情況
+    if (e.response?.status === 403) {
+      const message = e.response?.data?.message || ""
+      if (message.includes("merchant") && message.includes("not allowed")) {
+        alert("此商家目前無法銷售商品，請聯繫客服或選擇其他商家的商品")
+      } else {
+        alert("權限不足：" + message)
+      }
+    } else if (e.response?.status === 400) {
+      alert("請求錯誤：" + (e.response?.data?.message || "資料格式不正確"))
+    } else if (e.response?.status === 401) {
+      alert("登入已過期，請重新登入")
+      router.push({ name: 'login' })
+    } else {
+      alert("結帳失敗，請稍後再試")
+    }
   } finally {
     isSubmitting.value = false
   }

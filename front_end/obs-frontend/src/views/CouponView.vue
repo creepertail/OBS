@@ -46,8 +46,20 @@ const createForm = ref({
   validDate: '',
   discount: 0.9,
   description: '',
-  redemptionCode: ''
+  redemptionCode: '',
+  discountType: 1
 })
+
+// 監聽 discountType 變化，自動調整 discount 預設值
+function onDiscountTypeChange() {
+  if (createForm.value.discountType === 2) {
+    // 貨運折扣：預設值改為固定金額
+    createForm.value.discount = 50
+  } else {
+    // 季節性或商家折扣：預設值為百分比
+    createForm.value.discount = 0.9
+  }
+}
 
 onMounted(async () => {
   try {
@@ -135,9 +147,10 @@ function openAddModal() {
     createForm.value = {
       quantity: 1,
       validDate: '',
-      discount: 0.9,
+      discount: userType.value === 'merchant' ? 0.9 : 0.9,
       description: '',
-      redemptionCode: ''
+      redemptionCode: '',
+      discountType: userType.value === 'merchant' ? 1 : 0
     }
   }
 }
@@ -220,7 +233,8 @@ async function createCoupon() {
         discount: createForm.value.discount,
         description: createForm.value.description,
         redemptionCode: createForm.value.redemptionCode,
-        memberID: memberID
+        memberID: memberID,
+        discountType: createForm.value.discountType
       },
       {
         headers: {
@@ -419,6 +433,20 @@ function handleSubmit() {
           </div>
 
           <div class="form-group">
+            <label for="discountType">折扣類型</label>
+            <select
+              id="discountType"
+              v-model.number="createForm.discountType"
+              @change="onDiscountTypeChange"
+              required
+            >
+              <option v-if="userType === 'admin'" :value="0">季節性折扣</option>
+              <option v-if="userType === 'merchant'" :value="1">商家折扣</option>
+              <option v-if="userType === 'admin'" :value="2">貨運折扣</option>
+            </select>
+          </div>
+
+          <div class="form-group">
             <label for="redemptionCodeCreate">兌換碼</label>
             <input
               id="redemptionCodeCreate"
@@ -431,14 +459,17 @@ function handleSubmit() {
 
           <div class="form-row">
             <div class="form-group">
-              <label for="discount">折扣（0-1之間）</label>
+              <label for="discount">
+                {{ createForm.discountType === 2 ? '折扣金額（1-60）' : '折扣（0-1之間）' }}
+              </label>
               <input
                 id="discount"
                 type="number"
-                step="0.01"
-                min="0"
-                max="1"
+                :step="createForm.discountType === 2 ? '1' : '0.01'"
+                :min="createForm.discountType === 2 ? '1' : '0'"
+                :max="createForm.discountType === 2 ? '60' : '1'"
                 v-model.number="createForm.discount"
+                :placeholder="createForm.discountType === 2 ? '例如：50' : '例如：0.9'"
                 required
               />
             </div>
@@ -731,6 +762,23 @@ function handleSubmit() {
 }
 
 .form-group input:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.form-group select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  background: white;
+  cursor: pointer;
+}
+
+.form-group select:focus {
   outline: none;
   border-color: #3498db;
 }
