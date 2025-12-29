@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue"
+import { ref, onMounted, watch, computed } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import axios from "axios"
 import type { Book } from "../type/book"
 import type { Member } from "../type/member"
 import type { Subscribe } from "../type/subscribe"
+import type { Review } from "../type/review"
 import SubscribeButton from '../components/SubscribeMerchantButton.vue'
 
 const route = useRoute()
@@ -21,6 +22,14 @@ const errorMsg = ref("")
 const quantity = ref(1)
 const currentImageIndex = ref(0)
 const currentUserType = localStorage.getItem("type")
+
+const reviews = ref<Review[]>([])
+const reviewLoading = ref(false)
+const reviewCount = ref(0)
+const averageStars = ref(0)
+const starFillPercent = computed(() => {
+  return Math.min(averageStars.value / 5 * 100, 100)
+})
 
 const isSubscribed = ref(false)
 const isFavorite = ref(false)
@@ -61,7 +70,6 @@ onMounted(async () => {
     }
 
     book.value = data
-    // console.log("book", book.value)
     quantity.value = Math.min(1, data.inventoryQuantity || 1)
   } catch (e) {
     errorMsg.value = "無法載入書籍資料"
@@ -111,9 +119,30 @@ onMounted(async () => {
     isFavorite.value = false
   }
 
-  // GET {{baseUrl}}/favorites/{{bookID}}
-  // Authorization: Bearer {{access_token}}
 
+  try {
+    reviewLoading.value = true
+    const bookID = route.params.bookID as string
+
+    const res = await axios.get<Review[]>(
+      `http://localhost:3000/reviews/book/${bookID}`
+    )
+
+    reviews.value = res.data ?? []
+    reviewCount.value = reviews.value.length
+
+    if (reviews.value.length > 0) {
+      const total = reviews.value.reduce(
+        (sum: number, r: any) => sum + r.stars,
+        0
+      )
+      averageStars.value = Number((total / reviews.value.length).toFixed(1))
+    }
+  } catch (e) {
+    reviews.value = []
+  } finally {
+    reviewLoading.value = false
+  }
 })
 
 // 切換圖片
@@ -228,6 +257,15 @@ function goToSearchMerchantPage(){
   })
 }
 
+function goToAllReviews() {
+  router.push({
+    name: "bookReviews",
+    params: {
+      bookID: book.value?.bookID
+    }
+  })
+}
+
 async function delistBook() {
   if (!book.value) return
   
@@ -322,7 +360,39 @@ async function delistBook() {
         <!-- 書籍資訊 -->
         <div class="book-info">
           <div class="book-info__header">
-            <h1 class="book-info__title">{{ book.name }}</h1>
+            <div class="book-info__title-group">
+              <h1 class="book-info__title">{{ book.name }}</h1>
+
+              <div
+                v-if="reviewCount > 0"
+                class="book-info__rating"
+                @click="goToAllReviews"
+              >
+                <div class="star-rating">
+                  <!-- 底層：空星 -->
+                  <div class="star-rating__base">
+                    <i v-for="i in 5" :key="i" class="pi pi-star" />
+                  </div>
+
+                  <!-- 上層：填滿星（用寬度裁切） -->
+                  <div
+                    class="star-rating__fill"
+                    :style="{ width: starFillPercent + '%' }"
+                  >
+                    <i v-for="i in 5" :key="i" class="pi pi-star-fill" />
+                  </div>
+                </div>
+
+                <span class="book-info__rating-score">
+                  {{ averageStars }}
+                </span>
+
+                <span class="book-info__rating-count">
+                  （{{ reviewCount }} 則評論）
+                </span>
+              </div>
+
+            </div>
 
             <button
               class="book-info__btn book-info__btn--icon book-info__favorite"
@@ -336,6 +406,7 @@ async function delistBook() {
               />
             </button>
           </div>
+
           
 
           <div class="book-info__meta">
@@ -470,6 +541,70 @@ async function delistBook() {
         </p>
       </div>
 
+      <!-- 書籍評論 -->
+      <section class="book-reviews">
+        <div class="book-reviews__header">
+          <h2 class="book-reviews__title">
+            書籍評論
+            <span v-if="reviews.length">（{{ reviews.length }} 則）</span>
+          </h2>
+
+          <button
+            v-if="reviews.length > 0"
+            class="book-reviews__more"
+            @click="goToAllReviews"
+          >
+            查看所有評論 →
+          </button>
+        </div>
+
+        <!-- 載入中 -->
+        <p v-if="reviewLoading" class="book-reviews__loading">
+          正在載入評論…
+        </p>
+
+        <!-- 沒有評論 -->
+        <p v-else-if="reviews.length === 0" class="book-reviews__empty">
+          尚無評論
+        </p>
+
+        <!-- 評論列表（只顯示前 5 筆） -->
+        <div
+          v-else
+          class="book-reviews__list"
+        >
+          <div
+            v-for="review in reviews.slice(0, 5)"
+            :key="review.userID + review.date"
+            class="review-card"
+          >
+            <div class="review-card__header">
+              <span class="review-card__user">
+                {{ review.user.userName }}
+              </span>
+
+              <span class="review-card__date">
+                {{ review.date }}
+              </span>
+            </div>
+
+            <!-- 星等 -->
+            <div class="review-card__stars">
+              <i
+                v-for="n in 5"
+                :key="n"
+                class="pi"
+                :class="n <= review.stars ? 'pi-star-fill' : 'pi-star'"
+              />
+            </div>
+
+            <p class="review-card__content">
+              {{ review.description }}
+            </p>
+          </div>
+        </div>
+      </section>
+
     </section>
   </main>
 </template>
@@ -579,6 +714,70 @@ async function delistBook() {
 .book-info {
   display: flex;
   flex-direction: column;
+}
+
+/* 書名＋評分 */
+.book-info__title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.book-info__rating-score {
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.book-info__rating-count {
+  color: var(--color-text-secondary);
+}
+
+/* ===== 星等顯示 ===== */
+.book-info__rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  padding-bottom: 10px;
+}
+
+.star-rating {
+  position: relative;
+  display: inline-block;
+  line-height: 1;
+}
+
+.star-rating__base,
+.star-rating__fill {
+  display: flex;
+}
+
+.star-rating__base i {
+  color: #d1d5db; /* 灰色空星 */
+  font-size: 14px;
+}
+
+.star-rating__fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.star-rating__fill i {
+  color: #f59e0b; /* 金色實星 */
+  font-size: 14px;
+}
+
+.book-info__rating-score {
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.book-info__rating-count {
+  color: var(--color-text-secondary);
 }
 
 /* 書名 + favorite icon */
@@ -951,5 +1150,81 @@ async function delistBook() {
 
 .book-info__btn--icon i {
   font-size: 16px;
+}
+
+/* ===== 書籍評論 ===== */
+.book-reviews {
+  margin-top: 64px;
+}
+
+.book-reviews__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.book-reviews__title {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.book-reviews__more {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.book-reviews__more:hover {
+  text-decoration: underline;
+}
+
+.book-reviews__loading,
+.book-reviews__empty {
+  color: var(--color-text-secondary);
+}
+
+/* ===== 評論卡片 ===== */
+.review-card {
+  background: var(--color-bg-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.review-card__header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.review-card__user {
+  font-weight: 700;
+}
+
+.review-card__date {
+  color: var(--color-text-secondary);
+}
+
+.review-card__stars {
+  margin-bottom: 8px;
+}
+
+.review-card__stars .pi-star-fill {
+  color: #f59e0b;
+}
+
+.review-card__stars .pi-star {
+  color: #d1d5db;
+}
+
+.review-card__content {
+  font-size: 15px;
+  line-height: 1.7;
 }
 </style>
