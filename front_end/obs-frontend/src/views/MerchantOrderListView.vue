@@ -60,8 +60,7 @@ async function takeOrders(order: Order) {
     )
     order.state = 1
   } catch (e) {
-    errorMsg.value = '更改訂單狀態失敗失敗'
-    console.error(e)
+    alert("更改訂單狀態失敗失敗")
   }
 }
 
@@ -80,8 +79,7 @@ async function ship(order: Order) {
     )
     order.state = 2
   } catch (e) {
-    errorMsg.value = '更改訂單狀態失敗失敗'
-    console.error(e)
+    alert("更改訂單狀態失敗失敗")
   }
 }
 
@@ -100,8 +98,7 @@ async function deliveredGoods(order: Order) {
     )
     order.state = 3
   } catch (e) {
-    errorMsg.value = '更改訂單狀態失敗失敗'
-    console.error(e)
+    alert("更改訂單狀態失敗失敗")
   }
 }
 
