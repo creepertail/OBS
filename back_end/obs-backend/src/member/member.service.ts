@@ -11,6 +11,7 @@ import { Member } from './entities/member.entity';
 import { Subscribes } from '../subscription/entities/subscribes.entity';
 import { MemberType } from './member-type.enum';
 import { Book } from '../book/entities/book.entity';
+import { Order } from '../order/entities/order.entity';
 
 @Injectable()
 export class MemberService {
@@ -21,6 +22,8 @@ export class MemberService {
     private readonly subscribesRepository: Repository<Subscribes>,
     @InjectRepository(Book)
     private readonly bookRepository: Repository<Book>,
+    @InjectRepository(Order)
+    private readonly orderRepository: Repository<Order>,
     private readonly jwtService: JwtService,
   ) { }
 
@@ -235,6 +238,52 @@ export class MemberService {
     return {
       access_token
     };
+  }
+
+  /**
+   * Update member level based on total spending
+   * Level rules:
+   * - Level 1 (default): total < 5000
+   * - Level 2: total >= 5000
+   * - Level 3: total >= 10000
+   * - Level 4: total >= 15000
+   */
+  async updateMemberLevel(userId: string): Promise<{ level: number; totalSpent: number }> {
+    const member = await this.memberRepository.findOne({
+      where: { memberID: userId, type: MemberType.User }
+    });
+
+    if (!member) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Calculate total spending from all checked-out orders (state >= 0)
+    const result = await this.orderRepository
+      .createQueryBuilder('order')
+      .select('SUM(order.totalPrice)', 'total')
+      .where('order.userId = :userId', { userId })
+      .andWhere('order.state >= :state', { state: 0 })
+      .getRawOne();
+
+    const totalSpent = Number(result?.total || 0);
+
+    // Determine level based on total spending
+    let newLevel = 1;
+    if (totalSpent >= 15000) {
+      newLevel = 4;
+    } else if (totalSpent >= 10000) {
+      newLevel = 3;
+    } else if (totalSpent >= 5000) {
+      newLevel = 2;
+    }
+
+    // Update member level if changed
+    if (member.userLevel !== newLevel) {
+      member.userLevel = newLevel;
+      await this.memberRepository.save(member);
+    }
+
+    return { level: newLevel, totalSpent };
   }
 
   private async ensureUniqueFields(

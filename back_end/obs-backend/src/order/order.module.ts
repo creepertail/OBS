@@ -10,9 +10,13 @@ import { Book } from '../book/entities/book.entity';
 import { AddsToCart } from '../cart/entities/adds-to-cart.entity';
 import { Claim } from '../claims/entities/claim.entity';
 import { Coupon } from '../coupon/entities/coupon.entity';
+import { MemberModule } from '../member/member.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Order, Contains, Member, Book, AddsToCart, Claim, Coupon])],
+  imports: [
+    TypeOrmModule.forFeature([Order, Contains, Member, Book, AddsToCart, Claim, Coupon]),
+    MemberModule,
+  ],
   controllers: [OrderController],
   providers: [OrderService],
   exports: [OrderService],

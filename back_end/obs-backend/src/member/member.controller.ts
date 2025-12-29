@@ -60,6 +60,13 @@ export class MemberController {
     return this.memberService.findByID(user.sub);
   }
 
+  // GET url/members/me/level
+  @JWTGuard(MemberType.User)
+  @Get('me/level')
+  async getMemberLevel(@CurrentUser() user: any) {
+    return this.memberService.updateMemberLevel(user.sub);
+  }
+
   // GET url/members/merchantWithBooks
   @JWTGuard(MemberType.Merchant)
   @Get('merchantWithBooks')

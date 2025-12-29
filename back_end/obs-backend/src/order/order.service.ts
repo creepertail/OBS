@@ -13,6 +13,7 @@ import { AddsToCart } from '../cart/entities/adds-to-cart.entity';
 import { CheckoutOrderDto } from './dto/checkout-order.dto';
 import { Claim } from '../claims/entities/claim.entity';
 import { Coupon } from '../coupon/entities/coupon.entity';
+import { MemberService } from '../member/member.service';
 
 export interface CreateOrderItem {
   bookId: string;
@@ -36,6 +37,7 @@ export class OrderService {
     private readonly claimRepository: Repository<Claim>,
     @InjectRepository(Coupon)
     private readonly couponRepository: Repository<Coupon>,
+    private readonly memberService: MemberService,
   ) { }
 
   private readonly baseShippingFee = 60;
@@ -187,6 +189,9 @@ export class OrderService {
     await this.cartRepository.delete(
       cartItems.map(ci => ({ userID: userId, bookID: ci.bookID }))
     );
+
+    // Update member level based on total spending
+    await this.memberService.updateMemberLevel(userId);
 
     return {
       order: await this.findByID(savedOrder.orderId, userId, MemberType.User),

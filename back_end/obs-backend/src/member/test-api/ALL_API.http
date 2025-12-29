@@ -5,6 +5,10 @@
 #    *   - account password
 #    *
 #    * GET url/members            => 所有member
+#    * GET url/members/me         => 取得自己的資料 (需帶 Access Token)
+#    * GET url/members/me/level   => 取得並更新會員等級 (需帶 User 的 Access Token)
+#    *   回傳格式: { level: number, totalSpent: number }
+#    *   Level 規則: Level 1 (< 5000), Level 2 (>= 5000), Level 3 (>= 10000), Level 4 (>= 15000)
 #    * GET url/members/:id        => 用id找member
 #    * GET url/members/:id/type   => 用id找member的type
 #    * POST url/members + body     => 新增member資料，並回傳member

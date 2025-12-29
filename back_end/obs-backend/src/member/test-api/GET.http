@@ -1,6 +1,7 @@
 #  /**
 #    * API 功能：
 #    * GET url/members/me         => 取得自己的資料 (需帶 Access Token)
+#    * GET url/members/me/level   => 取得並更新會員等級 (需帶 User 的 Access Token)
 #    * GET url/members            => 所有member
 #    * GET url/members/:id        => 用id找member
 #    * GET url/members/:id/type   => 用id找member的type
@@ -10,6 +11,7 @@
 @user_id = 31fde60e-6b3a-4910-ae22-a484e27764aa
 @merchant_id = 0281a18a-b682-40ae-bff3-bddaf041fa57
 @access_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjNTFlMzkyZS1lMTA5LTQ3ODktYTJjYS1lYmI4Y2QyOWM1NmEiLCJhY2NvdW50IjoibWVyY2hhbnQxIiwidHlwZSI6Im1lcmNoYW50IiwiaWF0IjoxNzY1ODY3NDUwLCJleHAiOjE3NjU5NTM4NTB9.931Z2Hqe1okExQrKvwe9SY69OCPy3RlF53bIbZmgPRY
+@user_access_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzMWZkZTYwZS02YjNhLTQ5MTAtYWUyMi1hNDg0ZTI3NzY0YWEiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTczNTU1MDAwMCwiZXhwIjoxNzM1NjM2NDAwfQ.example
 
 
 
@@ -20,6 +22,17 @@ GET http://localhost:3000/members
 ### 拿回自己的資料
 GET http://localhost:3000/members/me
 Authorization: Bearer {{access_token}}
+
+
+### 查詢會員等級並更新 (User only)
+# 回傳格式: { level: number, totalSpent: number }
+# Level 規則:
+#   Level 1: 總消費 < 5000
+#   Level 2: 總消費 >= 5000
+#   Level 3: 總消費 >= 10000
+#   Level 4: 總消費 >= 15000
+GET http://localhost:3000/members/me/level
+Authorization: Bearer {{user_access_token}}
 
 
 ### 拿回某成員的資料
