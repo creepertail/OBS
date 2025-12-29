@@ -96,6 +96,12 @@ export class OrderService {
       throw new NotFoundException('Merchant not found');
     }
 
+    // 驗證商家狀態
+    const merchantState = ((merchant.merchantState ?? 0) / 2) % 2 === 1;
+    if(merchantState) {
+      throw new ForbiddenException('The merchant is not allowed to sell books.'); 
+    }
+
     // 建立訂單（使用 JWT 的 userId 和從書籍取得的 merchantId）
     const order = this.orderRepository.create({
       ...createOrderDto,
