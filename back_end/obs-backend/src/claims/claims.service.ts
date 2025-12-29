@@ -48,11 +48,19 @@ export class ClaimsService {
       throw new ConflictException('Coupon is expired');
     }
 
+    if (coupon.quantity <= 0) {
+      throw new ConflictException('Coupon is out of stock');
+    }
+
     const claim = this.claimsRepository.create({
       userID: currentUser.sub,
       couponID: coupon.couponID,
       state: 0,
     });
+
+    coupon.quantity -= 1;
+    await this.couponRepository.save(coupon);
+
     return this.claimsRepository.save(claim);
   }
 
