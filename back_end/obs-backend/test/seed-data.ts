@@ -204,6 +204,7 @@ async function seedData() {
       description: 'merchant1 年末折扣券',
       redemptionCode: 'MERCHANT1-NEWYEAR-90',
       memberID: merchant1.memberID,
+      discountType: 0, // 指定商家折扣
     });
 
     const coupon2 = await couponRepo.save({
@@ -213,12 +214,35 @@ async function seedData() {
       description: 'merchant2 新客八折券',
       redemptionCode: 'MERCHANT2-WELCOME-80',
       memberID: merchant2.memberID,
+      discountType: 0, // 指定商家折扣
+    });
+
+    const coupon3 = await couponRepo.save({
+      quantity: 200,
+      validDate: new Date('2026-12-31T00:00:00Z'),
+      discount: 0.85,
+      description: '全平台 85 折券（Admin 全域）',
+      redemptionCode: 'GLOBAL-ADMIN-85',
+      memberID: admin.memberID,
+      discountType: 1, // 全域折扣
+    });
+
+    const coupon4 = await couponRepo.save({
+      quantity: 150,
+      validDate: new Date('2026-06-30T00:00:00Z'),
+      discount: 60,
+      description: '全平台免運券（Admin）',
+      redemptionCode: 'GLOBAL-SHIPPING-FREE',
+      memberID: admin.memberID,
+      discountType: 2, // 貨運折扣
     });
 
     await claimRepo.save([
       { userID: user1.memberID, couponID: coupon1.couponID, state: 0 },
       { userID: user2.memberID, couponID: coupon1.couponID, state: 0 },
       { userID: user3.memberID, couponID: coupon2.couponID, state: 0 },
+      { userID: user1.memberID, couponID: coupon3.couponID, state: 0 },
+      { userID: user2.memberID, couponID: coupon4.couponID, state: 0 },
     ]);
 
     const categories = await categoryRepo.save([

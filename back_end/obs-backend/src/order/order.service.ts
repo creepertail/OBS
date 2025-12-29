@@ -132,6 +132,10 @@ export class OrderService {
         throw new ForbiddenException('Invalid coupon owner');
       }
 
+      if (coupon.discountType === 0 && coupon.memberID !== dto.merchantId) {
+        throw new ForbiddenException('This coupon is restricted to a specific merchant');
+      }
+
       if (coupon.discountType === 2) {
         const result = this.applyDiscount(shippingFee, coupon.discount);
         shippingFee = result.value;

@@ -15,7 +15,7 @@ Authorization: Bearer {{admin_token}}
   "discount": 0.9,
   "description": "年末特價",
   "redemptionCode": "PLATFORM-NEWYEAR-90",
-  "discountType": 0,
+  "discountType": 1,
   "memberID": "{{admin_id}}"
 }
 
@@ -30,6 +30,6 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NWI5ZTcwN
   "discount": 0.8,
   "description": "新客八折券",
   "redemptionCode": "SHOP-WELCOME-80",
-  "discountType": 1,
+  "discountType": 0,
   "memberID": "55b9e707-5007-4683-a254-cc15e8c20e85"
 }

@@ -1,6 +1,6 @@
 @baseUrl = http://localhost:3000
 @userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZWI3Y2JjYi05N2Q3LTQwNjktYTExOC05M2M0MjE0NTM5NTkiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2NzAxNDI1MiwiZXhwIjoxNzY3MTAwNjUyfQ.bxgQ33F0Dx_H7NKMACs7pf7m42ZJ98A-S05WZ6q463g
-@merchantId = 1fbcf45e-fd73-4c92-8fa8-03eb4974ffc9
+@merchantId = 55b9e707-5007-4683-a254-cc15e8c20e85
 @claimId = c8eecadb-e09a-40e8-ab35-cd3e70a4da24
 
 ### 結帳（從購物車、指定商家，支援優惠券）
