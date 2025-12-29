@@ -97,7 +97,7 @@ export class OrderService {
     }
 
     // 驗證商家狀態
-    const merchantState = ((merchant.merchantState ?? 0) / 2) % 2 === 1;
+    const merchantState = (merchant.merchantState ?? 0) % 2 === 1;
     if(merchantState) {
       throw new ForbiddenException('The merchant is not allowed to sell books.'); 
     }
