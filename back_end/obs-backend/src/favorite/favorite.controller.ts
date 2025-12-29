@@ -22,6 +22,15 @@ export class FavoriteController {
   }
 
   @JWTGuard(MemberType.User)
+  @Get(':bookID')
+  getFavoriteByBookID(
+    @Param('bookID') bookID: string, 
+    @CurrentUser() user: any,
+  ) {
+    return this.favoriteService.getFavoriteByBookID(user.sub, bookID);
+  }
+
+  @JWTGuard(MemberType.User)
   @Delete(':bookID')
   remove(@Param('bookID') bookID: string, @CurrentUser() user: any) {
     return this.favoriteService.remove(bookID, user);

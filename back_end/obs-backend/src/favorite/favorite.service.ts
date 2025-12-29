@@ -42,6 +42,13 @@ export class FavoriteService {
     });
   }
 
+  async getFavoriteByBookID(userID: string, bookID: string): Promise<boolean> {
+    const favorite = await this.favoriteRepository.findOne({
+      where: { userID, bookID }
+    });
+    return !!favorite;
+  }
+
   async remove(bookID: string, currentUser: { sub: string; type: MemberType }): Promise<void> {
     this.ensureUser(currentUser);
     const favorite = await this.favoriteRepository.findOne({ where: { userID: currentUser.sub, bookID } });
