@@ -25,6 +25,23 @@ export class CouponController {
     return this.couponService.findByOwner(user.sub);
   }
 
+  // User：查看哪些券可領/不可領（含原因），可選 merchantId、discountType
+  @JWTGuard(MemberType.User)
+  @Get('eligibility')
+  checkEligibility(
+    @CurrentUser() user: any,
+    @Query('merchantId') merchantId?: string,
+    @Query('discountType') discountType?: string,
+  ) {
+    const parsedDiscountType = discountType !== undefined ? Number(discountType) : undefined;
+    const hasValidDiscountType = parsedDiscountType !== undefined && !Number.isNaN(parsedDiscountType);
+
+    return this.couponService.eligibility(user.sub, {
+      merchantId,
+      discountType: hasValidDiscountType ? parsedDiscountType : undefined,
+    });
+  }
+
   // User/商家：只看可兌換的優惠券（未過期且有庫存，可選 discountType）
   @JWTGuard()
   @Get('available')

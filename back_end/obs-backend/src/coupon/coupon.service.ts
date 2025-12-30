@@ -7,6 +7,7 @@ import { CreateCouponDto } from './dto/create-coupon.dto';
 import { UpdateCouponDto } from './dto/update-coupon.dto';
 import { Member } from '../member/entities/member.entity';
 import { MemberType } from '../member/member-type.enum';
+import { Claim } from '../claims/entities/claim.entity';
 
 @Injectable()
 export class CouponService {
@@ -15,6 +16,8 @@ export class CouponService {
     private readonly couponRepository: Repository<Coupon>,
     @InjectRepository(Member)
     private readonly memberRepository: Repository<Member>,
+    @InjectRepository(Claim)
+    private readonly claimRepository: Repository<Claim>,
   ) {}
 
   async create(createCouponDto: CreateCouponDto, currentUser: { sub: string; type: MemberType }): Promise<Coupon> {
@@ -136,5 +139,59 @@ export class CouponService {
     if (coupon.memberID !== currentUser.sub) {
       throw new ForbiddenException('You can only access your own coupons');
     }
+  }
+
+  async eligibility(
+    userId: string,
+    options?: { merchantId?: string; discountType?: number },
+  ): Promise<{
+    claimable: Array<Coupon>;
+    blocked: Array<{ coupon: Coupon; reason: string }>;
+  }> {
+    const user = await this.memberRepository.findOne({ where: { memberID: userId, type: MemberType.User } });
+    if (!user) {
+      throw new ForbiddenException('Only users can view coupon eligibility');
+    }
+
+    const userClaims = await this.claimRepository.find({ where: { userID: userId } });
+    const claimCountMap = userClaims.reduce<Record<string, number>>((acc, claim) => {
+      acc[claim.couponID] = (acc[claim.couponID] || 0) + 1;
+      return acc;
+    }, {});
+
+    const filters: FindOptionsWhere<Coupon>[] = [{}];
+    if (options?.discountType !== undefined) {
+      filters.forEach((f) => (f.discountType = options.discountType));
+    }
+
+    const coupons = await this.couponRepository.find({ where: filters });
+    const now = Date.now();
+    const claimable: Coupon[] = [];
+    const blocked: Array<{ coupon: Coupon; reason: string }> = [];
+
+    for (const coupon of coupons) {
+      const reasons: string[] = [];
+      if (coupon.quantity <= 0) reasons.push('已無庫存');
+      if (coupon.validDate && coupon.validDate.getTime() < now) reasons.push('已過期');
+
+      const count = claimCountMap[coupon.couponID] || 0;
+      if (count >= 2) reasons.push('已領取 2 次');
+
+      if (coupon.discountType === 0) {
+        if (!options?.merchantId) {
+          reasons.push('缺少 merchantId');
+        } else if (coupon.memberID !== options.merchantId) {
+          reasons.push('商家不符');
+        }
+      }
+
+      if (reasons.length === 0) {
+        claimable.push(coupon);
+      } else {
+        blocked.push({ coupon, reason: reasons.join('、') });
+      }
+    }
+
+    return { claimable, blocked };
   }
 }
