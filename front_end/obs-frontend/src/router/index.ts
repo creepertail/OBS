@@ -16,6 +16,7 @@ import CouponView from '@/views/CouponView.vue'
 import MerchantReportView from '@/views/MerchantReportView.vue'
 import BookReviewsView from '@/views/BookReviewsView.vue'
 import FavoriteView from '@/views/FavoriteView.vue'
+import ClaimCouponView from '@/views/ClaimCouponView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -104,6 +105,11 @@ const router = createRouter({
       path: '/coupon',
       name: 'coupon',
       component: CouponView
+    },
+    {
+      path: '/coupon/claim',
+      name: 'claimCoupon',
+      component: ClaimCouponView
     },
     {
       path: '/admin',

@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import axios from 'axios'
 import type Coupon from '../type/coupon'
 import type ClaimWithCoupon from '../type/claimWithCoupon'
+
+const router = useRouter()
 
 const userType = ref('')
 const coupons = ref<Coupon[]>([])
@@ -145,6 +148,11 @@ function openAddModal() {
       discountType: userType.value === 'merchant' ? 1 : 0
     }
   }
+}
+
+// 前往查看所有可領取優惠券頁面
+function goToClaimCouponView() {
+  router.push({ name: 'claimCoupon' })
 }
 
 // 關閉模態框
@@ -302,7 +310,12 @@ async function deleteCoupon(couponID: string) {
   <main class="coupon-page">
     <div class="coupon-title">
       <h1>{{ pageTitle }}</h1>
-      <button class="add-button" @click="openAddModal">新增優惠券</button>
+      <div class="button-group">
+        <button v-if="userType === 'user'" class="view-available-button" @click="goToClaimCouponView">
+          查看可領取優惠券
+        </button>
+        <button class="add-button" @click="openAddModal">新增優惠券</button>
+      </div>
     </div>
 
     <!-- 載入中 -->
@@ -564,10 +577,15 @@ async function deleteCoupon(couponID: string) {
   font-weight: 800;
 }
 
-.add-button {
+.button-group {
+  display: flex;
+  gap: 12px;
+}
+
+.add-button,
+.view-available-button {
   padding: 10px 20px;
   border: none;
-  background: #3498db;
   color: white;
   border-radius: 8px;
   cursor: pointer;
@@ -576,8 +594,20 @@ async function deleteCoupon(couponID: string) {
   white-space: nowrap;
 }
 
+.add-button {
+  background: #3498db;
+}
+
 .add-button:hover {
   background: #2980b9;
+}
+
+.view-available-button {
+  background: #27ae60;
+}
+
+.view-available-button:hover {
+  background: #229954;
 }
 
 /* 狀態 */
