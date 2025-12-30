@@ -192,6 +192,13 @@ async function submitReviewAndReceive() {
               class="cart-item"
               @click="goToBookPage(item.book.bookID)"
             >
+              <img
+                :src="
+                  item.book.images.find(img => img.isCover)?.imageUrl
+                  ?? 'http://localhost:3000/uploads/defaultImages/default_book_image.png'
+                "
+                class="cart-item__image"
+              />
               <div class="cart-item__content">
                 <div>
                   <h2 class="cart-item__title">{{ item.book.name }}</h2>
