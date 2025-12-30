@@ -75,7 +75,7 @@ export class MemberController {
   }
 
   // GET url/members/canAcceptOrder/:merchantID
-  @JWTGuard(MemberType.Merchant)
+  @JWTGuard(MemberType.User)
   @Get('canAcceptOrder')
   canAcceptOrder(
     @CurrentUser() user: any,
