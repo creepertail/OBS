@@ -25,7 +25,7 @@ async function fetchAvailableCoupons() {
     if (!token) {
       errorMsg.value = '請先登入'
       loading.value = false
-      return
+      return 
     }
 
     // 構建API URL
@@ -110,7 +110,7 @@ function formatDiscount(discount: number, discountType: number) {
 
 // 格式化折扣類型
 function formatDiscountType(discountType: number) {
-  const types = ['季節性折扣', '商家折扣', '貨運折扣']
+  const types = ['商家折扣', '季節性折扣', '貨運折扣']
   return types[discountType] || '未知類型'
 }
 
