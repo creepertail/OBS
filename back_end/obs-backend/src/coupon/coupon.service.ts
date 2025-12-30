@@ -190,14 +190,6 @@ export class CouponService {
       const count = claimCountMap[coupon.couponID] || 0;
       if (count >= 1) reasons.push('已領取過');
 
-      if (coupon.discountType === 0) {
-        if (!options?.merchantId) {
-          reasons.push('缺少 merchantId');
-        } else if (coupon.memberID !== options.merchantId) {
-          reasons.push('商家不符');
-        }
-      }
-
       if (reasons.length === 0) {
         claimable.push(coupon);
       } else {
