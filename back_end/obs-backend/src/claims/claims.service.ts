@@ -36,11 +36,11 @@ export class ClaimsService {
     await this.ensureUserExists(currentUser.sub);
 
     // 不可重複兌換同一券
-    const existingClaim = await this.claimsRepository.findOne({
+    const claimCount = await this.claimsRepository.count({
       where: { userID: currentUser.sub, couponID: coupon.couponID },
     });
-    if (existingClaim) {
-      throw new ConflictException('You have already claimed this coupon');
+    if (claimCount >= 2) {
+      throw new ConflictException('You have already claimed this coupon twice');
     }
 
     // 檢查有效期
