@@ -143,8 +143,8 @@ function goBack() {
         class="filter-select"
       >
         <option value="all">全部</option>
-        <option value="0">季節性折扣</option>
-        <option value="1">商家折扣</option>
+        <option value="0">商家折扣</option>
+        <option value="1">季節性折扣</option>
         <option value="2">貨運折扣</option>
       </select>
     </div>
