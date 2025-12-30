@@ -563,6 +563,8 @@ textarea::placeholder {
   color: var(--color-danger);
   font-weight: 700;
   margin-top: 8px;
+  width: 80px;
+  text-align: right;
 }
 
 .cart-item__footer {

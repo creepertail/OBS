@@ -6,9 +6,16 @@
       <h3>{{ props.title }}</h3>
       <p class="author">{{ props.author }}</p>
       <p class="publisher">出版社：{{ props.publisher }}</p>
-      <p class="price">$ {{ props.price }}</p>
-      <p class="note" v-if="props.status===0">已下架</p>
-      <button class="edit-btn" @click="router.push({ name: 'editProduct', params: { bookID: props.bookID} })">編輯商品</button>
+      <div class="bottom">
+        <p class="price">$ {{ props.price }}</p>
+        <p class="note" v-if="props.status===0">已下架</p>
+        <button
+          class="edit-btn"
+          @click="router.push({ name: 'editProduct', params: { bookID: props.bookID} })"
+        >
+          編輯商品
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -32,12 +39,14 @@ const props = defineProps({
 <style scoped>
 .product-card {
   width: 250px;
-  /* background: #fff; */
   border-radius: 12px;
   overflow: hidden;
   padding-bottom: 10px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   transition: 0.25s ease;
+
+  display: flex;
+  flex-direction: column; /* ⭐ 重要 */
 }
 
 .product-card:hover {
@@ -50,9 +59,12 @@ const props = defineProps({
   height: 180px;
   object-fit: cover;
 }
-
+ 
 .info {
   padding: 10px 14px;
+  flex: 1; /* ⭐ 撐滿卡片剩餘高度 */
+  display: flex;
+  flex-direction: column;
 }
 
 .author {
@@ -63,6 +75,10 @@ const props = defineProps({
 .publisher {
   font-size: 13px;
   color: #999;
+}
+
+.bottom {
+  margin-top: auto; /* ⭐⭐ 把這一整塊推到最底下 */
 }
 
 .price {
