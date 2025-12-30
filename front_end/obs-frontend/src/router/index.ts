@@ -18,6 +18,7 @@ import BookReviewsView from '@/views/BookReviewsView.vue'
 import FavoriteView from '@/views/FavoriteView.vue'
 import ClaimCouponView from '@/views/ClaimCouponView.vue'
 import SubscribeView from '@/views/SubscribeView.vue'
+import MemberProfileView from '@/views/MemberProfileView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -126,6 +127,11 @@ const router = createRouter({
       path: '/subscribe',
       name: 'subscribe',
       component: SubscribeView
+    },
+    {
+      path: '/profile',
+      name: 'profile',
+      component: MemberProfileView
     }
   ]
 })
