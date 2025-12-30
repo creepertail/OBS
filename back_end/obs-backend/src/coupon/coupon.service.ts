@@ -50,7 +50,7 @@ export class CouponService {
     return this.couponRepository.save(coupon);
   }
 
-  findAll(options?: { onlyAvailable?: boolean; discountType?: number }): Promise<Coupon[]> {
+  async findAll(options?: { onlyAvailable?: boolean; discountType?: number; userID?: string }): Promise<Coupon[]> {
     const filters: FindOptionsWhere<Coupon>[] = options?.onlyAvailable
       ? [
           { quantity: MoreThan(0), validDate: IsNull() },
@@ -64,7 +64,15 @@ export class CouponService {
       });
     }
 
-    return this.couponRepository.find({ where: filters });
+    let coupons = await this.couponRepository.find({ where: filters });
+
+    if (options?.userID) {
+      const userClaims = await this.claimRepository.find({ where: { userID: options.userID } });
+      const claimedCouponIDs = new Set(userClaims.map((claim) => claim.couponID));
+      coupons = coupons.filter((coupon) => !claimedCouponIDs.has(coupon.couponID));
+    }
+
+    return coupons;
   }
 
   async findByOwner(memberID: string): Promise<Coupon[]> {
@@ -175,7 +183,7 @@ export class CouponService {
       if (coupon.validDate && coupon.validDate.getTime() < now) reasons.push('已過期');
 
       const count = claimCountMap[coupon.couponID] || 0;
-      if (count >= 2) reasons.push('已領取 2 次');
+      if (count >= 1) reasons.push('已領取過');
 
       if (coupon.discountType === 0) {
         if (!options?.merchantId) {
