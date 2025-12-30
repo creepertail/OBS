@@ -1,7 +1,7 @@
 @baseUrl = http://localhost:3000
-@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1OTJlNmQ5My02NDdmLTRiY2YtYTY5ZC01MjRlODU5YmFjMGIiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2NzA3MTgyMywiZXhwIjoxNzY3MTU4MjIzfQ.Vmme-0jKzARhAmDiXngwTtCXM0B8FhW8znzPXb_NZw4
-@merchantId = f43bc9d6-039f-4770-89c8-4d932c4cab77
-@claimId = 378c9184-a60b-4e00-866f-a6d3791f9416
+@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1OTJlNmQ5My02NDdmLTRiY2YtYTY5ZC01MjRlODU5YmFjMGIiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2NzA3NDA3MywiZXhwIjoxNzY3MTYwNDczfQ.b0f0VeTjFC82BDy9Wed0AfgHB82LDFwUAW0fbNELff0
+@merchantId = 739e504f-e07d-4af1-84f3-33c11e97868e
+@couponId = 950ce1cd-0b60-4ac7-9069-f09ab41e440c
 
 ### 結帳（從購物車、指定商家，支援優惠券）
 POST {{baseUrl}}/orders/checkout
@@ -12,7 +12,7 @@ Authorization: Bearer {{userToken}}
   "shippingAddress": "台北市信義區仁愛路100號",
   "paymentMethod": 1,
   "merchantId": "{{merchantId}}",
-  "claimId": "{{claimId}}"
+  "couponId": "{{couponId}}"
 }
 
 ### 結帳（無優惠券）

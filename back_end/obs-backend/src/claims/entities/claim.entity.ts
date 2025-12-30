@@ -1,17 +1,14 @@
 // src/claims/entities/claim.entity.ts
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { Member } from '../../member/entities/member.entity';
 import { Coupon } from '../../coupon/entities/coupon.entity';
 
 @Entity('claims')
 export class Claim {
-  @PrimaryGeneratedColumn('uuid', { name: 'ClaimID' })
-  claimID: string;
-
-  @Column({ type: 'char', length: 36, name: 'UserID' })
+  @PrimaryColumn({ type: 'char', length: 36, name: 'UserID' })
   userID: string;
 
-  @Column({ type: 'char', length: 36, name: 'CouponID' })
+  @PrimaryColumn({ type: 'char', length: 36, name: 'CouponID' })
   couponID: string;
 
   @CreateDateColumn({ name: 'ClaimedAt' })

@@ -21,7 +21,6 @@ export class ClaimsService {
   ) {}
 
   async create(createClaimDto: CreateClaimDto, currentUser: { sub: string; type: MemberType }): Promise<Claim> {
-    // 僅 User 可領取
     if (currentUser.type !== MemberType.User) {
       throw new ForbiddenException('Only users can claim coupons');
     }
@@ -35,15 +34,13 @@ export class ClaimsService {
 
     await this.ensureUserExists(currentUser.sub);
 
-    // 不可重複兌換同一券
-    const claimCount = await this.claimsRepository.count({
+    const existingClaim = await this.claimsRepository.findOne({
       where: { userID: currentUser.sub, couponID: coupon.couponID },
     });
-    if (claimCount >= 2) {
-      throw new ConflictException('You have already claimed this coupon twice');
+    if (existingClaim) {
+      throw new ConflictException('You have already claimed this coupon');
     }
 
-    // 檢查有效期
     if (coupon.validDate && coupon.validDate.getTime() < Date.now()) {
       throw new ConflictException('Coupon is expired');
     }
@@ -72,24 +69,28 @@ export class ClaimsService {
     return this.claimsRepository.find({ where: { userID }, relations: ['coupon'] });
   }
 
-  async findOne(claimID: string, currentUser: { sub: string; type: MemberType }): Promise<Claim> {
+  async findOne(couponID: string, currentUser: { sub: string; type: MemberType }, targetUserID?: string): Promise<Claim> {
+    const where = targetUserID
+      ? { couponID, userID: targetUserID }
+      : { couponID, userID: currentUser.sub };
     const claim = await this.claimsRepository.findOne({
-      where: { claimID },
+      where,
       relations: ['coupon'],
     });
     if (!claim) {
-      throw new NotFoundException(`Claim ${claimID} not found`);
+      throw new NotFoundException(`Claim for coupon ${couponID} not found`);
     }
-    this.ensureCanAccess(claim, currentUser);
+    this.ensureCanAccess(claim, currentUser, targetUserID);
     return claim;
   }
 
   async update(
-    claimID: string,
+    couponID: string,
     updateClaimDto: UpdateClaimDto,
     currentUser: { sub: string; type: MemberType },
+    targetUserID?: string,
   ): Promise<Claim> {
-    const claim = await this.findOne(claimID, currentUser);
+    const claim = await this.findOne(couponID, currentUser, targetUserID);
 
     if (updateClaimDto.state !== undefined) {
       claim.state = updateClaimDto.state;
@@ -103,16 +104,16 @@ export class ClaimsService {
     return this.claimsRepository.save(claim);
   }
 
-  async remove(claimID: string, currentUser: { sub: string; type: MemberType }): Promise<void> {
-    const claim = await this.findOne(claimID, currentUser);
+  async remove(couponID: string, currentUser: { sub: string; type: MemberType }, targetUserID?: string): Promise<void> {
+    const claim = await this.findOne(couponID, currentUser, targetUserID);
     await this.claimsRepository.remove(claim);
   }
 
-  private ensureCanAccess(claim: Claim, currentUser: { sub: string; type: MemberType }): void {
+  private ensureCanAccess(claim: Claim, currentUser: { sub: string; type: MemberType }, targetUserID?: string): void {
     if (currentUser.type === MemberType.Admin) {
       return;
     }
-    if (claim.userID !== currentUser.sub) {
+    if (claim.userID !== currentUser.sub || (targetUserID && targetUserID !== currentUser.sub)) {
       throw new ForbiddenException('You can only access your own claims');
     }
   }

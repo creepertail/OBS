@@ -105,9 +105,9 @@ export class OrderService {
 
     let claimToUpdate: Claim | undefined;
 
-    if (dto.claimId) {
+    if (dto.couponId) {
       const claim = await this.claimRepository.findOne({
-        where: { claimID: dto.claimId },
+        where: { couponID: dto.couponId, userID: userId },
         relations: ['coupon'],
       });
       if (!claim) {

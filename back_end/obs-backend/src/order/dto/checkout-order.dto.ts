@@ -16,5 +16,5 @@ export class CheckoutOrderDto {
 
   @IsUUID()
   @IsOptional()
-  claimId?: string;
+  couponId?: string;
 }

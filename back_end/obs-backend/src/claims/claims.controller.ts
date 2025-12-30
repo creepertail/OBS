@@ -1,4 +1,4 @@
-﻿import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { ClaimsService } from './claims.service';
 import { CreateClaimDto } from './dto/create-claim.dto';
 import { UpdateClaimDto } from './dto/update-claim.dto';
@@ -33,22 +33,22 @@ export class ClaimsController {
 
   // 依 ClaimID 取得單筆（Admin 任意；User 僅能查自己的）
   @JWTGuard(MemberType.User, MemberType.Admin)
-  @Get(':claimID')
-  findOne(@Param('claimID') claimID: string, @CurrentUser() user: any) {
-    return this.claimsService.findOne(claimID, user);
+  @Get(':couponID')
+  findOne(@Param('couponID') couponID: string, @CurrentUser() user: any) {
+    return this.claimsService.findOne(couponID, user);
   }
 
   // 更新領券紀錄（Admin 或本人）
   @JWTGuard(MemberType.User, MemberType.Admin)
-  @Patch(':claimID')
-  update(@Param('claimID') claimID: string, @Body() updateClaimDto: UpdateClaimDto, @CurrentUser() user: any) {
-    return this.claimsService.update(claimID, updateClaimDto, user);
+  @Patch(':couponID')
+  update(@Param('couponID') couponID: string, @Body() updateClaimDto: UpdateClaimDto, @CurrentUser() user: any) {
+    return this.claimsService.update(couponID, updateClaimDto, user);
   }
 
   // 刪除領券紀錄（Admin 或本人）
   @JWTGuard(MemberType.User, MemberType.Admin)
-  @Delete(':claimID')
-  remove(@Param('claimID') claimID: string, @CurrentUser() user: any) {
-    return this.claimsService.remove(claimID, user);
+  @Delete(':couponID')
+  remove(@Param('couponID') couponID: string, @CurrentUser() user: any) {
+    return this.claimsService.remove(couponID, user);
   }
 }
