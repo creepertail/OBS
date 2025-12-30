@@ -74,9 +74,9 @@ export class MemberController {
     return this.memberService.findBookByMerchantID(user.sub);
   }
 
-  // GET url/members/canAceeptOrder
+  // GET url/members/canAcceptOrder
   @JWTGuard(MemberType.Merchant)
-  @Get('canAceeptOrder')
+  @Get('canAcceptOrder')
   canAcceptOrder(@CurrentUser() user: any) {
     return this.memberService.canAcceptOrder(user.sub);
   }
