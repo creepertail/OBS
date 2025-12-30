@@ -35,6 +35,7 @@ interface CartGroup {
 const router = useRouter()
 const cartGroups = ref<CartGroup[]>([])
 const selectedMerchantId = ref<string | null>(null)
+const canCreateOrder = ref(false)
 
 onMounted(async () => {
   const token = localStorage.getItem('accessToken')
@@ -67,6 +68,19 @@ onMounted(async () => {
     }))
   }))
   console.log("cart group", cartGroups.value)
+
+  const res2 = await axios.get(
+    'http://localhost:3000/members/canCreateOrder',
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  )
+  console.log("res2", res2)
+
+  canCreateOrder.value = res2.data
+  console.log("canCreateOrder", canCreateOrder.value)
 })
 
 const totalAmount = computed(() => {
@@ -289,7 +303,7 @@ async function deleteAllCartItem(){
 
         <button 
           class="btn btn-primary"
-          :disabled="!selectedMerchantId"
+          :disabled="!selectedMerchantId || !canCreateOrder"
           @click="goToCheckout"
         >
           前往結帳

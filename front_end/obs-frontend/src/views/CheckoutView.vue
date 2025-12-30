@@ -39,6 +39,7 @@ const selectedClaim = ref<ClaimWithCoupon | null>(null)
 const selectedCity = ref("")
 const selectedDistrict = ref("")
 const detailAddress = ref("")
+const canAceeptOrder = ref(false)
 
 onMounted(async () => {
   const token = localStorage.getItem('accessToken')
@@ -86,6 +87,20 @@ onMounted(async () => {
   // 只留下「尚未使用」的優惠券
   myClaims.value = claimRes.data.filter(c => c.state === 0)
   console.log("my claim", myClaims.value)
+
+  const res2 = await axios.get(
+    `http://localhost:3000/members/canAcceptOrder/${merchantID.value}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  )
+  console.log("res2", res2)
+
+  canAceeptOrder.value = res2.data
+  console.log("canAceeptOrder", canAceeptOrder.value)
+  // members/canAceeptOrder
 })
 
 const paymentMethod = ref<PaymentMethod>("cash")
@@ -380,7 +395,7 @@ async function checkout() {
     <!-- 確認結帳 -->
     <button
       class="checkout-btn"
-      :disabled="isSubmitting"
+      :disabled="isSubmitting || !canAceeptOrder"
       @click="checkout"
     >
       確認結帳
@@ -468,6 +483,11 @@ h2 {
   background: var(--color-accent);
   color: white;
   cursor: pointer;
+}
+
+.checkout-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .coupon-item {

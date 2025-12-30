@@ -96,15 +96,13 @@ function formatDate(dateString: string) {
 }
 
 // 格式化折扣
-function formatDiscount(discount: number, discountType: number) {
-  if (discountType === 2) {
+function formatDiscount(discount: number) {
+  if (discount > 1) {
     // 貨運折扣：固定金額
-    return `折抵 $${discount}`
+    return `折 $${discount} 元`
   } else {
     // 季節性或商家折扣：百分比
-    const percentage = Math.round(discount * 100)
-    const offPercentage = 100 - percentage
-    return `${offPercentage}% OFF (${percentage}折)`
+    return `${Math.round((1 - discount) * 100)} % OFF`
   }
 }
 

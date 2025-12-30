@@ -12,6 +12,7 @@ const token = localStorage.getItem('accessToken')
 
 const showReviewModal = ref(false)
 const selectedBookID = ref<string | null>(null)
+const canCreateReview = ref(false)
 
 const hoverRating = ref<number>(0)
 const rating = ref<number>(0)
@@ -36,6 +37,20 @@ onMounted(async () => {
 
     orders.value = res.data
     console.log("orders", orders.value)
+
+  const res2 = await axios.get(
+    'http://localhost:3000/members/canCreateReview',
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  )
+  console.log("res2", res2)
+
+  canCreateReview.value = res2.data
+  console.log("canCreateReview", canCreateReview.value)
+    // canCreateReview
   } catch (e) {
     errorMsg.value = '取得訂單失敗'
     console.error(e)
@@ -220,6 +235,7 @@ async function submitReviewAndReceive() {
 
                   <button class="button" 
                     v-if="order.state === 4"
+                    :disabled="!canCreateReview"
                     @click.stop
                     @click="openReviewModal(item.book.bookID)"
                   >評論</button>

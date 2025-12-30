@@ -425,9 +425,9 @@ async function deleteCoupon(couponID: string) {
             </div>
           </div>
 
-          <button class="delete-coupon-button" @click="deleteCoupon(coupon.couponID)">
+          <!-- <button class="delete-coupon-button" @click="deleteCoupon(coupon.couponID)">
             刪除優惠券
-          </button>
+          </button> -->
         </article>
       </section>
     </div>
@@ -565,9 +565,8 @@ async function deleteCoupon(couponID: string) {
 .coupon-page {
   min-height: 100vh;
   padding: 100px 24px 48px;
-  background: #f5f7fa;
-  color: #2c3e50;
-  font-family: 'Noto Sans', sans-serif;
+  background: var(--color-bg-page);
+  color: var(--color-text-primary);
 }
 
 .coupon-title {
@@ -583,7 +582,6 @@ async function deleteCoupon(couponID: string) {
 .coupon-title h1 {
   font-size: 32px;
   font-weight: 800;
-  color: #34495e;
 }
 
 .button-group {
@@ -595,44 +593,39 @@ async function deleteCoupon(couponID: string) {
 .view-available-button {
   padding: 10px 20px;
   border: none;
-  border-radius: 12px;
+  color: white;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
-  font-weight: 600;
-  transition: all 0.2s ease-in-out;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: 0.2s;
+  white-space: nowrap;
 }
 
 .add-button {
-  background: linear-gradient(90deg, #667eea, #764ba2);
-  color: white;
+  background: #3498db;
 }
 
 .add-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  background: #2980b9;
 }
 
 .view-available-button {
-  background: linear-gradient(90deg, #27ae60, #2ecc71);
-  color: white;
+  background: #27ae60;
 }
 
 .view-available-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  background: #229954;
 }
 
-/* ===== Status ===== */
+/* 狀態 */
 .coupon-state {
   text-align: center;
   padding: 80px 0;
-  color: #95a5a6;
-  font-size: 18px;
+  color: var(--color-text-secondary);
 }
 
 .coupon-state.error {
-  color: #e74c3c;
+  color: var(--color-danger);
 }
 
 /* ===== List ===== */
@@ -647,18 +640,29 @@ async function deleteCoupon(couponID: string) {
 /* ===== Card ===== */
 .coupon-card {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 20px;
+  border-radius: 18px;
   padding: 24px;
   color: white;
   box-shadow: 0 12px 30px rgba(102, 126, 234, 0.3);
+  transition: transform 0.3s, box-shadow 0.3s;
   position: relative;
   overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.coupon-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  pointer-events: none;
 }
 
 .coupon-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 20px 40px rgba(102, 126, 234, 0.4);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(102, 126, 234, 0.4);
 }
 
 .coupon-card.used {
@@ -676,7 +680,7 @@ async function deleteCoupon(couponID: string) {
 .coupon-discount {
   font-size: 32px;
   font-weight: 800;
-  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .coupon-status,
@@ -686,7 +690,7 @@ async function deleteCoupon(couponID: string) {
   font-size: 13px;
   font-weight: 600;
   background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(10px);
 }
 
 .coupon-type-tag {
@@ -696,7 +700,7 @@ async function deleteCoupon(couponID: string) {
   font-size: 12px;
   font-weight: 600;
   background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
   margin-bottom: 12px;
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
@@ -711,11 +715,15 @@ async function deleteCoupon(couponID: string) {
 .coupon-code {
   background: rgba(255, 255, 255, 0.15);
   padding: 12px;
-  border-radius: 10px;
+  border-radius: 8px;
   margin-bottom: 16px;
   font-size: 14px;
   border: 1px dashed rgba(255, 255, 255, 0.3);
-  word-break: break-all;
+}
+
+.coupon-code strong {
+  font-size: 16px;
+  letter-spacing: 1px;
 }
 
 .coupon-info {
@@ -738,41 +746,58 @@ async function deleteCoupon(couponID: string) {
   font-weight: 600;
 }
 
-/* Delete button */
 .delete-coupon-button {
   width: 100%;
   margin-top: 16px;
   padding: 10px;
   border: none;
-  border-radius: 12px;
-  background: #e74c3c;
+  border-radius: 8px;
+  background: rgba(231, 76, 60, 0.9);
   color: white;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
 }
 
 .delete-coupon-button:hover {
-  transform: translateY(-2px);
-  background: #c0392b;
+  background: rgba(192, 57, 43, 1);
+  transform: translateY(-1px);
+}
+
+.delete-coupon-button:active {
+  transform: translateY(0);
+}
+
+/* 響應式 */
+@media (max-width: 768px) {
+  .coupon-list {
+    grid-template-columns: 1fr;
+  }
+  
+  .coupon-title h1 {
+    font-size: 24px;
+  }
 }
 
 /* ===== Modal ===== */
 .modal-overlay {
   position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
-  backdrop-filter: blur(4px);
   z-index: 1000;
+  backdrop-filter: blur(4px);
 }
 
 .modal-content {
-  background: #ffffff;
-  border-radius: 20px;
+  background: white;
+  border-radius: 16px;
   width: 90%;
   max-width: 500px;
   max-height: 90vh;
@@ -791,19 +816,26 @@ async function deleteCoupon(couponID: string) {
 .modal-header h2 {
   font-size: 24px;
   font-weight: 700;
+  margin: 0;
 }
 
 .close-button {
   background: none;
   border: none;
-  font-size: 28px;
+  font-size: 32px;
   cursor: pointer;
-  color: #7f8c8d;
+  color: #666;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: color 0.2s;
 }
 
 .close-button:hover {
-  color: #34495e;
+  color: #333;
 }
 
 .modal-form {
@@ -818,31 +850,52 @@ async function deleteCoupon(couponID: string) {
   display: block;
   margin-bottom: 8px;
   font-weight: 600;
-  color: #2c3e50;
+  color: #333;
 }
 
-.form-group input,
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
 .form-group select {
   width: 100%;
   padding: 12px;
-  border: 1px solid #dcdcdc;
-  border-radius: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
   font-size: 14px;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  background: white;
+  cursor: pointer;
 }
 
-.form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 8px rgba(102, 126, 234, 0.3);
+  border-color: #3498db;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
 }
 
 .modal-error {
-  background: #fdecea;
-  color: #e74c3c;
+  background: #fee;
+  color: #c33;
   padding: 12px;
-  border-radius: 12px;
+  border-radius: 8px;
   margin-bottom: 16px;
   font-size: 14px;
 }
@@ -854,22 +907,38 @@ async function deleteCoupon(couponID: string) {
   margin-top: 24px;
 }
 
+.cancel-button,
+.submit-button {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
 .cancel-button {
-  background: #ecf0f1;
-  color: #7f8c8d;
+  background: #f0f0f0;
+  color: #666;
 }
 
 .cancel-button:hover {
-  background: #dcdde1;
+  background: #e0e0e0;
 }
 
 .submit-button {
-  background: #667eea;
+  background: #3498db;
   color: white;
 }
 
 .submit-button:hover:not(:disabled) {
-  background: #5a67d8;
+  background: #2980b9;
+}
+
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .button { 
