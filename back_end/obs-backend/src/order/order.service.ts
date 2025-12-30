@@ -42,7 +42,11 @@ export class OrderService {
 
   private readonly baseShippingFee = 60;
 
-  private applyDiscount(base: number, discount: number): { value: number; discountAmount: number } {
+  private applyDiscount(base: number, discountRaw: number): { value: number; discountAmount: number } {
+    const discount = Number(discountRaw);
+    if (!Number.isFinite(discount) || discount <= 0) {
+      throw new BadRequestException('Invalid coupon discount value');
+    }
     const value = discount < 1 ? base * discount : Math.max(0, base - discount);
     return { value, discountAmount: base - value };
   }
@@ -128,22 +132,34 @@ export class OrderService {
       if (!owner) {
         throw new NotFoundException('Coupon owner not found');
       }
+      const effectiveDiscountType =
+        coupon.discountType === null || coupon.discountType === undefined
+          ? owner.type === MemberType.Admin
+            ? 1
+            : 0
+          : coupon.discountType;
+
       if (owner.type === MemberType.Merchant && coupon.memberID !== dto.merchantId) {
         throw new ForbiddenException('Coupon is not valid for this merchant');
       } else if (owner.type !== MemberType.Admin && owner.type !== MemberType.Merchant) {
         throw new ForbiddenException('Invalid coupon owner');
       }
 
-      if (coupon.discountType === 0 && coupon.memberID !== dto.merchantId) {
+      if (effectiveDiscountType === 0 && coupon.memberID !== dto.merchantId) {
         throw new ForbiddenException('This coupon is restricted to a specific merchant');
       }
 
-      if (coupon.discountType === 2) {
-        const result = this.applyDiscount(shippingFee, coupon.discount);
+      const discountValue = Number(coupon.discount);
+      if (!Number.isFinite(discountValue) || discountValue <= 0) {
+        throw new BadRequestException('Invalid coupon discount value');
+      }
+
+      if (effectiveDiscountType === 2) {
+        const result = this.applyDiscount(shippingFee, discountValue);
         shippingFee = result.value;
         discountAmount = result.discountAmount;
       } else {
-        const result = this.applyDiscount(subtotal, coupon.discount);
+        const result = this.applyDiscount(subtotal, discountValue);
         discountedSubtotal = result.value;
         discountAmount = result.discountAmount;
       }

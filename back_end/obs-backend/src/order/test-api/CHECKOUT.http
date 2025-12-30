@@ -1,7 +1,7 @@
 @baseUrl = http://localhost:3000
-@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZWI3Y2JjYi05N2Q3LTQwNjktYTExOC05M2M0MjE0NTM5NTkiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2NzAxNDI1MiwiZXhwIjoxNzY3MTAwNjUyfQ.bxgQ33F0Dx_H7NKMACs7pf7m42ZJ98A-S05WZ6q463g
-@merchantId = 55b9e707-5007-4683-a254-cc15e8c20e85
-@claimId = c8eecadb-e09a-40e8-ab35-cd3e70a4da24
+@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1OTJlNmQ5My02NDdmLTRiY2YtYTY5ZC01MjRlODU5YmFjMGIiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2NzA3MTgyMywiZXhwIjoxNzY3MTU4MjIzfQ.Vmme-0jKzARhAmDiXngwTtCXM0B8FhW8znzPXb_NZw4
+@merchantId = f43bc9d6-039f-4770-89c8-4d932c4cab77
+@claimId = 378c9184-a60b-4e00-866f-a6d3791f9416
 
 ### 結帳（從購物車、指定商家，支援優惠券）
 POST {{baseUrl}}/orders/checkout
