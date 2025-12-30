@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRouter } from "vue-router"
 import axios from 'axios'
 import type Order from '../type/order'
 
+const router = useRouter()
 const orders = ref<Order[]>([])
 const loading = ref(true)
 const errorMsg = ref('')
@@ -102,6 +104,12 @@ async function deliveredGoods(order: Order) {
   }
 }
 
+function goToBookPage(bookID: string) {
+  router.push({
+    name: 'book',
+    params: { bookID }
+  })
+}
 </script>
 
 <template>
@@ -156,6 +164,44 @@ async function deliveredGoods(order: Order) {
 
         <!-- 訂單資訊 -->
         <div class="order-info">
+          <!-- 書本清單 -->
+          <section class="cart-list">
+            <div
+              v-for="item in order.contains"
+              :key="item.book.bookID"
+              class="cart-item"
+              @click="goToBookPage(item.book.bookID)"
+            >
+              <img
+                :src="
+                  item.book.images.find(img => img.isCover)?.imageUrl
+                  ?? 'http://localhost:3000/uploads/defaultImages/default_book_image.png'
+                "
+                class="cart-item__image"
+              />
+              <div class="cart-item__content">
+                <div>
+                  <h2 class="cart-item__title">{{ item.book.name }}</h2>
+                  
+                  <p class="cart-item__price">
+                    NT$ {{ item.book.price }}
+                  </p>
+                </div>
+
+                <div class="cart-item__footer">
+                  <div class="cart-item__quantity">
+                    <span>數量</span>
+                    <div class="quantity-control">
+                      <span class="quantity-control__number">
+                        {{ item.quantity }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
           <div>
             <span>付款方式</span>
             <span>{{ paymentMethodText(order.paymentMethod) }}</span>
@@ -310,4 +356,70 @@ async function deliveredGoods(order: Order) {
   cursor: not-allowed;
 }
 
+.cart-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cart-item {
+  display: flex;
+  gap: 20px;
+  background: var(--color-bg-card);
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s ease;
+}
+
+.cart-item:hover {
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+}
+
+.cart-item__image {
+  max-width: 128px;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-muted);
+}
+
+.cart-item__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.cart-item__title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.cart-item__meta {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+}
+
+.cart-item__price {
+  color: var(--color-danger);
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+.cart-item__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.cart-item__quantity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 </style>
