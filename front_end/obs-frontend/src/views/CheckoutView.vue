@@ -71,9 +71,11 @@ onMounted(async () => {
       headers: { Authorization: `Bearer ${token}` }
     }
   )
+  console.log("claim", claimRes.data)
 
   // 只留下「尚未使用」的優惠券
   myClaims.value = claimRes.data.filter(c => c.state === 0)
+  console.log("my claim", myClaims.value)
 })
 
 const couponInput = ref("")
@@ -96,8 +98,11 @@ const discount = computed(() => {
 
   const coupon = selectedClaim.value.coupon
 
+  if(coupon.discountType === 2){
+    return 0
+  }
   // percent
-  if (coupon.discountType === 0) {
+  if (coupon.discount < 1) {
     return Math.floor(subtotal.value * (1 - coupon.discount))
   }
 
@@ -105,7 +110,15 @@ const discount = computed(() => {
   return coupon.discount
 })
 
-const shippingFee = computed(() => 60)
+const shippingFee = computed(() => {
+  if (!selectedClaim.value) return 60
+
+  if (selectedClaim.value.coupon.discountType === 2) {
+    return 0
+  }
+
+  return 60
+})
 
 const total = computed(() =>
   Math.max(0, subtotal.value - discount.value + shippingFee.value)
@@ -156,22 +169,39 @@ async function checkout() {
       quantity: item.quantity
     }))
 
-    await axios.post(
-      "http://localhost:3000/orders",
-      {
-        shippingAddress: shippingAddress.value,
-        paymentMethod: paymentMethodNumber,
-        totalPrice: total.value,
-        totalAmount,
-        items
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          "Content-Type": "application/json"
+    if (selectedClaim.value === null){
+      await axios.post(
+        "http://localhost:3000/orders/checkout",
+        {
+          shippingAddress: shippingAddress.value,
+          paymentMethod: paymentMethodNumber,
+          merchantId: merchantID.value
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            "Content-Type": "application/json"
+          }
         }
-      }
-    )
+      )
+    }
+    else{
+      await axios.post(
+        "http://localhost:3000/orders/checkout",
+        {
+          shippingAddress: shippingAddress.value,
+          paymentMethod: paymentMethodNumber,
+          merchantId: merchantID.value,
+          couponId: selectedClaim.value.couponID 
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            "Content-Type": "application/json"
+          }
+        }
+      )
+    }
 
     await axios.delete(
       `http://localhost:3000/cart/merchant/${merchantID.value}`,
@@ -260,7 +290,7 @@ async function checkout() {
           {{ claim.coupon.description }}
         </div>
         <div class="coupon-desc">
-          {{ claim.coupon.discountType === 0
+          {{ claim.coupon.discount < 1
             ? `打 ${(claim.coupon.discount * 10).toFixed(1)} 折`
             : `折 NT$ ${claim.coupon.discount}` }}
         </div>
@@ -268,7 +298,7 @@ async function checkout() {
           有效期限：{{ claim.coupon.validDate.slice(0, 10) }}
         </div>
       </div>
-
+      
       <p v-if="selectedClaim" class="success">
         已套用優惠券：{{ selectedClaim.coupon.description }}
       </p>
@@ -291,7 +321,7 @@ async function checkout() {
     <section class="card summary">
       <div>商品小計：NT$ {{ subtotal }}</div>
       <div>折扣：-NT$ {{ discount }}</div>
-      <div>運費：NT$ {{ shippingFee }}</div>
+      <div>運費：NT$ {{ shippingFee  }}</div>
       <hr />
       <div class="total">應付金額：NT$ {{ total }}</div>
     </section>
