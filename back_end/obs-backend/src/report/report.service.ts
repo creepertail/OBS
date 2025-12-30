@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { Order } from '../order/entities/order.entity';
 import { Contains } from '../order/entities/contains.entity';
 import { Member } from '../member/entities/member.entity';
+import { MerchantMonthlySalesView } from './entities/merchant-monthly-sales.view';
 import { SalesReportQueryDto } from './dto/sales-report-query.dto';
 
 @Injectable()
@@ -16,11 +17,29 @@ export class ReportService {
     private containsRepository: Repository<Contains>,
     @InjectRepository(Member)
     private memberRepository: Repository<Member>,
+    @InjectRepository(MerchantMonthlySalesView)
+    private monthlySalesViewRepository: Repository<MerchantMonthlySalesView>,
   ) {}
 
   /**
-   * 取得商家過去6個月的銷售摘要報表
-   * 回傳每月銷售資料，包含總件數和總金額
+   * 取得商家過去6個月的銷售摘要報表（使用 View）
+   * 完全基於 MerchantMonthlySalesView，無需 JavaScript 層資料處理
+   *
+   * 使用的 View 定義 (MerchantMonthlySalesView):
+   * SELECT
+   *   `order`.merchantId,
+   *   YEAR(`order`.orderDate) as year,
+   *   MONTH(`order`.orderDate) as month,
+   *   SUM(`order`.totalPrice) as totalRevenue,
+   *   COUNT(`order`.orderId) as totalOrders,
+   *   SUM(`order`.totalQuantity) as totalQuantity
+   * FROM `order`
+   * WHERE `order`.state >= 0
+   * GROUP BY
+   *   `order`.merchantId,
+   *   YEAR(`order`.orderDate),
+   *   MONTH(`order`.orderDate)
+   *
    * @param merchantId - 商家 ID
    * @param query - 查詢參數（日期範圍）
    */
@@ -38,22 +57,16 @@ export class ReportService {
     const endDate = new Date();
     const startDate = new Date();
     startDate.setMonth(startDate.getMonth() - 6);
-    startDate.setDate(1); // 從6個月前的第一天開始
+    startDate.setDate(1);
     startDate.setHours(0, 0, 0, 0);
 
-    // 建立過去6個月的查詢
-    const queryBuilder = this.orderRepository
-      .createQueryBuilder('order')
-      .where('order.merchantId = :merchantId', { merchantId })
-      .andWhere('order.orderDate >= :startDate', { startDate })
-      .andWhere('order.orderDate <= :endDate', { endDate });
-
-    const orders = await queryBuilder.getMany();
-
-    // 按月份分組訂單
-    const monthlySales: Record<string, { month: string; totalQuantity: number; totalRevenue: number }> = {};
+    const startYear = startDate.getFullYear();
+    const startMonth = startDate.getMonth() + 1;
+    const endYear = endDate.getFullYear();
+    const endMonth = endDate.getMonth() + 1;
 
     // 初始化所有6個月的資料為零
+    const monthlySales: Record<string, { month: string; totalQuantity: number; totalRevenue: number }> = {};
     for (let i = 0; i < 6; i++) {
       const date = new Date();
       date.setMonth(date.getMonth() - i);
@@ -65,14 +78,28 @@ export class ReportService {
       };
     }
 
-    // 按月份匯總銷售資料
-    orders.forEach(order => {
-      const orderDate = new Date(order.orderDate);
-      const monthKey = `${orderDate.getFullYear()}-${String(orderDate.getMonth() + 1).padStart(2, '0')}`;
+    // 直接從 View 查詢月銷售資料（已經在資料庫層面聚合完成）
+    const monthlySalesData = await this.monthlySalesViewRepository
+      .createQueryBuilder('view')
+      .where('view.merchantId = :merchantId', { merchantId })
+      .andWhere(
+        '(view.year > :startYear OR (view.year = :startYear AND view.month >= :startMonth))',
+        { startYear, startMonth },
+      )
+      .andWhere(
+        '(view.year < :endYear OR (view.year = :endYear AND view.month <= :endMonth))',
+        { endYear, endMonth },
+      )
+      .orderBy('view.year', 'ASC')
+      .addOrderBy('view.month', 'ASC')
+      .getMany();
 
+    // 將 View 資料填入對應月份（轉換字串為數字）
+    monthlySalesData.forEach(data => {
+      const monthKey = `${data.year}-${String(data.month).padStart(2, '0')}`;
       if (monthlySales[monthKey]) {
-        monthlySales[monthKey].totalQuantity += order.totalQuantity;
-        monthlySales[monthKey].totalRevenue += order.totalPrice;
+        monthlySales[monthKey].totalQuantity = Number(data.totalQuantity);
+        monthlySales[monthKey].totalRevenue = Number(data.totalRevenue);
       }
     });
 
@@ -80,10 +107,10 @@ export class ReportService {
     const monthlySalesArray = Object.values(monthlySales)
       .sort((a, b) => a.month.localeCompare(b.month));
 
-    // 計算整個6個月期間的總計
-    const totalRevenue = orders.reduce((sum, order) => sum + order.totalPrice, 0);
-    const totalQuantity = orders.reduce((sum, order) => sum + order.totalQuantity, 0);
-    const totalOrders = orders.length;
+    // 使用 View 資料直接計算總計（避免重複查詢，轉換字串為數字）
+    const totalRevenue = monthlySalesData.reduce((sum, item) => sum + Number(item.totalRevenue), 0);
+    const totalQuantity = monthlySalesData.reduce((sum, item) => sum + Number(item.totalQuantity), 0);
+    const totalOrders = monthlySalesData.reduce((sum, item) => sum + Number(item.totalOrders), 0);
 
     return {
       merchantId,

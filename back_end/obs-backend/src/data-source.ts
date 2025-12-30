@@ -12,7 +12,7 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME || 'root',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_DATABASE || 'OBS',
-  entities: ['src/**/*.entity.ts'],
+  entities: ['src/**/*.entity.ts', 'src/**/*.view.ts'],
   migrations: ['src/migrations/*.ts'],
   synchronize: false,
   logging: true,
