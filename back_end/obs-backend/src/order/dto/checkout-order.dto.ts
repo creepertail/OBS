@@ -1,5 +1,6 @@
 // src/order/dto/checkout-order.dto.ts
 import { IsInt, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength, Min } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class CheckoutOrderDto {
   @IsString()
@@ -14,6 +15,7 @@ export class CheckoutOrderDto {
   @IsUUID()
   merchantId: string;
 
+  @Transform(({ value }) => (value === null ? undefined : value))
   @IsUUID()
   @IsOptional()
   couponId?: string;
