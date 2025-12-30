@@ -251,9 +251,9 @@ async function checkout() {
 
       <div
         v-for="claim in myClaims"
-        :key="claim.claimID"
+        :key="claim.userID + '-' + claim.couponID"
         class="coupon-item"
-        :class="{ active: selectedClaim?.claimID === claim.claimID }"
+        :class="{ active: selectedClaim?.userID + '-' + selectedClaim?.couponID === claim.userID + '-' + claim.couponID }"
         @click="applyCoupon(claim)"
       >
         <div class="coupon-title">

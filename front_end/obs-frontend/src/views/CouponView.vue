@@ -337,7 +337,7 @@ async function deleteCoupon(couponID: string) {
       <section v-else class="coupon-list">
         <article
           v-for="claim in claims"
-          :key="claim.claimID"
+          :key="claim.userID + '-' + claim.couponID"
           class="coupon-card"
           :class="{ used: claim.state === 1 }"
         >
