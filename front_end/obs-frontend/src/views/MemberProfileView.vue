@@ -88,7 +88,7 @@ function goToSettingPage() {
     
     <p><strong>帳號：</strong>{{ member.account }}</p>
     <p><strong>Email：</strong>{{ member.email }}</p>
-    <p><strong>姓名：</strong>{{ member.userName }}</p>
+    <p v-if="isUser"><strong>姓名：</strong>{{ member.userName }}</p>
     <p><strong>電話：</strong>{{ member.phoneNumber }}</p>
     <p><strong>身分：</strong>{{ member.type }}</p>
   </section>
