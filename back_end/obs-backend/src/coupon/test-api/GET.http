@@ -12,7 +12,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0YTczNTViO
 ###
 # User/商家：只看可兌換的優惠券（未過期且有庫存；可選 discountType）
 GET {{baseUrl}}/coupons/available?discountType=1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZWI3Y2JjYi05N2Q3LTQwNjktYTExOC05M2M0MjE0NTM5NTkiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2NzAxMDc0NCwiZXhwIjoxNzY3MDk3MTQ0fQ.3bm3wQ2rvt_pIgN1UbO_utF4VLQZ1dCDpI6qTQPs7kA
+Authorization: Bearer {{user_token}}
 ###
 # Admin 取得全部優惠券（可選 available=true、discountType）
 GET {{baseUrl}}/coupons?available=true&discountType=1
@@ -22,8 +22,3 @@ Authorization: Bearer {{admin_token}}
 # 依 ID 取得單一優惠券（Admin 可看全部，商家只能看自己）
 GET {{baseUrl}}/coupons/{{coupon_id}}
 Authorization: Bearer {{merchant_token}}
-
-###
-# User：查詢可領/不可領（含原因），可傳 merchantId 以檢查商家券
-GET {{baseUrl}}/coupons/eligibility?merchantId={{merchant_id}}&discountType=0
-Authorization: Bearer {{user_token}}
