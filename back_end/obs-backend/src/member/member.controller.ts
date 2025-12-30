@@ -77,15 +77,22 @@ export class MemberController {
   // GET url/members/canAceeptOrder
   @JWTGuard(MemberType.Merchant)
   @Get('canAceeptOrder')
-  CanAcceptOrder(@CurrentUser() user: any) {
-    return this.memberService.CanAcceptOrder(user.sub);
+  canAcceptOrder(@CurrentUser() user: any) {
+    return this.memberService.canAcceptOrder(user.sub);
   }
 
-  // GET url/members/CreateReview
+  // GET url/members/canCreateReview
   @JWTGuard(MemberType.User)
-  @Get('CreateReview')
-  findMyStateCreateReview(@CurrentUser() user: any) {
-    return this.memberService.findMyStateCreateReview(user.sub);
+  @Get('canCreateReview')
+  canCreateReview(@CurrentUser() user: any) {
+    return this.memberService.canCreateReview(user.sub);
+  }
+
+  // GET url/members/canCreateOrder
+  @JWTGuard(MemberType.User)
+  @Get('canCreateOrder')
+  canCreateOrder(@CurrentUser() user: any) {
+    return this.memberService.canCreateOrder(user.sub);
   }
 
   // GET url/members/MerchantInfoWithBook/:id
