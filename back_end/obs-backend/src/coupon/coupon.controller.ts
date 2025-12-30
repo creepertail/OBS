@@ -45,9 +45,17 @@ export class CouponController {
   // User/商家：只看可兌換的優惠券（未過期且有庫存，可選 discountType）
   @JWTGuard()
   @Get('available')
-  findAvailable(@Query('discountType') discountType?: string) {
+  findAvailable(@Query('discountType') discountType?: string, @CurrentUser() user?: any) {
     const parsedDiscountType = discountType !== undefined ? Number(discountType) : undefined;
     const hasValidDiscountType = parsedDiscountType !== undefined && !Number.isNaN(parsedDiscountType);
+
+    if (user?.type === MemberType.User) {
+      return this.couponService
+        .eligibility(user.sub, {
+          discountType: hasValidDiscountType ? parsedDiscountType : undefined,
+        })
+        .then((res) => res.claimable);
+    }
 
     return this.couponService.findAll({
       onlyAvailable: true,
