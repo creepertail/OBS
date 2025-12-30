@@ -483,6 +483,7 @@ textarea::placeholder {
 .stars input {
   display: none;
 }
+
 .button {
   background-color: var(--color-accent);
   color: var(--vt-c-white);
