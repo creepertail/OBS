@@ -60,6 +60,7 @@ export class CouponController {
     return this.couponService.findAll({
       onlyAvailable: true,
       discountType: hasValidDiscountType ? parsedDiscountType : undefined,
+      userID: user?.sub,
     });
   }
 
