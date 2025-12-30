@@ -4,6 +4,8 @@ import { useRoute, useRouter } from "vue-router"
 import axios from "axios"
 import type CartItem from "../type/cartItem"
 import type Coupon from "../type/coupon"
+import type ClaimWithCoupon from "../type/claimWithCoupon"
+
 
 /* ========= 型別 ========= */
 type PaymentMethod = "cash" | "credit_card"
@@ -27,8 +29,12 @@ interface RawCartItem {
 /* ========= 狀態 ========= */
 const route = useRoute()
 const router = useRouter()
+
 const merchantID = ref(route.params.merchantID as string)
 const cartItems = ref<CartItem[]>([])
+
+const myClaims = ref<ClaimWithCoupon[]>([])
+const selectedClaim = ref<ClaimWithCoupon | null>(null)
 
 onMounted(async () => {
   const token = localStorage.getItem('accessToken')
@@ -57,6 +63,17 @@ onMounted(async () => {
       publisher: item.publisher
   }))
   console.log("cart item", cartItems.value)
+
+  // 載入我的優惠券
+  const claimRes = await axios.get<ClaimWithCoupon[]>(
+    "http://localhost:3000/claims/mine",
+    {
+      headers: { Authorization: `Bearer ${token}` }
+    }
+  )
+
+  // 只留下「尚未使用」的優惠券
+  myClaims.value = claimRes.data.filter(c => c.state === 0)
 })
 
 const couponInput = ref("")
@@ -75,10 +92,17 @@ const subtotal = computed(() =>
 )
 
 const discount = computed(() => {
-  if (!coupon.value) return 0
-  return coupon.value.discountType === "amount"
-    ? coupon.value.discountValue
-    : Math.floor(subtotal.value * coupon.value.discountValue / 100)
+  if (!selectedClaim.value) return 0
+
+  const coupon = selectedClaim.value.coupon
+
+  // percent
+  if (coupon.discountType === 0) {
+    return Math.floor(subtotal.value * (1 - coupon.discount))
+  }
+
+  // amount
+  return coupon.discount
 })
 
 const shippingFee = computed(() => 60)
@@ -88,24 +112,12 @@ const total = computed(() =>
 )
 
 /* ========= 優惠券 ========= */
-function applyCoupon() {
-  couponError.value = ""
-
-  if (couponInput.value === "BOOK100") {
-    coupon.value = {
-      code: "BOOK100",
-      discountType: "amount",
-      discountValue: 100
-    }
-  } else if (couponInput.value === "SALE10") {
-    coupon.value = {
-      code: "SALE10",
-      discountType: "percent",
-      discountValue: 10
-    }
-  } else {
-    coupon.value = null
-    couponError.value = "無效的優惠碼"
+function applyCoupon(claim : ClaimWithCoupon) {
+  if (selectedClaim.value === claim){
+    selectedClaim.value = null
+  }
+  else {
+    selectedClaim.value = claim
   }
 }
 
@@ -231,19 +243,34 @@ async function checkout() {
 
     <!-- 優惠券 -->
     <section class="card">
-      <h2>優惠券</h2>
-      <div class="coupon-row">
-        <input
-          v-model="couponInput"
-          placeholder="輸入優惠碼"
-        />
-        <button @click="applyCoupon">套用</button>
+      <h2>選擇優惠券</h2>
+
+      <div v-if="myClaims.length === 0">
+        目前沒有可用的優惠券
       </div>
-      <p v-if="coupon" class="success">
-        已套用優惠券：{{ coupon.code }}
-      </p>
-      <p v-if="couponError" class="error">
-        {{ couponError }}
+
+      <div
+        v-for="claim in myClaims"
+        :key="claim.claimID"
+        class="coupon-item"
+        :class="{ active: selectedClaim?.claimID === claim.claimID }"
+        @click="applyCoupon(claim)"
+      >
+        <div class="coupon-title">
+          {{ claim.coupon.description }}
+        </div>
+        <div class="coupon-desc">
+          {{ claim.coupon.discountType === 0
+            ? `打 ${(claim.coupon.discount * 10).toFixed(1)} 折`
+            : `折 NT$ ${claim.coupon.discount}` }}
+        </div>
+        <div class="coupon-date">
+          有效期限：{{ claim.coupon.validDate.slice(0, 10) }}
+        </div>
+      </div>
+
+      <p v-if="selectedClaim" class="success">
+        已套用優惠券：{{ selectedClaim.coupon.description }}
       </p>
     </section>
 
@@ -360,5 +387,32 @@ h2 {
   background: var(--color-accent);
   color: white;
   cursor: pointer;
+}
+
+.coupon-item {
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.coupon-item.active {
+  border-color: var(--color-accent);
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.coupon-title {
+  font-weight: 700;
+}
+
+.coupon-desc {
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.coupon-date {
+  font-size: 12px;
+  color: #666;
 }
 </style>

@@ -1,29 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
-
-interface Coupon {
-  couponID: string
-  quantity: number
-  validDate: string
-  discount: number
-  description: string
-  redemptionCode: string
-  memberID: string
-  discountType: number
-  createdAt: string
-  updatedAt: string
-}
-
-interface ClaimWithCoupon {
-  claimID: string
-  userID: string
-  couponID: string
-  claimedAt: string
-  state: number
-  usedAt: string | null
-  coupon: Coupon
-}
+import type Coupon from '../type/coupon'
+import type ClaimWithCoupon from '../type/claimWithCoupon'
 
 const userType = ref('')
 const coupons = ref<Coupon[]>([])
