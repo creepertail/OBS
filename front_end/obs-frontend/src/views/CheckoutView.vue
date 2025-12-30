@@ -5,7 +5,7 @@ import axios from "axios"
 import type CartItem from "../type/cartItem"
 import type Coupon from "../type/coupon"
 import type ClaimWithCoupon from "../type/claimWithCoupon"
-
+import { twCities } from "@/data/twAddress"
 
 /* ========= 型別 ========= */
 type PaymentMethod = "cash" | "credit_card"
@@ -35,6 +35,10 @@ const cartItems = ref<CartItem[]>([])
 
 const myClaims = ref<ClaimWithCoupon[]>([])
 const selectedClaim = ref<ClaimWithCoupon | null>(null)
+
+const selectedCity = ref("")
+const selectedDistrict = ref("")
+const detailAddress = ref("")
 
 onMounted(async () => {
   const token = localStorage.getItem('accessToken')
@@ -78,12 +82,24 @@ onMounted(async () => {
   console.log("my claim", myClaims.value)
 })
 
-const couponInput = ref("")
-const coupon = ref<Coupon | null>(null)
-const couponError = ref("")
 const paymentMethod = ref<PaymentMethod>("cash")
-const shippingAddress = ref("") // <-- 新增地址欄位
+// const shippingAddress = ref("") // <-- 新增地址欄位
 const isSubmitting = ref(false)
+
+/* ========= 地點 ========= */
+const districts = computed(() => {
+  const city = twCities.find(c => c.name === selectedCity.value)
+  return city ? city.districts : []
+})
+
+const shippingAddress = computed(() => {
+  if (!selectedCity.value || !selectedDistrict.value || !detailAddress.value) {
+    return ""
+  }
+  return `${selectedCity.value}${selectedDistrict.value}${detailAddress.value}`
+})
+
+
 
 /* ========= 計算金額 ========= */
 const subtotal = computed(() =>
@@ -264,12 +280,41 @@ async function checkout() {
     <!-- 地址欄位 -->
     <section class="card">
       <h2>收件地址</h2>
+
+      <div class="address-row">
+        <!-- 縣市 -->
+        <select v-model="selectedCity">
+          <option value="">選擇縣市</option>
+          <option
+            v-for="city in twCities"
+            :key="city.name"
+            :value="city.name"
+          >
+            {{ city.name }}
+          </option>
+        </select>
+
+        <!-- 區 / 鄉 / 鎮 -->
+        <select v-model="selectedDistrict" :disabled="!selectedCity">
+          <option value="">選擇區域</option>
+          <option
+            v-for="d in districts"
+            :key="d"
+            :value="d"
+          >
+            {{ d }}
+          </option>
+        </select>
+      </div>
+
+      <!-- 詳細地址 -->
       <input
         type="text"
-        v-model="shippingAddress"
-        placeholder="請輸入收件地址"
+        v-model="detailAddress"
+        placeholder="街道、門牌號碼"
       />
     </section>
+
 
     <!-- 優惠券 -->
     <section class="card">
@@ -445,4 +490,20 @@ h2 {
   font-size: 12px;
   color: #666;
 }
+
+.address-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.address-row select {
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-card);
+  color: var(--color-text-primary);
+}
+
 </style>
