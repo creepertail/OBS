@@ -32,6 +32,7 @@ const createForm = ref({
   redemptionCode: '',
   discountType: 0
 })
+const isDiscountPersent = ref(true)
 
 // 監聽 discountType 變化，自動調整 discount 預設值
 function onDiscountTypeChange() {
@@ -503,19 +504,25 @@ async function deleteCoupon(couponID: string) {
           <div class="form-row">
             <div class="form-group">
               <label for="discount">
-                {{ createForm.discountType === 2 ? '折扣金額（1-60）' : '折扣（0-1之間）' }}
+                {{ createForm.discountType === 2 ? '折扣金額（1-60）' : (!isDiscountPersent) ? '折扣（1-500之間）' : '折扣（0-1之間）' }}
               </label>
               <input
                 id="discount"
                 type="number"
                 :step="createForm.discountType === 2 ? '1' : '0.01'"
-                :min="createForm.discountType === 2 ? '1' : '0'"
-                :max="createForm.discountType === 2 ? '60' : '1'"
+                :min="createForm.discountType === 2 || !isDiscountPersent ? '1' : '0'"
+                :max="createForm.discountType === 2 ? '60' : !isDiscountPersent ? '500' : '1'"
                 v-model.number="createForm.discount"
                 :placeholder="createForm.discountType === 2 ? '例如：50' : '例如：0.9'"
                 required
               />
-            </div>
+              <button class="button" 
+                v-if="createForm.discountType !== 2"
+                @click="isDiscountPersent = !isDiscountPersent;
+                  createForm.discount = (isDiscountPersent) ? 0.9 : 100
+                "
+              >{{isDiscountPersent ? '打 X 折' : '折扣 X 元'}}</button>
+          </div>
 
             <div class="form-group">
               <label for="quantity">數量</label>
@@ -542,8 +549,8 @@ async function deleteCoupon(couponID: string) {
           <div v-if="modalError" class="modal-error">{{ modalError }}</div>
 
           <div class="modal-actions">
-            <button type="button" @click="closeModal" class="cancel-button">取消</button>
-            <button type="submit" class="submit-button" :disabled="modalLoading">
+            <button type="button" @click="closeModal" class="cancel-button button">取消</button>
+            <button type="submit" class="submit-button button" :disabled="modalLoading">
               {{ modalLoading ? '處理中...' : '建立' }}
             </button>
           </div>
@@ -558,8 +565,9 @@ async function deleteCoupon(couponID: string) {
 .coupon-page {
   min-height: 100vh;
   padding: 100px 24px 48px;
-  background: var(--color-bg-page);
-  color: var(--color-text-primary);
+  background: #f5f7fa;
+  color: #2c3e50;
+  font-family: 'Noto Sans', sans-serif;
 }
 
 .coupon-title {
@@ -575,6 +583,7 @@ async function deleteCoupon(couponID: string) {
 .coupon-title h1 {
   font-size: 32px;
   font-weight: 800;
+  color: #34495e;
 }
 
 .button-group {
@@ -586,39 +595,44 @@ async function deleteCoupon(couponID: string) {
 .view-available-button {
   padding: 10px 20px;
   border: none;
-  color: white;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
   font-size: 14px;
-  transition: 0.2s;
-  white-space: nowrap;
+  font-weight: 600;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .add-button {
-  background: #3498db;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  color: white;
 }
 
 .add-button:hover {
-  background: #2980b9;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
 .view-available-button {
-  background: #27ae60;
+  background: linear-gradient(90deg, #27ae60, #2ecc71);
+  color: white;
 }
 
 .view-available-button:hover {
-  background: #229954;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
-/* 狀態 */
+/* ===== Status ===== */
 .coupon-state {
   text-align: center;
   padding: 80px 0;
-  color: var(--color-text-secondary);
+  color: #95a5a6;
+  font-size: 18px;
 }
 
 .coupon-state.error {
-  color: var(--color-danger);
+  color: #e74c3c;
 }
 
 /* ===== List ===== */
@@ -633,29 +647,18 @@ async function deleteCoupon(couponID: string) {
 /* ===== Card ===== */
 .coupon-card {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 18px;
+  border-radius: 20px;
   padding: 24px;
   color: white;
   box-shadow: 0 12px 30px rgba(102, 126, 234, 0.3);
-  transition: transform 0.3s, box-shadow 0.3s;
   position: relative;
   overflow: hidden;
-}
-
-.coupon-card::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  right: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-  pointer-events: none;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .coupon-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 40px rgba(102, 126, 234, 0.4);
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(102, 126, 234, 0.4);
 }
 
 .coupon-card.used {
@@ -673,7 +676,7 @@ async function deleteCoupon(couponID: string) {
 .coupon-discount {
   font-size: 32px;
   font-weight: 800;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .coupon-status,
@@ -683,7 +686,7 @@ async function deleteCoupon(couponID: string) {
   font-size: 13px;
   font-weight: 600;
   background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(6px);
 }
 
 .coupon-type-tag {
@@ -693,7 +696,7 @@ async function deleteCoupon(couponID: string) {
   font-size: 12px;
   font-weight: 600;
   background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(8px);
   margin-bottom: 12px;
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
@@ -708,15 +711,11 @@ async function deleteCoupon(couponID: string) {
 .coupon-code {
   background: rgba(255, 255, 255, 0.15);
   padding: 12px;
-  border-radius: 8px;
+  border-radius: 10px;
   margin-bottom: 16px;
   font-size: 14px;
   border: 1px dashed rgba(255, 255, 255, 0.3);
-}
-
-.coupon-code strong {
-  font-size: 16px;
-  letter-spacing: 1px;
+  word-break: break-all;
 }
 
 .coupon-info {
@@ -739,58 +738,41 @@ async function deleteCoupon(couponID: string) {
   font-weight: 600;
 }
 
+/* Delete button */
 .delete-coupon-button {
   width: 100%;
   margin-top: 16px;
   padding: 10px;
   border: none;
-  border-radius: 8px;
-  background: rgba(231, 76, 60, 0.9);
+  border-radius: 12px;
+  background: #e74c3c;
   color: white;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
 .delete-coupon-button:hover {
-  background: rgba(192, 57, 43, 1);
-  transform: translateY(-1px);
-}
-
-.delete-coupon-button:active {
-  transform: translateY(0);
-}
-
-/* 響應式 */
-@media (max-width: 768px) {
-  .coupon-list {
-    grid-template-columns: 1fr;
-  }
-  
-  .coupon-title h1 {
-    font-size: 24px;
-  }
+  transform: translateY(-2px);
+  background: #c0392b;
 }
 
 /* ===== Modal ===== */
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
   backdrop-filter: blur(4px);
+  z-index: 1000;
 }
 
 .modal-content {
-  background: white;
-  border-radius: 16px;
+  background: #ffffff;
+  border-radius: 20px;
   width: 90%;
   max-width: 500px;
   max-height: 90vh;
@@ -809,26 +791,19 @@ async function deleteCoupon(couponID: string) {
 .modal-header h2 {
   font-size: 24px;
   font-weight: 700;
-  margin: 0;
 }
 
 .close-button {
   background: none;
   border: none;
-  font-size: 32px;
+  font-size: 28px;
   cursor: pointer;
-  color: #666;
-  padding: 0;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  color: #7f8c8d;
   transition: color 0.2s;
 }
 
 .close-button:hover {
-  color: #333;
+  color: #34495e;
 }
 
 .modal-form {
@@ -843,52 +818,31 @@ async function deleteCoupon(couponID: string) {
   display: block;
   margin-bottom: 8px;
   font-weight: 600;
-  color: #333;
+  color: #2c3e50;
 }
 
-.form-group input {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 14px;
-  transition: border-color 0.2s;
-  box-sizing: border-box;
-}
-
-.form-group input:focus {
-  outline: none;
-  border-color: #3498db;
-}
-
+.form-group input,
 .form-group select {
   width: 100%;
   padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  border: 1px solid #dcdcdc;
+  border-radius: 12px;
   font-size: 14px;
-  transition: border-color 0.2s;
-  box-sizing: border-box;
-  background: white;
-  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
+.form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #3498db;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  border-color: #667eea;
+  box-shadow: 0 0 8px rgba(102, 126, 234, 0.3);
 }
 
 .modal-error {
-  background: #fee;
-  color: #c33;
+  background: #fdecea;
+  color: #e74c3c;
   padding: 12px;
-  border-radius: 8px;
+  border-radius: 12px;
   margin-bottom: 16px;
   font-size: 14px;
 }
@@ -900,37 +854,32 @@ async function deleteCoupon(couponID: string) {
   margin-top: 24px;
 }
 
-.cancel-button,
-.submit-button {
-  padding: 10px 24px;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
 .cancel-button {
-  background: #f0f0f0;
-  color: #666;
+  background: #ecf0f1;
+  color: #7f8c8d;
 }
 
 .cancel-button:hover {
-  background: #e0e0e0;
+  background: #dcdde1;
 }
 
 .submit-button {
-  background: #3498db;
+  background: #667eea;
   color: white;
 }
 
 .submit-button:hover:not(:disabled) {
-  background: #2980b9;
+  background: #5a67d8;
 }
 
-.submit-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.button { 
+  padding: 12px; 
+  border-radius: 8px; 
+  font-size: 16px; 
+  font-weight: 600; 
+  margin: 4px 4px; 
+  border: none; 
+  cursor: pointer; 
+  transition: background-color 0.3s, transform 0.1s; 
 }
 </style>
