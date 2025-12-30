@@ -30,7 +30,7 @@ import { ReportModule } from './report/report.module';
       username: process.env.DB_USERNAME || 'root',
       password: process.env.DB_PASSWORD || '',
       database: process.env.DB_DATABASE || 'OBS',
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],  // 這行會自動掃描所有 .entity.ts 檔案
+      entities: [__dirname + '/**/*.entity{.ts,.js}', __dirname + '/**/*.view{.ts,.js}'],  // 這行會自動掃描所有 .entity.ts 和 .view.ts 檔案
       synchronize: true, // 關閉自動同步，避免重複建表錯誤
       // 注意：當你新增或修改 Entity 時，需要手動執行 SQL 或使用 migration
       // logging: ['query', 'error', 'schema'],
