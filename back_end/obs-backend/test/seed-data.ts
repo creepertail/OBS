@@ -1075,6 +1075,73 @@ async function seedData() {
 
     console.log('✅ 新增了 11 筆 7-12 月的訂單（總共 17 筆訂單）');
 
+    // 6. 創建評論資料（針對已完成訂單中的書籍）
+    console.log('\n💬 創建評論數據...');
+    const reviewRepo = AppDataSource.getRepository(Review);
+
+    // user2 對已完成訂單中的書籍留言（order8, order11, order14 - state: 3）
+    await reviewRepo.save([
+      // order8 - book3, book4
+      {
+        userID: user2.memberID,
+        bookID: book3.bookID,
+        date: new Date('2025-07-25'),
+        stars: 5,
+        description: '原住民文學選集非常精彩，值得收藏！每一篇都能感受到深厚的文化底蘊。',
+      },
+      {
+        userID: user2.memberID,
+        bookID: book4.bookID,
+        date: new Date('2025-07-26'),
+        stars: 4,
+        description: '很棒的自然療癒書籍，每天看一棵樹的故事讓心情平靜許多。',
+      },
+      // order11 - book7, book6
+      {
+        userID: user2.memberID,
+        bookID: book7.bookID,
+        date: new Date('2025-09-20'),
+        stars: 5,
+        description: '語言學習方法很實用！作者的沉浸式學習法真的有效，推薦給想學外語的人。',
+      },
+      {
+        userID: user2.memberID,
+        bookID: book6.bookID,
+        date: new Date('2025-09-21'),
+        stars: 5,
+        description: '小孩很喜歡這套科普書，內容豐富又有趣，每天都主動閱讀10分鐘。第二次購買送給朋友的小孩，反應也很好！科學知識編排得淺顯易懂。',
+      },
+    ]);
+
+    // user3 對已完成訂單中的書籍留言（order4, order9, order12 - state: 3）
+    await reviewRepo.save([
+      // order4 - book6
+      {
+        userID: user3.memberID,
+        bookID: book6.bookID,
+        date: new Date('2025-08-05'),
+        stars: 5,
+        description: '超棒的科普套書！兩本書200個知識點，孩子看得津津有味，cp值很高。',
+      },
+      // order9 - book5, book8
+      {
+        userID: user3.memberID,
+        bookID: book5.bookID,
+        date: new Date('2025-08-12'),
+        stars: 5,
+        description: '藝術設計理論講解清晰，對於理解設計史很有幫助，適合設計系學生。後來又買了一本送給學設計的朋友，他說這本書對他的畢業專題很有啟發！',
+      },
+      {
+        userID: user3.memberID,
+        bookID: book8.bookID,
+        date: new Date('2025-08-13'),
+        stars: 5,
+        description: '環遊世界200國真是一本精彩的旅遊書！圖文並茂，激發了我的旅行夢想。',
+      },
+    ]);
+
+    console.log('✅ 創建了 7 筆評論（user2: 4筆，user3: 3筆）');
+
     // 顯示統計資訊
     console.log('\n📊 數據統計：');
     console.log('─────────────────────────────');
@@ -1094,6 +1161,7 @@ async function seedData() {
     console.log(`   - 已出貨：${await orderRepo.count({ where: { state: 2 } })}`);
     console.log(`   - 已完成：${await orderRepo.count({ where: { state: 3 } })}`);
     console.log(`📦 訂單項目數：${await containsRepo.count()}`);
+    console.log(`💬 評論總數：${await reviewRepo.count()}`);
     console.log('─────────────────────────────');
 
     console.log('\n🎉 測試數據生成完成！');

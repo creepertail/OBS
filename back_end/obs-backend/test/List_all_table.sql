@@ -21,4 +21,6 @@ FROM obs.coupon;
 select *
 from obs.manage;
 select *
-from obs.clain;
+from obs.claims;
+select *
+from obs.review;
