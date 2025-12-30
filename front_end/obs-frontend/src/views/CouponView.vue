@@ -30,7 +30,7 @@ const createForm = ref({
   discount: 0.9,
   description: '',
   redemptionCode: '',
-  discountType: 1
+  discountType: 0
 })
 
 // 監聽 discountType 變化，自動調整 discount 預設值
@@ -142,10 +142,10 @@ function openAddModal() {
     createForm.value = {
       quantity: 1,
       validDate: '',
-      discount: userType.value === 'merchant' ? 0.9 : 0.9,
+      discount: 0.9,
       description: '',
       redemptionCode: '',
-      discountType: userType.value === 'merchant' ? 1 : 0
+      discountType: userType.value === 'merchant' ? 0 : 1
     }
   }
 }
@@ -483,8 +483,8 @@ async function deleteCoupon(couponID: string) {
               @change="onDiscountTypeChange"
               required
             >
-              <option v-if="userType === 'admin'" :value="0">季節性折扣</option>
-              <option v-if="userType === 'merchant'" :value="1">商家折扣</option>
+              <option v-if="userType === 'merchant'" :value="0">商家折扣</option>
+              <option v-if="userType === 'admin'" :value="1">季節性折扣</option>
               <option v-if="userType === 'admin'" :value="2">貨運折扣</option>
             </select>
           </div>

@@ -167,7 +167,12 @@ export class CouponService {
       return acc;
     }, {});
 
-    const filters: FindOptionsWhere<Coupon>[] = [{}];
+    // 只查詢未過期且有庫存的優惠券
+    const filters: FindOptionsWhere<Coupon>[] = [
+      { quantity: MoreThan(0), validDate: IsNull() },
+      { quantity: MoreThan(0), validDate: MoreThan(new Date()) },
+    ];
+
     if (options?.discountType !== undefined) {
       filters.forEach((f) => (f.discountType = options.discountType));
     }

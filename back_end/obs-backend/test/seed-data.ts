@@ -241,7 +241,7 @@ async function seedData() {
       { userID: user1.memberID, couponID: coupon1.couponID, state: 0 },
       { userID: user2.memberID, couponID: coupon1.couponID, state: 0 },
       { userID: user3.memberID, couponID: coupon2.couponID, state: 0 },
-      { userID: user1.memberID, couponID: coupon3.couponID, state: 0 },
+      { userID: user3.memberID, couponID: coupon3.couponID, state: 0 }, // user3 領取 coupon3
       { userID: user2.memberID, couponID: coupon4.couponID, state: 0 },
     ]);
 
@@ -1073,7 +1073,25 @@ async function seedData() {
       },
     ]);
 
-    console.log('✅ 新增了 11 筆 7-12 月的訂單（總共 17 筆訂單）');
+    // 10月 - user3 向 merchant1 購買 book9（已完成）
+    const order18 = await orderRepo.save({
+      shippingAddress: '高雄市三民區建國三路123號',
+      paymentMethod: 1,
+      totalPrice: 280,
+      totalQuantity: 1,
+      state: 3, // 已完成
+      orderDate: new Date('2025-10-08'),
+      userId: user3.memberID,
+      merchantId: merchant1.memberID,
+    });
+
+    await containsRepo.save({
+      orderId: order18.orderId,
+      bookId: book9.bookID,
+      quantity: 1,
+    });
+
+    console.log('✅ 新增了 12 筆 7-12 月的訂單（總共 18 筆訂單）');
 
     // 6. 創建評論資料（針對已完成訂單中的書籍）
     console.log('\n💬 創建評論數據...');
@@ -1111,6 +1129,14 @@ async function seedData() {
         stars: 5,
         description: '小孩很喜歡這套科普書，內容豐富又有趣，每天都主動閱讀10分鐘。第二次購買送給朋友的小孩，反應也很好！科學知識編排得淺顯易懂。',
       },
+      // order5 - book9
+      {
+        userID: user2.memberID,
+        bookID: book9.bookID,
+        date: new Date('2025-10-02'),
+        stars: 4,
+        description: '用物理角度看運動很有趣！幫助我理解了一些運動技巧背後的原理，內容實用且容易理解。',
+      },
     ]);
 
     // user3 對已完成訂單中的書籍留言（order4, order9, order12 - state: 3）
@@ -1138,9 +1164,17 @@ async function seedData() {
         stars: 5,
         description: '環遊世界200國真是一本精彩的旅遊書！圖文並茂，激發了我的旅行夢想。',
       },
+      // order18 - book9
+      {
+        userID: user3.memberID,
+        bookID: book9.bookID,
+        date: new Date('2025-10-10'),
+        stars: 5,
+        description: '作為運動愛好者，這本書讓我從物理學的角度重新認識各種運動！內容深入淺出，44項運動的分析都很精彩，強力推薦！',
+      },
     ]);
 
-    console.log('✅ 創建了 7 筆評論（user2: 4筆，user3: 3筆）');
+    console.log('✅ 創建了 9 筆評論（user2: 5筆，user3: 4筆）');
 
     // 顯示統計資訊
     console.log('\n📊 數據統計：');
