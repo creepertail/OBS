@@ -22,7 +22,6 @@
   </RouterLink>
 </template>
 
-
 <script setup>
 const props = defineProps({
   bookID: { type: String, required: true },
@@ -40,7 +39,6 @@ const isSoldOut = (props.inventoryQuantity == 0)? true: false;
 
 <style scoped>
 .book-card {
-  
   width: 200px;
   height: 100%;
   overflow: hidden;
@@ -89,7 +87,7 @@ const isSoldOut = (props.inventoryQuantity == 0)? true: false;
 }
 
 .book-price {
-  color: darkred;
+  color: var(--color-danger);
   font-weight: bold;
   margin-top: auto;
 }

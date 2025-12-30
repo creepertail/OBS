@@ -70,11 +70,17 @@ onMounted(async () => {
 
   // 載入我的優惠券
   const claimRes = await axios.get<ClaimWithCoupon[]>(
-    "http://localhost:3000/claims/mine",
+    "http://localhost:3000/claims/usable",
     {
-      headers: { Authorization: `Bearer ${token}` }
+      params: {
+        merchantId: merchantID.value
+      },
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
     }
   )
+
   console.log("claim", claimRes.data)
 
   // 只留下「尚未使用」的優惠券
