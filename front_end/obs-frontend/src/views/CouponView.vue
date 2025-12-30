@@ -106,13 +106,13 @@ function formatDate(dateString: string) {
 }
 
 // 格式化折扣
-function formatDiscount(discount: number, discountType: number) {
-  if (discountType === 2) {
+function formatDiscount(discount: number) {
+  if (discount > 1) {
     // 貨運折扣：固定金額
-    return `折 $${discount}`
+    return `折 $${discount} 元`
   } else {
     // 季節性或商家折扣：百分比
-    return `${Math.round(discount * 100)}% OFF`
+    return `${Math.round((1 - discount) * 100)} % OFF`
   }
 }
 
@@ -343,7 +343,7 @@ async function deleteCoupon(couponID: string) {
         >
           <div class="coupon-card__header">
             <div class="coupon-discount">
-              {{ formatDiscount(claim.coupon.discount, claim.coupon.discountType) }}
+              {{ formatDiscount(claim.coupon.discount) }}
             </div>
             <span class="coupon-status">
               {{ claimStateText(claim.state) }}
@@ -394,7 +394,7 @@ async function deleteCoupon(couponID: string) {
         >
           <div class="coupon-card__header">
             <div class="coupon-discount">
-              {{ formatDiscount(coupon.discount, coupon.discountType) }}
+              {{ formatDiscount(coupon.discount) }}
             </div>
             <span class="coupon-quantity">
               剩餘數量：{{ coupon.quantity }}
