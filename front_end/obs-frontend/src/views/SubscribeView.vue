@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import LeftMenu from '../components/LeftMenu.vue'
 import { ref, onMounted } from "vue"
 import { useRouter } from 'vue-router'
 import axios from 'axios'
@@ -70,94 +69,106 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main style="padding-top: 100px;">
-    <LeftMenu />
-    
-    <div class="subscribe-container">
+  <main class="subscribe-page">
+    <div class="subscribe-title">
       <h1>我的訂閱</h1>
-      
-      <div v-if="loading" class="loading">
-        載入中...
-      </div>
-      
-      <div v-else-if="error" class="error">
-        {{ error }}
-      </div>
-      
-      <div v-else-if="subscriptions.length === 0" class="empty">
-        您還沒有訂閱任何商家
-      </div>
-      
-      <div v-else class="merchant-list">
-        <div 
-          v-for="sub in subscriptions" 
-          :key="sub.merchantID"
-          class="merchant-card"
-          @click="goToMerchant(sub.merchantID)"
-        >
-          <div class="merchant-info">
-            <h3 class="merchant-name">{{ sub.merchant?.merchantName || '商家名稱' }}</h3>
-            <p class="merchant-account">@{{ sub.merchant?.account }}</p>
-            <p class="merchant-address" v-if="sub.merchant?.merchantAddress">
-              <i class="pi pi-map-marker"></i> {{ sub.merchant.merchantAddress }}
-            </p>
-            <p class="merchant-subscribers">
-              <i class="pi pi-users"></i> {{ sub.merchant?.merchantSubscriberCount || 0 }} 位訂閱者
-            </p>
-          </div>
-          
-          <div class="subscription-status">
-            <div class="notification-badge" :class="{ active: sub.notificationEnabled }">
-              <i :class="sub.notificationEnabled ? 'pi pi-bell' : 'pi pi-bell-slash'"></i>
-              <span>{{ sub.notificationEnabled ? '通知已開啟' : '通知已關閉' }}</span>
-            </div>
+    </div>
+    
+    <!-- 載入中 -->
+    <div v-if="loading" class="subscribe-state">
+      載入中…
+    </div>
+    
+    <!-- 錯誤 -->
+    <div v-else-if="error" class="subscribe-state error">
+      {{ error }}
+    </div>
+    
+    <!-- 空狀態 -->
+    <div v-else-if="subscriptions.length === 0" class="subscribe-state">
+      您還沒有訂閱任何商家
+    </div>
+    
+    <!-- 商家列表 -->
+    <section v-else class="merchant-list">
+      <div 
+        v-for="sub in subscriptions" 
+        :key="sub.merchantID"
+        class="merchant-card"
+        @click="goToMerchant(sub.merchantID)"
+      >
+        <div class="merchant-info">
+          <h3 class="merchant-name">{{ sub.merchant?.merchantName || '商家名稱' }}</h3>
+          <p class="merchant-account">@{{ sub.merchant?.account }}</p>
+          <p class="merchant-address" v-if="sub.merchant?.merchantAddress">
+            <i class="pi pi-map-marker"></i> {{ sub.merchant.merchantAddress }}
+          </p>
+          <p class="merchant-subscribers">
+            <i class="pi pi-users"></i> {{ sub.merchant?.merchantSubscriberCount || 0 }} 位訂閱者
+          </p>
+        </div>
+        
+        <div class="subscription-status">
+          <div class="notification-badge" :class="{ active: sub.notificationEnabled }">
+            <i :class="sub.notificationEnabled ? 'pi pi-bell' : 'pi pi-bell-slash'"></i>
+            <span>{{ sub.notificationEnabled ? '通知已開啟' : '通知已關閉' }}</span>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   </main>
 </template>
 
 <style scoped>
-.subscribe-container {
-  padding: 20px;
-  margin: 0 auto;
-  padding-top: 10px;
+/* ===== Page ===== */
+.subscribe-page {
+  min-height: 100vh;
+  padding: 100px 24px 48px;
+  background: var(--color-bg-page);
+  color: var(--color-text-primary);
+}
+
+.subscribe-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
   max-width: 1200px;
-  margin-left: 270px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-h1 {
-  font-size: 28px;
-  font-weight: 600;
-  margin-bottom: 30px;
-  color: #333;
+.subscribe-title h1 {
+  font-size: 32px;
+  font-weight: 800;
 }
 
-.loading, .error, .empty {
+/* 狀態 */
+.subscribe-state {
   text-align: center;
-  padding: 40px;
-  font-size: 18px;
+  padding: 80px 0;
+  color: var(--color-text-secondary);
 }
 
-.error {
-  color: #d9534f;
+.subscribe-state.error {
+  color: var(--color-danger);
 }
 
-.empty {
-  color: #666;
-}
-
+/* ===== List ===== */
 .merchant-list {
   display: grid;
-  gap: 20px;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
+/* ===== Card ===== */
+/* ===== Card ===== */
 .merchant-card {
   background: white;
   border: 1px solid #e0e0e0;
-  border-radius: 12px;
+  border-radius: 18px;
   padding: 24px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -231,11 +242,6 @@ h1 {
 
 /* 響應式設計 */
 @media (max-width: 1024px) {
-  .subscribe-container {
-    margin-left: 0;
-    padding: 20px;
-  }
-
   .merchant-list {
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   }
@@ -244,6 +250,10 @@ h1 {
 @media (max-width: 768px) {
   .merchant-list {
     grid-template-columns: 1fr;
+  }
+  
+  .subscribe-title h1 {
+    font-size: 24px;
   }
 }
 </style>
