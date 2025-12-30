@@ -318,4 +318,19 @@ export class MemberService {
       }
     }
   }
+
+  async canAcceptOrder(merchantID: string) : Promise<boolean> {
+    const merchant = await this.memberRepository.findOne({ where: { memberID: merchantID } });
+    return ((merchant?.merchantState ?? 0) % 2 === 0);
+  }
+
+  async canCreateReview(userID: string) : Promise<boolean> {
+    const user = await this.memberRepository.findOne({ where: { memberID: userID } });
+    return (((user?.userState ?? 0) / 2) % 2 === 0);
+  }
+
+  async canCreateOrder(userID: string) : Promise<boolean> {
+    const user = await this.memberRepository.findOne({ where: { memberID: userID } });
+    return ((user?.userState ?? 0) % 2 === 0);
+  }
 }

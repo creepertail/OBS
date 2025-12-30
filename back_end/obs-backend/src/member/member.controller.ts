@@ -74,6 +74,20 @@ export class MemberController {
     return this.memberService.findBookByMerchantID(user.sub);
   }
 
+  // GET url/members/canAceeptOrder
+  @JWTGuard(MemberType.Merchant)
+  @Get('canAceeptOrder')
+  CanAcceptOrder(@CurrentUser() user: any) {
+    return this.memberService.CanAcceptOrder(user.sub);
+  }
+
+  // GET url/members/CreateReview
+  @JWTGuard(MemberType.User)
+  @Get('CreateReview')
+  findMyStateCreateReview(@CurrentUser() user: any) {
+    return this.memberService.findMyStateCreateReview(user.sub);
+  }
+
   // GET url/members/MerchantInfoWithBook/:id
   @Get('merchantInfoWithBook/:id')
   findMemberInfoWithBook(@Param('id') id: string) {
@@ -115,4 +129,5 @@ export class MemberController {
   remove(@Param('id') id: string) {
     return this.memberService.remove(id);
   }
+
 }
