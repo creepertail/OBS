@@ -1,18 +1,30 @@
-﻿@baseUrl = http://localhost:3000
-@access_token = {{access_token}}   // 使用者 access token（User）
-@admin_token = {{admin_token}}     // 管理員 access token
-@claim_id = {{claim_id}}
+@baseUrl = http://localhost:3000
+@access_token = {{access_token}}   // user access token
+@admin_token = {{admin_token}}     // admin access token
+@coupon_id = {{coupon_id}}
+@member_id = {{member_id}}
+@merchant_id = {{merchant_id}}
 
-# User 查詢自己的領券紀錄
+# User: list my claims
 GET {{baseUrl}}/claims/mine
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkMzYyODE0OS1hNzRmLTRkMTctYmNlNy0yZWMzOTcwMTBiZTQiLCJhY2NvdW50IjoidXNlcjEiLCJ0eXBlIjoidXNlciIsImlhdCI6MTc2Njc0NDkxNSwiZXhwIjoxNzY2ODMxMzE1fQ.K0mPRpDDlaHWZqfPjqTfcQcEf0grobpNJkRGQBnus_w
+Authorization: Bearer {{access_token}}
 
 ###
-# Admin 查詢全部領券紀錄
+# Admin: list all claims
 GET {{baseUrl}}/claims
 Authorization: Bearer {{admin_token}}
 
 ###
-# 依 ClaimID 取得單筆（Admin 任意；User 僅能查自己的）
-GET {{baseUrl}}/claims/{{claim_id}}
+# Get single claim by couponID (User: only own; Admin: can specify userID)
+GET {{baseUrl}}/claims/{{coupon_id}}
+Authorization: Bearer {{access_token}}
+
+###
+# Admin get claim for specific user (couponID + userID)
+GET {{baseUrl}}/claims/{{coupon_id}}?userID={{member_id}}
+Authorization: Bearer {{admin_token}}
+
+###
+# For checkout: list usable coupons for a merchant
+GET {{baseUrl}}/claims/usable?merchantId={{merchant_id}}
 Authorization: Bearer {{access_token}}

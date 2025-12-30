@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ClaimsService } from './claims.service';
 import { CreateClaimDto } from './dto/create-claim.dto';
 import { UpdateClaimDto } from './dto/update-claim.dto';
@@ -22,6 +22,13 @@ export class ClaimsController {
   @Get('mine')
   findMine(@CurrentUser() user: any) {
     return this.claimsService.findMine(user.sub);
+  }
+
+  // 查詢「結帳時可用」的優惠券列表（需帶 merchantId，僅 User）
+  @JWTGuard(MemberType.User)
+  @Get('usable')
+  findUsable(@Query('merchantId') merchantId: string, @CurrentUser() user: any) {
+    return this.claimsService.findUsable(user.sub, merchantId);
   }
 
   // Admin 取得全部領券紀錄

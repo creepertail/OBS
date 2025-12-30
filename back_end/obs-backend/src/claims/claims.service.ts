@@ -1,5 +1,5 @@
 // src/claims/claims.service.ts
-import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Claim } from './entities/claim.entity';
@@ -67,6 +67,47 @@ export class ClaimsService {
 
   async findMine(userID: string): Promise<Claim[]> {
     return this.claimsRepository.find({ where: { userID }, relations: ['coupon'] });
+  }
+
+  // 結帳用：回傳 state=0、未過期、且商家券需符合 merchantId 的領券紀錄
+  async findUsable(userID: string, merchantID: string): Promise<Claim[]> {
+    if (!merchantID) {
+      throw new BadRequestException('merchantId is required');
+    }
+
+    const claims = await this.claimsRepository.find({
+      where: { userID, state: 0 },
+      relations: ['coupon'],
+    });
+
+    const now = Date.now();
+    const usable: Claim[] = [];
+
+    for (const claim of claims) {
+      const coupon = claim.coupon;
+      if (!coupon) continue;
+
+      // 過期
+      if (coupon.validDate && coupon.validDate.getTime() < now) continue;
+
+      const owner = await this.memberRepository.findOne({ where: { memberID: coupon.memberID } });
+      if (!owner) continue;
+
+      const effectiveDiscountType =
+        coupon.discountType === null || coupon.discountType === undefined
+          ? owner.type === MemberType.Admin
+            ? 1
+            : 0
+          : coupon.discountType;
+
+      // 商家券：必須符合 merchantID
+      if (effectiveDiscountType === 0 && coupon.memberID !== merchantID) continue;
+
+      // 其他類型：不限制 merchant
+      usable.push(claim);
+    }
+
+    return usable;
   }
 
   async findOne(couponID: string, currentUser: { sub: string; type: MemberType }, targetUserID?: string): Promise<Claim> {
